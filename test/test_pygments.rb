@@ -23,6 +23,9 @@ class PygmentsLexerTest < Test::Unit::TestCase
   def test_lexer_by_filename_and_content
     assert_equal 'rb', lexer_name_for(RUBY_CODE, :filename => 'test.rb')
   end
+  def test_lexer_by_nothing
+    assert_equal nil, lexer_name_for(:invalid => true)
+  end
 end
 
 class PygmentsCssTest < Test::Unit::TestCase
@@ -77,6 +80,11 @@ class PygmentsHighlightTest < Test::Unit::TestCase
   def test_highlight_defaults_to_html
     code = highlight(RUBY_CODE)
     assert_match '<span class="c1">#!/usr/bin/ruby</span>', code
+  end
+
+  def test_highlight_works_with_null_bytes
+    code = highlight("\0hello", :lexer => 'rb')
+    assert_match "hello", code
   end
 
   def test_highlight_works_on_utf8
