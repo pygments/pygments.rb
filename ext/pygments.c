@@ -18,7 +18,7 @@
 #define RSTRING_LEN(str) RSTRING(str)->len
 #endif
 
-static VALUE mPygments;
+static VALUE mPygments, mPygmentsC;
 static PyObject
   /* modules */
   *pygments,
@@ -443,12 +443,13 @@ Init_pygments_ext()
 
   { /* ruby stuff */
     mPygments = rb_define_module("Pygments");
-    rb_define_method(mPygments, "lexer_name_for", rb_pygments_lexer_name_for, -1);
-    rb_define_method(mPygments, "css", rb_pygments_css, -1);
-    rb_define_method(mPygments, "highlight", rb_pygments_highlight, -1);
-    rb_define_method(mPygments, "styles", rb_pygments_styles, 0);
-    rb_define_method(mPygments, "filters", rb_pygments_filters, 0);
-    rb_define_method(mPygments, "_lexers", rb_pygments_lexers, 0);
-    rb_define_method(mPygments, "_formatters", rb_pygments_formatters, 0);
+    mPygmentsC = rb_define_module_under(mPygments, "C");
+    rb_define_method(mPygmentsC, "lexer_name_for", rb_pygments_lexer_name_for, -1);
+    rb_define_method(mPygmentsC, "css", rb_pygments_css, -1);
+    rb_define_method(mPygmentsC, "highlight", rb_pygments_highlight, -1);
+    rb_define_method(mPygmentsC, "styles", rb_pygments_styles, 0);
+    rb_define_method(mPygmentsC, "filters", rb_pygments_filters, 0);
+    rb_define_method(mPygmentsC, "_lexers", rb_pygments_lexers, 0);
+    rb_define_method(mPygmentsC, "_formatters", rb_pygments_formatters, 0);
   }
 }
