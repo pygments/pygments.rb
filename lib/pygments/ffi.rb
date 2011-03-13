@@ -88,8 +88,13 @@ module Pygments
       formatter = formatter_for(opts[:formatter] || 'html', kwargs)
 
       out = pygments.highlight(code, lexer, formatter)
-      out = out.encode('utf-8')
-      out = out.rubify
+      out = out.encode('utf-8').rubify
+
+      if formatter.name.rubify == 'HTML'
+        out.gsub!(%r{</pre></div>\Z}, "</pre>\n</div>")
+      end
+
+      out
     end
 
     private

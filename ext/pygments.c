@@ -446,7 +446,7 @@ Init_pygments_ext()
     mPygmentsC = rb_define_module_under(mPygments, "C");
     rb_define_method(mPygmentsC, "lexer_name_for", rb_pygments_lexer_name_for, -1);
     rb_define_method(mPygmentsC, "css", rb_pygments_css, -1);
-    rb_define_method(mPygmentsC, "highlight", rb_pygments_highlight, -1);
+    rb_define_method(mPygmentsC, "_highlight", rb_pygments_highlight, -1);
     rb_define_method(mPygmentsC, "styles", rb_pygments_styles, 0);
     rb_define_method(mPygmentsC, "filters", rb_pygments_filters, 0);
     rb_define_method(mPygmentsC, "_lexers", rb_pygments_lexers, 0);

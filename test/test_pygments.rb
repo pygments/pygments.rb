@@ -82,6 +82,11 @@ class PygmentsHighlightTest < Test::Unit::TestCase
     assert_match '<span class="c1">#!/usr/bin/ruby</span>', code
   end
 
+  def test_highlight_markdown_compatible_html
+    code = highlight(RUBY_CODE)
+    assert_no_match %r{</pre></div>\Z}, code
+  end
+
   def test_highlight_works_with_null_bytes
     code = highlight("\0hello", :lexer => 'rb')
     assert_match "hello", code

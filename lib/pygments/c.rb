@@ -27,5 +27,13 @@ module Pygments
         hash
       end
     end
+
+    def highlight(code, opts={})
+      out = _highlight(code, opts)
+      if opts[:formatter].nil? or opts[:formatter].to_s.downcase == 'html'
+        out.gsub!(%r{</pre></div>\Z}, "</pre>\n</div>")
+      end
+      out
+    end
   end
 end
