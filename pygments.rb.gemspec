@@ -16,7 +16,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'rubypython', '>= 0.5.0'
   s.add_development_dependency 'rake-compiler', '0.7.6'
 
-  s.extensions = ['ext/extconf.rb']
+  # s.extensions = ['ext/extconf.rb']
   s.require_paths = ['lib']
 
   s.files = `git ls-files`.split("\n")
