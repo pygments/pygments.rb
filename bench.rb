@@ -10,7 +10,7 @@ num = ARGV[0] ? ARGV[0].to_i : 25
 code = File.read(__FILE__)
 
 albino, pygments, ffi =
-  Albino.new(code, :ruby, :html).execute.out,
+  Albino.new(code, :ruby, :html).colorize,
   Pygments::C.highlight(code, :lexer => 'ruby'),
   Pygments::FFI.highlight(code, :lexer => 'ruby')
 
@@ -21,7 +21,7 @@ end
 Benchmark.bm(25) do |x|
   x.report('albino') do
     num.times do
-      Albino.new(code, :ruby, :html).execute.out
+      Albino.new(code, :ruby, :html).colorize
     end
   end
   x.report('pygments::c') do
@@ -46,9 +46,10 @@ end
 
 __END__
 
-$ ruby bench.rb 50
+$ ruby -rubygems bench.rb 50
                                user     system      total        real
-albino                     0.040000   0.040000  12.930000 ( 13.609393)
-pygments::c                1.000000   0.010000   1.010000 (  1.019455)
-pygments::ffi + reload    11.720000   1.320000  13.040000 ( 13.339369)
-pygments::ffi              1.120000   0.010000   1.130000 (  1.236264)
+albino                     0.050000   0.050000  12.830000 ( 13.180806)
+pygments::c                1.000000   0.010000   1.010000 (  1.009348)
+pygments::ffi + reload    11.350000   1.240000  12.590000 ( 12.692320)
+pygments::ffi              1.130000   0.010000   1.140000 (  1.171589)
+
