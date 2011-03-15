@@ -7,11 +7,9 @@ module Pygments
     def start
       RubyPython.start
 
-      %w[ pygments.lexers
-          pygments.formatters
-          pygments.styles
-          pygments.filters ].each do |name|
-        RubyPython.import(name)
+      @modules = [ :lexers, :formatters, :styles, :filters ].inject(Hash.new) do |hash, name|
+        hash[name] = RubyPython.import("pygments.#{name}")
+        hash
       end
 
       @pygments = RubyPython.import('pygments')
@@ -20,11 +18,12 @@ module Pygments
     def stop
       RubyPython.stop
       @pygments = nil
+      @modules = {}
     end
 
     def formatters
       start unless pygments
-      pygments.formatters.get_all_formatters.to_enum.inject(Hash.new) do |hash, fmt|
+      @modules[:formatters].get_all_formatters.to_enum.inject(Hash.new) do |hash, fmt|
         name = fmt.__name__.rubify.sub!(/Formatter$/,'')
 
         hash[name] = {
@@ -38,7 +37,7 @@ module Pygments
 
     def lexers
       start unless pygments
-      pygments.lexers.get_all_lexers.to_enum.inject(Hash.new) do |hash, lxr|
+      @modules[:lexers].get_all_lexers.to_enum.inject(Hash.new) do |hash, lxr|
         lxr = lxr.rubify
         name = lxr.first
 
@@ -54,12 +53,12 @@ module Pygments
 
     def filters
       start unless pygments
-      pygments.filters.get_all_filters.to_enum.map{ |o| o.rubify }
+      @modules[:filters].get_all_filters.to_enum.map{ |o| o.rubify }
     end
 
     def styles
       start unless pygments
-      pygments.styles.get_all_styles.to_enum.map{ |o| o.rubify }
+      @modules[:styles].get_all_styles.to_enum.map{ |o| o.rubify }
     end
 
     def css(klass='', opts={})
@@ -104,7 +103,7 @@ module Pygments
 
     def formatter_for(name, opts={})
       start unless pygments
-      pygments.formatters.get_formatter_by_name!(name, opts)
+      @modules[:formatters].get_formatter_by_name!(name, opts)
     end
 
     def lexer_for(code, opts={})
@@ -115,7 +114,7 @@ module Pygments
         code = nil
       end
 
-      mod = pygments.lexers
+      mod = @modules[:lexers]
       kwargs = opts[:options] || {}
 
       if name = opts[:lexer]
