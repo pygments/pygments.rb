@@ -81,20 +81,28 @@ module Pygments
       code.force_encoding('utf-8') if code.respond_to?(:force_encoding)
       code = RubyPython::PyMain.unicode(code, 'utf-8')
 
-      kwargs = opts[:options] || {}
-
       lexer = lexer_for(code, opts)
-      formatter = formatter_for(opts[:formatter] || 'html', kwargs)
+
+      kwargs = opts[:options] || {}
+      fmt_name = (opts[:formatter] || 'html').downcase
+      formatter = formatter_for(fmt_name, kwargs)
 
       out = pygments.highlight(code, lexer, formatter)
-      out = out.encode('utf-8').rubify
-      out.force_encoding('utf-8') if out.respond_to?(:force_encoding)
+      encoded = out.encode('utf-8')
+      str = encoded.rubify
 
-      if formatter.name.rubify == 'HTML'
-        out.gsub!(%r{</pre></div>\Z}, "</pre>\n</div>")
+      # ruby's GC will clean these up eventually, but we explicitly
+      # decref to avoid unncessary memory/gc pressure.
+      [ code, lexer, formatter, out, encoded ].each do |obj|
+        obj.pObject.xDecref
       end
 
-      out
+      str.force_encoding('utf-8') if str.respond_to?(:force_encoding)
+      if fmt_name == 'html'
+        str.gsub!(%r{</pre></div>\Z}, "</pre>\n</div>")
+      end
+
+      str
     end
 
     private
