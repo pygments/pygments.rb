@@ -6,6 +6,8 @@ module Pygments
 
     def start
       RubyPython.start
+      sys = RubyPython.import('sys')
+      sys.path.insert(0, File.expand_path('../../../vendor/Pygments-1.4/', __FILE__))
 
       @modules = [ :lexers, :formatters, :styles, :filters ].inject(Hash.new) do |hash, name|
         hash[name] = RubyPython.import("pygments.#{name}")
