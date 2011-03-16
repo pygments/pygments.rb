@@ -1,4 +1,6 @@
+ENV['PYTHONPATH'] = File.expand_path('../../../vendor/Pygments-1.4/', __FILE__)
 require 'pygments_ext'
+ENV['PYTHONPATH'] = nil
 
 module Pygments
   module C
