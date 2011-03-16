@@ -6,6 +6,12 @@ module Pygments
   module C
     extend self
 
+    def start
+    end
+
+    def stop
+    end
+
     def formatters
       _formatters.inject(Hash.new) do |hash, (name, desc, aliases)|
         name.sub!(/Formatter$/,'')
