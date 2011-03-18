@@ -8,6 +8,7 @@ module Pygments
       RubyPython.start
       sys = RubyPython.import('sys')
       sys.path.insert(0, File.expand_path('../../../vendor/Pygments-1.4/', __FILE__))
+      sys.path.insert(0, File.expand_path('../../../vendor/python2-chardet-2.0.1/', __FILE__))
 
       @modules = [ :lexers, :formatters, :styles, :filters ].inject(Hash.new) do |hash, name|
         hash[name] = RubyPython.import("pygments.#{name}")
@@ -80,8 +81,9 @@ module Pygments
     def highlight(code, opts={})
       start unless pygments
 
-      code.force_encoding('utf-8') if code.respond_to?(:force_encoding)
-      code = RubyPython::PyMain.unicode(code, 'utf-8')
+      opts[:options] ||= {}
+      opts[:options][:encoding] ||= 'chardet'
+      opts[:options][:outencoding] ||= 'utf-8'
 
       lexer = lexer_for(code, opts)
 
@@ -90,16 +92,15 @@ module Pygments
       formatter = formatter_for(fmt_name, kwargs)
 
       out = pygments.highlight(code, lexer, formatter)
-      encoded = out.encode('utf-8')
-      str = encoded.rubify
+      str = out.rubify
 
       # ruby's GC will clean these up eventually, but we explicitly
       # decref to avoid unncessary memory/gc pressure.
-      [ code, lexer, formatter, out, encoded ].each do |obj|
+      [ lexer, formatter, out ].each do |obj|
         obj.pObject.xDecref
       end
 
-      str.force_encoding('utf-8') if str.respond_to?(:force_encoding)
+      str.force_encoding(opts[:options][:outencoding]) if str.respond_to?(:force_encoding)
       if fmt_name == 'html'
         str.gsub!(%r{</pre></div>\Z}, "</pre>\n</div>")
       end
