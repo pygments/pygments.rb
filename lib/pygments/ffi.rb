@@ -81,6 +81,10 @@ module Pygments
     def highlight(code, opts={})
       start unless pygments
 
+      if code.nil? or code.empty?
+        return code
+      end
+
       opts[:options] ||= {}
       opts[:options][:encoding] ||= 'chardet'
       opts[:options][:outencoding] ||= 'utf-8'

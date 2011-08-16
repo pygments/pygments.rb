@@ -77,6 +77,11 @@ class PygmentsHighlightTest < Test::Unit::TestCase
 
   RUBY_CODE = "#!/usr/bin/ruby\nputs 'foo'"
 
+  def test_highlight_empty
+    highlight('')
+    highlight(nil)
+  end
+
   def test_highlight_defaults_to_html
     code = highlight(RUBY_CODE)
     assert_match '<span class="c1">#!/usr/bin/ruby</span>', code
