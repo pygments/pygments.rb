@@ -4,10 +4,10 @@ module Pygments
   module FFI
     extend self
 
-    def start
+    def start(pygments_path = File.expand_path('../../../vendor/Pygments-1.4/', __FILE__))
       RubyPython.start
       sys = RubyPython.import('sys')
-      sys.path.insert(0, File.expand_path('../../../vendor/Pygments-1.4/', __FILE__))
+      sys.path.insert(0, pygments_path)
       sys.path.insert(0, File.expand_path('../../../vendor/python2-chardet-2.0.1/', __FILE__))
 
       @modules = [ :lexers, :formatters, :styles, :filters ].inject(Hash.new) do |hash, name|

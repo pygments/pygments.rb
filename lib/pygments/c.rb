@@ -1,18 +1,21 @@
-ENV['PYTHONPATH'] = File.expand_path('../../../vendor/Pygments-1.4/', __FILE__)
-require 'pygments_ext'
-ENV['PYTHONPATH'] = nil
-
 module Pygments
   module C
     extend self
 
-    def start
+    def start(python_path = File.expand_path('../../../vendor/Pygments-1.4/', __FILE__))
+      ENV['PYTHONPATH'], prev = python_path, ENV['PYTHONPATH']
+      require 'pygments_ext'
+      @started = true
+    ensure
+      ENV['PYTHONPATH'] = prev
     end
 
     def stop
     end
 
     def formatters
+      start unless @started
+
       _formatters.inject(Hash.new) do |hash, (name, desc, aliases)|
         name.sub!(/Formatter$/,'')
         hash[name] = {
@@ -25,6 +28,8 @@ module Pygments
     end
 
     def lexers
+      start unless @started
+
       _lexers.inject(Hash.new) do |hash, (name, aliases, files, mimes)|
         hash[name] = {
           :description => name,
@@ -37,6 +42,8 @@ module Pygments
     end
 
     def highlight(code, opts={})
+      start unless @started
+
       out = _highlight(code, opts)
       if opts[:formatter].nil? or opts[:formatter].to_s.downcase == 'html'
         out.gsub!(%r{</pre></div>\Z}, "</pre>\n</div>")
