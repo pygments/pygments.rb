@@ -10,21 +10,27 @@ class PygmentsLexerTest < Test::Unit::TestCase
 
   def test_lexer_by_content
     assert_equal 'rb', lexer_name_for(RUBY_CODE)
+    assert_equal Lexer['Ruby'], lexer_for(RUBY_CODE)
   end
   def test_lexer_by_mimetype
     assert_equal 'rb', lexer_name_for(:mimetype => 'text/x-ruby')
+    assert_equal Lexer['Ruby'], lexer_for(:mimetype => 'text/x-ruby')
   end
   def test_lexer_by_filename
     assert_equal 'rb', lexer_name_for(:filename => 'test.rb')
+    assert_equal Lexer['Ruby'], lexer_for(:filename => 'test.rb')
   end
   def test_lexer_by_name
     assert_equal 'rb', lexer_name_for(:lexer => 'ruby')
+    assert_equal Lexer['Ruby'], lexer_for(:lexer => 'ruby')
   end
   def test_lexer_by_filename_and_content
     assert_equal 'rb', lexer_name_for(RUBY_CODE, :filename => 'test.rb')
+    assert_equal Lexer['Ruby'], lexer_for(RUBY_CODE, :filename => 'test.rb')
   end
   def test_lexer_by_nothing
     assert_equal nil, lexer_name_for(:invalid => true)
+    assert_equal nil, lexer_for(:invalid => true)
   end
 end
 

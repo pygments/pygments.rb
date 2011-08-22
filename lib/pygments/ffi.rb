@@ -40,16 +40,11 @@ module Pygments
 
     def lexers
       start unless pygments
-      @modules[:lexers].get_all_lexers.to_enum.inject(Hash.new) do |hash, lxr|
+      @@lexers ||= @modules[:lexers].get_all_lexers.to_enum.inject(Hash.new) do |hash, lxr|
         lxr = lxr.rubify
         name = lxr.first
 
-        hash[name] = {
-          :name => name,
-          :aliases => lxr[1],
-          :filenames => lxr[2],
-          :mimetypes => lxr[3]
-        }
+        hash[name] = Lexer.new(name, lxr[1], lxr[2], lxr[3])
         hash
       end
     end
@@ -74,8 +69,15 @@ module Pygments
     end
 
     def lexer_name_for(*args)
-      lxr = lexer_for(*args)
-      lxr.aliases[0].rubify if lxr
+      if lxr = lexer_for(*args)
+        lxr.aliases.first
+      end
+    end
+
+    def lexer_for(*args)
+      if lxr = _lexer_for(*args)
+        lexers[lxr.name.rubify]
+      end
     end
 
     def highlight(code, opts={})
@@ -89,7 +91,7 @@ module Pygments
       opts[:options][:encoding] ||= 'chardet'
       opts[:options][:outencoding] ||= 'utf-8'
 
-      lexer = lexer_for(code, opts)
+      lexer = _lexer_for(code, opts)
 
       kwargs = opts[:options] || {}
       fmt_name = (opts[:formatter] || 'html').downcase
@@ -121,7 +123,7 @@ module Pygments
       @modules[:formatters].get_formatter_by_name!(name, opts)
     end
 
-    def lexer_for(code, opts={})
+    def _lexer_for(code, opts={})
       start unless pygments
 
       if code.is_a?(Hash)
