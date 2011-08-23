@@ -4,6 +4,7 @@ module Pygments
     @index           = {}
     @name_index      = {}
     @alias_index     = {}
+    @extname_index   = {}
     @mimetypes_index = {}
 
     # Internal: Create a new Lexer object
@@ -20,6 +21,11 @@ module Pygments
 
       lexer.aliases.each do |name|
         @index[name.downcase] = @alias_index[name] = lexer
+      end
+
+      lexer.filenames.each do |filename|
+        extname = File.extname(filename)
+        @extname_index[extname] = lexer if extname != ""
       end
 
       lexer.mimetypes.each do |type|
@@ -79,6 +85,20 @@ module Pygments
     # Returns the Lexer or nil if none was found.
     def self.find_by_alias(name)
       @alias_index[name]
+    end
+
+    # Public: Look up Lexer by one of it's file extensions.
+    #
+    # extname - A String file extension.
+    #
+    # Examples
+    #
+    #  Lexer.find_by_extname('.rb')
+    #  # => #<Lexer name="Ruby">
+    #
+    # Returns the Lexer or nil if none was found.
+    def self.find_by_extname(extname)
+      @extname_index[extname]
     end
 
     # Public: Look up Lexer by one of it's mime types.
