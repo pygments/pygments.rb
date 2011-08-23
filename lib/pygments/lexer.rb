@@ -1,20 +1,109 @@
 module Pygments
   class Lexer < Struct.new(:name, :aliases, :filenames, :mimetypes)
-    def self.[](name)
-      Pygments.lexers[name]
+    @lexers          = []
+    @index           = {}
+    @name_index      = {}
+    @alias_index     = {}
+    @mimetypes_index = {}
+
+    # Internal: Create a new Lexer object
+    #
+    # hash - A hash of attributes
+    #
+    # Returns a Lexer object
+    def self.create(hash)
+      lexer = new(hash[:name], hash[:aliases], hash[:filenames], hash[:mimetypes])
+
+      @lexers << lexer
+
+      @index[lexer.name] = @name_index[lexer.name] = lexer
+
+      lexer.aliases.each do |name|
+        @index[name] = @alias_index[name] = lexer
+      end
+
+      lexer.mimetypes.each do |type|
+        @mimetypes_index[type] = lexer
+      end
+
+      lexer
     end
 
+    # Public: Get all Lexers
+    #
+    # Returns an Array of Lexers
+    def self.all
+      @lexers
+    end
+
+    # Public: Look up Lexer by name or alias.
+    #
+    # name - A String name or alias
+    #
+    #   Lexer['Ruby']
+    #   => #<Lexer name="Ruby">
+    #
+    # Returns the Lexer or nil if none was found.
+    def self.[](name)
+      @index[name]
+    end
+
+    # Public: Look up Lexer by its proper name.
+    #
+    # name - The String name of the Lexer
+    #
+    # Examples
+    #
+    #   Lexer.find_by_name('Ruby')
+    #   # => #<Lexer name="Ruby">
+    #
+    # Returns the Lexer or nil if none was found.
+    def self.find_by_name(name)
+      @name_index[name]
+    end
+
+    # Public: Look up Lexer by one of its aliases.
+    #
+    # name - A String alias of the Lexer
+    #
+    # Examples
+    #
+    #   Lexer.find_by_alias('rb')
+    #   # => #<Lexer name="Ruby">
+    #
+    # Returns the Lexer or nil if none was found.
+    def self.find_by_alias(name)
+      @alias_index[name]
+    end
+
+    # Public: Look up Lexer by one of it's mime types.
+    #
+    # type - A mime type String.
+    #
+    # Examples
+    #
+    #  Lexer.find_by_mimetype('application/x-ruby')
+    #  # => #<Lexer name="Ruby">
+    #
+    # Returns the Lexer or nil if none was found.
+    def self.find_by_mimetype(type)
+      @mimetypes_index[type]
+    end
+
+    # Public: Highlight syntax of text
+    #
+    # text    - String of code to be highlighted
+    # options - Hash of options (defaults to {})
+    #
+    # Returns html String
     def highlight(text, options = {})
       options[:lexer] = aliases.first
       Pygments.highlight(text, options)
     end
 
-    def ==(other)
-      eql?(other)
-    end
-
-    def eql?(other)
-      equal?(other)
-    end
+    alias_method :==, :equal?
+    alias_method :eql?, :equal?
   end
+
+  lexers.values.each { |h| Lexer.create(h) }
 end

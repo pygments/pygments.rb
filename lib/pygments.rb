@@ -1,6 +1,5 @@
 # require 'pygments/c'
 require 'pygments/ffi'
-require 'pygments/lexer'
 
 module Pygments
   # include Pygments::C
@@ -8,3 +7,5 @@ module Pygments
 
   extend self
 end
+
+require 'pygments/lexer'
