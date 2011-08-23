@@ -38,7 +38,7 @@ module Pygments
 
         extnames.each do |extname|
           @extname_index[extname] = lexer
-          @index[extname.sub(/^\./, "")] ||= lexer
+          @index[extname.downcase.sub(/^\./, "")] ||= lexer
         end
       end
 
