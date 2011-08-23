@@ -20,17 +20,25 @@ module Pygments
       @index[lexer.name.downcase] = @name_index[lexer.name] = lexer
 
       lexer.aliases.each do |name|
-        @index[name.downcase] = @alias_index[name] = lexer
+        @alias_index[name] = lexer
+        @index[name.downcase] ||= lexer
       end
 
       lexer.filenames.each do |filename|
+        extnames = []
+
         extname = File.extname(filename)
         if m = extname.match(/\[(.+)\]/)
           m[1].scan(/./).each do |s|
-            @extname_index[extname.sub(m[0], s)] = lexer
+            extnames << extname.sub(m[0], s)
           end
         elsif extname != ""
+          extnames << extname
+        end
+
+        extnames.each do |extname|
           @extname_index[extname] = lexer
+          @index[extname.sub(/^\./, "")] ||= lexer
         end
       end
 

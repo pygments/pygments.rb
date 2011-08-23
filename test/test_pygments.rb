@@ -35,6 +35,8 @@ class PygmentsLexerClassTest < Test::Unit::TestCase
     assert_equal 'Ruby', Lexer['Ruby'].name
     assert_equal 'Ruby', Lexer['ruby'].name
     assert_equal 'Ruby', Lexer['rb'].name
+    assert_equal 'Ruby', Lexer['rake'].name
+    assert_equal 'Ruby', Lexer['gemspec'].name
   end
   def test_find_by_name
     assert_equal Lexer['Ruby'], Lexer.find_by_name('Ruby')
