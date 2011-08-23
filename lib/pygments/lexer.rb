@@ -25,7 +25,13 @@ module Pygments
 
       lexer.filenames.each do |filename|
         extname = File.extname(filename)
-        @extname_index[extname] = lexer if extname != ""
+        if m = extname.match(/\[(.+)\]/)
+          m[1].scan(/./).each do |s|
+            @extname_index[extname.sub(m[0], s)] = lexer
+          end
+        elsif extname != ""
+          @extname_index[extname] = lexer
+        end
       end
 
       lexer.mimetypes.each do |type|

@@ -45,6 +45,10 @@ class PygmentsLexerClassTest < Test::Unit::TestCase
   end
   def test_find_lexer_by_extname
     assert_equal Lexer['Ruby'], Lexer.find_by_extname('.rb')
+    assert_equal Lexer['PHP'], Lexer.find_by_extname('.php4')
+    assert_equal Lexer['PHP'], Lexer.find_by_extname('.php5')
+    assert_equal Lexer['Groff'], Lexer.find_by_extname('.1')
+    assert_equal Lexer['Groff'], Lexer.find_by_extname('.3')
   end
   def test_find_lexer_by_mimetype
     assert_equal Lexer['Ruby'], Lexer.find_by_mimetype('text/x-ruby')
