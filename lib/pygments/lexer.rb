@@ -40,12 +40,17 @@ module Pygments
     #
     # name - A String name or alias
     #
-    #   Lexer['Ruby']
+    #   Lexer.find('Ruby')
     #   => #<Lexer name="Ruby">
     #
     # Returns the Lexer or nil if none was found.
-    def self.[](name)
+    def self.find(name)
       @index[name]
+    end
+
+    # Public: Alias for find.
+    def self.[](name)
+      find(name)
     end
 
     # Public: Look up Lexer by its proper name.
