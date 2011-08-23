@@ -20,6 +20,11 @@ from pygments.util import get_bool_opt, get_int_opt, get_list_opt, \
 __all__ = ['Lexer', 'RegexLexer', 'ExtendedRegexLexer', 'DelegatingLexer',
            'LexerContext', 'include', 'bygroups', 'using', 'this']
 
+_encoding_map = [('\xef\xbb\xbf', 'utf-8'),
+                 ('\xff\xfe\0\0', 'utf-32'),
+                 ('\0\0\xfe\xff', 'UTF-32BE'),
+                 ('\xff\xfe', 'utf-16'),
+                 ('\xfe\xff', 'UTF-16BE')]
 
 _default_analyse = staticmethod(lambda x: 0.0)
 
@@ -142,8 +147,22 @@ class Lexer(object):
                     raise ImportError('To enable chardet encoding guessing, '
                                       'please install the chardet library '
                                       'from http://chardet.feedparser.org/')
-                enc = chardet.detect(text)
-                text = text.decode(enc['encoding'])
+
+                decoded = None
+
+                for bom, encoding in _encoding_map:
+                    if text.startswith(bom):
+                        decoded = unicode(text[len(bom):], encoding,
+                                          errors='replace')
+                        break
+
+                    # No BOM found, so use chardet
+                    if decoded == None:
+                        enc = chardet.detect(text[:8192])
+                        decoded = unicode(text, enc.get('encoding') or 'utf-8',
+                                          errors='replace')
+
+                    text = decoded
             else:
                 text = text.decode(self.encoding)
         # text now *is* a unicode string
