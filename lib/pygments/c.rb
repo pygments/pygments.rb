@@ -2,7 +2,7 @@ module Pygments
   module C
     extend self
 
-    def start(python_path = File.expand_path('../../../vendor/Pygments-1.4/', __FILE__))
+    def start(python_path = File.expand_path('../../../vendor/pygments-main/', __FILE__))
       ENV['PYTHONPATH'], prev = python_path, ENV['PYTHONPATH']
       require 'pygments_ext'
       @started = true
