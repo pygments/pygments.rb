@@ -16,10 +16,10 @@ module Pygments
 
       @lexers << lexer
 
-      @index[lexer.name] = @name_index[lexer.name] = lexer
+      @index[lexer.name.downcase] = @name_index[lexer.name] = lexer
 
       lexer.aliases.each do |name|
-        @index[name] = @alias_index[name] = lexer
+        @index[name.downcase] = @alias_index[name] = lexer
       end
 
       lexer.mimetypes.each do |type|
@@ -45,7 +45,7 @@ module Pygments
     #
     # Returns the Lexer or nil if none was found.
     def self.find(name)
-      @index[name]
+      @index[name.downcase]
     end
 
     # Public: Alias for find.
