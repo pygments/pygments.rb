@@ -127,7 +127,7 @@ class PygmentsHighlightTest < Test::Unit::TestCase
   end
 
   def test_highlight_works_on_utf8
-    code = highlight('# ø', :lexer => 'rb')
+    code = highlight('# ø', :lexer => 'rb', :options => {:encoding => 'utf-8'})
     assert_match '<span class="c1"># ø</span>', code
   end
 

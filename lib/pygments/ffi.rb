@@ -8,7 +8,6 @@ module Pygments
       RubyPython.start
       sys = RubyPython.import('sys')
       sys.path.insert(0, pygments_path)
-      sys.path.insert(0, File.expand_path('../../../vendor/python2-chardet-2.0.1/', __FILE__))
 
       @modules = [ :lexers, :formatters, :styles, :filters ].inject(Hash.new) do |hash, name|
         hash[name] = RubyPython.import("pygments.#{name}")
@@ -86,7 +85,6 @@ module Pygments
       end
 
       opts[:options] ||= {}
-      opts[:options][:encoding] ||= 'chardet'
       opts[:options][:outencoding] ||= 'utf-8'
 
       lexer = lexer_for(code, opts)

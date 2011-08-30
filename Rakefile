@@ -39,7 +39,6 @@ namespace :vendor do
   file 'vendor/pygments-main' do |f|
     sh "hg clone https://bitbucket.org/birkenfeld/pygments-main #{f.name}"
     sh "hg --repository #{f.name} identify --id > #{f.name}/REVISION"
-    sh "cat vendor/pygments.diff | patch -p1"
     rm_rf Dir["#{f.name}/.hg*"]
   end
 
