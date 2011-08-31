@@ -65,7 +65,7 @@ module Pygments
     #
     # Returns the Lexer or nil if none was found.
     def self.find(name)
-      @index[name.downcase]
+      @index[name.to_s.downcase]
     end
 
     # Public: Alias for find.
