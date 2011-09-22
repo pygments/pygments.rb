@@ -13,7 +13,7 @@ import re
 
 from pygments.lexer import Lexer, RegexLexer, ExtendedRegexLexer, \
      LexerContext, include, combined, do_insertions, bygroups, using, this
-from pygments.token import Error, Text, Other, \
+from pygments.token import Error, Text, Whitespace, Other, \
      Comment, Operator, Keyword, Name, String, Number, Generic, Punctuation
 from pygments.util import get_bool_opt, get_list_opt, shebang_matches
 from pygments import unistring as uni
@@ -1367,13 +1367,11 @@ class ClojureLexer(RegexLexer):
 
     keywords = [
         'fn', 'def', 'defn', 'defmacro', 'defmethod', 'defmulti', 'defn-',
-        'defstruct',
-        'if', 'cond',
-        'let', 'for'
+        'defstruct', 'if', 'cond', 'let', 'for'
     ]
     builtins = [
         '.', '..',
-        '*', '+', '-', '->', '..', '/', '<', '<=', '=', '==', '>', '>=',
+        '*', '+', '-', '->', '/', '<', '<=', '=', '==', '>', '>=',
         'accessor', 'agent', 'agent-errors', 'aget', 'alength', 'all-ns',
         'alter', 'and', 'append-child', 'apply', 'array-map', 'aset',
         'aset-boolean', 'aset-byte', 'aset-char', 'aset-double', 'aset-float',
@@ -1389,13 +1387,13 @@ class ClojureLexer(RegexLexer):
         'double', 'down', 'drop', 'drop-while', 'edit', 'end?', 'ensure',
         'eval', 'every?', 'false?', 'ffirst', 'file-seq', 'filter', 'find',
         'find-doc', 'find-ns', 'find-var', 'first', 'float', 'flush',
-        'fnseq', 'frest', 'gensym', 'get', 'get-proxy-class',
+        'fnseq', 'frest', 'gensym', 'get-proxy-class', 'get',
         'hash-map', 'hash-set', 'identical?', 'identity', 'if-let', 'import',
         'in-ns', 'inc', 'index', 'insert-child', 'insert-left', 'insert-right',
         'inspect-table', 'inspect-tree', 'instance?', 'int', 'interleave',
         'intersection', 'into', 'into-array', 'iterate', 'join', 'key', 'keys',
         'keyword', 'keyword?', 'last', 'lazy-cat', 'lazy-cons', 'left',
-        'lefts', 'line-seq', 'list', 'list*', 'load', 'load-file',
+        'lefts', 'line-seq', 'list*', 'list', 'load', 'load-file',
         'locking', 'long', 'loop', 'macroexpand', 'macroexpand-1',
         'make-array', 'make-node', 'map', 'map-invert', 'map?', 'mapcat',
         'max', 'max-key', 'memfn', 'merge', 'merge-with', 'meta', 'min',
@@ -1426,7 +1424,14 @@ class ClojureLexer(RegexLexer):
     # valid names for identifiers
     # well, names can only not consist fully of numbers
     # but this should be good enough for now
-    valid_name = r'[a-zA-Z0-9!$%&*+,/:<=>?@^_~-]+'
+
+    # TODO / should divide keywords/symbols into namespace/rest
+    # but that's hard, so just pretend / is part of the name
+    valid_name = r'[\w!$%*+,<=>?/.-]+'
+
+    def _multi_escape(entries):
+        return '|'.join([re.escape(entry) + '(?![\\w-!$%*+,<=>?/.-])'
+                         for entry in entries])
 
     tokens = {
         'root' : [
@@ -1435,42 +1440,29 @@ class ClojureLexer(RegexLexer):
             (r';.*$', Comment.Single),
 
             # whitespaces - usually not relevant
-            (r'\s+', Text),
+            (r'[,\s]+', Whitespace),
 
             # numbers
             (r'-?\d+\.\d+', Number.Float),
             (r'-?\d+', Number.Integer),
-            # support for uncommon kinds of numbers -
-            # have to figure out what the characters mean
-            #(r'(#e|#i|#b|#o|#d|#x)[\d.]+', Number),
+            (r'0x-?[abcdef\d]+', Number.Hex),
 
             # strings, symbols and characters
             (r'"(\\\\|\\"|[^"])*"', String),
             (r"'" + valid_name, String.Symbol),
-            (r"\\([()/'\".'_!Â§$%& ?;=#+-]{1}|[a-zA-Z0-9]+)", String.Char),
+            (r"\\(.|[a-z]+)", String.Char),
 
-            # constants
-            (r'(#t|#f)', Name.Constant),
+            # keywords
+            (r':' + valid_name, Name.Constant),
 
             # special operators
-            (r"('|#|`|,@|,|\.)", Operator),
+            (r'~@|[`\'#^~&]', Operator),
 
             # highlight the keywords
-            ('(%s)' % '|'.join([
-                re.escape(entry) + ' ' for entry in keywords]),
-                Keyword
-            ),
-
-            # first variable in a quoted string like
-            # '(this is syntactic sugar)
-            (r"(?<='\()" + valid_name, Name.Variable),
-            (r"(?<=#\()" + valid_name, Name.Variable),
+            (_multi_escape(keywords), Keyword),
 
             # highlight the builtins
-            ("(?<=\()(%s)" % '|'.join([
-                re.escape(entry) + ' ' for entry in builtins]),
-                Name.Builtin
-            ),
+            (_multi_escape(builtins), Name.Builtin),
 
             # the remaining functions
             (r'(?<=\()' + valid_name, Name.Function),
