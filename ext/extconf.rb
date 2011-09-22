@@ -9,6 +9,6 @@ $CFLAGS << " -Wall "
 unless python
   $stderr.puts '*** could not find libpython or Python.h'
 else
-  $CFLAGS << " -I/usr/include/python#{python} "
+  $defs << "-DPYGMENTS_PYTHON_VERSION=#{python.gsub('.','')}"
   create_makefile('pygments_ext')
 end

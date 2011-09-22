@@ -2,7 +2,18 @@
 #include <stdlib.h>
 
 #include <ruby.h>
-#include <Python.h>
+
+#if PYGMENTS_PYTHON_VERSION == 24
+#include <python2.4/Python.h>
+#elif PYGMENTS_PYTHON_VERSION == 25
+#include <python2.5/Python.h>
+#elif PYGMENTS_PYTHON_VERSION == 26
+#include <python2.6/Python.h>
+#elif PYGMENTS_PYTHON_VERSION == 27
+#include <python2.7/Python.h>
+#else
+#error Unknown python version
+#endif
 
 #ifdef RUBY_VM
 #include <ruby/st.h>
