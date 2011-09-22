@@ -6,6 +6,7 @@ module Pygments
 
     def start(pygments_path = File.expand_path('../../../vendor/pygments-main/', __FILE__))
       RubyPython.start
+      RubyPython.import('pkg_resources') rescue nil
       sys = RubyPython.import('sys')
       sys.path.insert(0, pygments_path)
 
