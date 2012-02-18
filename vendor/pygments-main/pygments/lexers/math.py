@@ -16,9 +16,10 @@ from pygments.token import Comment, String, Punctuation, Keyword, Name, \
     Operator, Number, Text, Generic
 
 from pygments.lexers.agile import PythonLexer
+from pygments.lexers import _scilab_builtins
 
 __all__ = ['MuPADLexer', 'MatlabLexer', 'MatlabSessionLexer', 'OctaveLexer',
-           'NumPyLexer', 'RConsoleLexer', 'SLexer']
+           'ScilabLexer', 'NumPyLexer', 'RConsoleLexer', 'SLexer']
 
 
 class MuPADLexer(RegexLexer):
@@ -637,6 +638,68 @@ class OctaveLexer(RegexLexer):
         if re.match('^\s*[%#]', text, re.M): #Comment
             return 0.9
         return 0.1
+
+
+class ScilabLexer(RegexLexer):
+    """
+    For Scilab source code.
+
+    *New in Pygments 1.5.*
+    """
+    name = 'Scilab'
+    aliases = ['scilab']
+    filenames = ['*.sci', '*.sce', '*.tst']
+    mimetypes = ['text/scilab']
+
+    tokens = {
+        'root': [
+            (r'//.*?$', Comment.Single),
+            (r'^\s*function', Keyword, 'deffunc'),
+
+            (r'(__FILE__|__LINE__|break|case|catch|classdef|continue|do|else|'
+             r'elseif|end|end_try_catch|end_unwind_protect|endclassdef|'
+             r'endevents|endfor|endfunction|endif|endmethods|endproperties|'
+             r'endswitch|endwhile|events|for|function|get|global|if|methods|'
+             r'otherwise|persistent|properties|return|set|static|switch|try|'
+             r'until|unwind_protect|unwind_protect_cleanup|while)\b', Keyword),
+
+            ("(" + "|".join(_scilab_builtins.functions_kw +
+                            _scilab_builtins.commands_kw +
+                            _scilab_builtins.macros_kw
+                            ) + r')\b',  Name.Builtin),
+
+            ("(" + "|".join(_scilab_builtins.builtin_consts) + r')\b',
+             Name.Constant),
+
+            # operators:
+            (r'-|==|~=|<|>|<=|>=|&&|&|~|\|\|?', Operator),
+            # operators requiring escape for re:
+            (r'\.\*|\*|\+|\.\^|\.\\|\.\/|\/|\\', Operator),
+
+
+            # punctuation:
+            (r'[\[\](){}:@.,=:;]', Punctuation),
+
+            (r'"[^"]*"', String),
+
+            # quote can be transpose, instead of string:
+            # (not great, but handles common cases...)
+            (r'(?<=[\w\)\]])\'', Operator),
+            (r'(?<![\w\)\]])\'', String, 'string'),
+
+            ('[a-zA-Z_][a-zA-Z0-9_]*', Name),
+            (r'.', Text),
+        ],
+        'string': [
+            (r"[^']*'", String, '#pop'),
+        ],
+        'deffunc': [
+            (r'(\s*)(?:(.+)(\s*)(=)(\s*))?(.+)(\()(.*)(\))(\s*)',
+             bygroups(Text.Whitespace, Text, Text.Whitespace, Punctuation,
+                      Text.Whitespace, Name.Function, Punctuation, Text,
+                      Punctuation, Text.Whitespace), '#pop'),
+        ],
+    }
 
 
 class NumPyLexer(PythonLexer):
