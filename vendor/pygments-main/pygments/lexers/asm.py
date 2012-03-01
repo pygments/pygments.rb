@@ -5,7 +5,7 @@
 
     Lexers for assembly languages.
 
-    :copyright: Copyright 2006-2011 by the Pygments team, see AUTHORS.
+    :copyright: Copyright 2006-2012 by the Pygments team, see AUTHORS.
     :license: BSD, see LICENSE for details.
 """
 
@@ -13,7 +13,8 @@ import re
 
 from pygments.lexer import RegexLexer, include, bygroups, using, DelegatingLexer
 from pygments.lexers.compiled import DLexer, CppLexer, CLexer
-from pygments.token import *
+from pygments.token import Text, Name, Number, String, Comment, Punctuation, \
+     Other, Keyword, Operator
 
 __all__ = ['GasLexer', 'ObjdumpLexer','DObjdumpLexer', 'CppObjdumpLexer',
            'CObjdumpLexer', 'LlvmLexer', 'NasmLexer']
@@ -72,6 +73,7 @@ class GasLexer(RegexLexer):
             ('%' + identifier, Name.Variable),
             # Numeric constants
             ('$'+number, Number.Integer),
+            (r"$'(.|\\')'", String.Char),
             (r'[\r\n]+', Text, '#pop'),
             (r'#.*?$', Comment, '#pop'),
             include('punctuation'),
@@ -300,7 +302,7 @@ class NasmLexer(RegexLexer):
     binn = r'[01]+b'
     decn = r'[0-9]+'
     floatn = decn + r'\.e?' + decn
-    string = r'"(\\"|[^"])*"|' + r"'(\\'|[^'])*'"
+    string = r'"(\\"|[^"\n])*"|' + r"'(\\'|[^'\n])*'|" + r"`(\\`|[^`\n])*`"
     declkw = r'(?:res|d)[bwdqt]|times'
     register = (r'[a-d][lh]|e?[a-d]x|e?[sb]p|e?[sd]i|[c-gs]s|st[0-7]|'
                 r'mm[0-7]|cr[0-4]|dr[0-367]|tr[3-7]')
