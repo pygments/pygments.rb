@@ -29,8 +29,8 @@ class Dasm16Lexer(RegexLexer):
 
     INSTRUCTIONS = [
         'SET', 'ADD', 'SUB', 'MUL', 'DIV', 'MOD', 'SHL',
-        'SHR', 'AND', 'BOR', 'XOR', 'IFE', 'IFN', 'IFG'
-        'IFB', 'JSR'
+        'SHR', 'AND', 'BOR', 'XOR', 'IFE', 'IFN', 'IFG', 'IFB',
+        'JSR'
     ]
 
     REGISTERS = [
@@ -42,6 +42,7 @@ class Dasm16Lexer(RegexLexer):
     ]
 
     # Regexes yo
+    string = r'"(\\"|[^"])*"'
     char = r'[a-zA-Z$._0-9@]'
     identifier = r'(?:[a-zA-Z$_]' + char + '*|\.' + char + '+)'
     number = r'(?:0[xX][a-zA-Z0-9]+|\d+)'
@@ -49,7 +50,7 @@ class Dasm16Lexer(RegexLexer):
 
     def guess_identifier(lexer, match):
         ident = match.group(0)
-        klass = Name.Variable if ident in lexer.REGISTERS else Name.Label
+        klass = Name.Variable if ident.lower() in lexer.REGISTERS else Name.Label
         yield match.start(), klass, ident
 
     tokens = {
@@ -57,6 +58,7 @@ class Dasm16Lexer(RegexLexer):
             include('whitespace'),
             (':' + identifier, Name.Label),
             (instruction, Name.Function, 'instruction-args'),
+            (r'(DAT|dat)', Name.Function, 'data-args'),
             (r'[\r\n]+', Text)
         ],
 
@@ -72,15 +74,26 @@ class Dasm16Lexer(RegexLexer):
             include('whitespace')
         ],
 
-        'instruction-args': [
-            (r',', Punctuation),
-            (r'\[', Punctuation, 'deref'),
-            include('arg'),
-
+        'instruction-line' : [
             (r'[\r\n]+', Text, '#pop'),
             (r';.*?$', Comment, '#pop'),
             include('whitespace')
         ],
+
+        'instruction-args': [
+            (r',', Punctuation),
+            (r'\[', Punctuation, 'deref'),
+            include('arg'),
+            include('instruction-line')
+        ],
+
+        'data-args' : [
+            (r',', Punctuation),
+            (number, Number.Integer),
+            (string, String),
+            include('instruction-line')
+        ],
+
         'whitespace': [
             (r'\n', Text),
             (r'\s+', Text),
