@@ -46,5 +46,14 @@ namespace :vendor do
     rm_rf 'vendor/pygments-main'
   end
 
-  task :update => [:clobber, 'vendor/pygments-main']
+  # Load all the custom lexers in the `vendor/custom_lexers` folder
+  # and stick them in our custom Pygments vendor
+  task :load_lexers do
+    LEXERS_DIR = 'vendor/pygments-main/pygments/lexers'
+    lexers = FileList['vendor/custom_lexers/*.py']
+    lexers.each { |l| FileUtils.copy l, LEXERS_DIR }
+    FileUtils.cd(LEXERS_DIR) { sh "python _mapping.py" }
+  end
+
+  task :update => [:clobber, 'vendor/pygments-main', :load_lexers]
 end
