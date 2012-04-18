@@ -112,6 +112,7 @@ class PuppetLexer(RegexLexer):
         ],
         'puppet': [
             include('comments'),
+            (r'(class)(\s*)(\{)', bygroups(Name.Class, Text, Punctuation), ('type', 'namevar')),
             (r'(class|define)', Keyword.Declaration, ('block','class_name')),
             (r'node', Keyword.Declaration, ('block', 'node_name')),
             (r'elsif', Keyword.Reserved, ('block', 'conditional')),
@@ -124,7 +125,7 @@ class PuppetLexer(RegexLexer):
             (r'(::)?([A-Z][\w:]+)+(\s*)(\[)', bygroups(Name.Class, Name.Class, Text, Punctuation), ('type', 'override_name')),
             (r'(@{0,2}[\w:]+)(\s*)(\{)(\s*)', bygroups(Name.Class, Text, Punctuation, Text), ('type', 'namevar')),
             (r'\$(::)?(\w+::)*\w+', Name.Variable, 'var_assign'),
-            (r'include', Keyword.Namespace, 'include'),
+            (r'(include|require)', Keyword.Namespace, 'include'),
             (r'import', Keyword.Namespace, 'import'),
             (r'(\w+)(\()', bygroups(Name.Function, Punctuation), 'function'),
             (r'\s', Text),
@@ -158,7 +159,7 @@ class PuppetLexer(RegexLexer):
         ],
         'include': [
             (r'\n', Text, '#pop'),
-            (r'[\w:]+', Name.Class),
+            (r'[\w:-]+', Name.Class),
             include('value'),
             (r'\s', Text),
         ],
