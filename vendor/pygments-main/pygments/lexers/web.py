@@ -1111,8 +1111,8 @@ class HaxeLexer(RegexLexer):
     For haXe source code (http://haxe.org/).
     """
 
-    name = 'haXe'
-    aliases = ['hx', 'haXe']
+    name = 'Haxe'
+    aliases = ['hx', 'Haxe','haxe','haXe']
     filenames = ['*.hx']
     mimetypes = ['text/haxe']
 
