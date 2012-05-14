@@ -50,7 +50,12 @@ class Dasm16Lexer(RegexLexer):
 
     def guess_identifier(lexer, match):
         ident = match.group(0)
-        klass = Name.Variable if ident.upper() in lexer.REGISTERS else Name.Label
+        for register in lexer.REGISTERS:
+            if ident.upper() == register:
+                klass = Name.Variable
+                break
+            else:
+                klass = Name.Label
         yield match.start(), klass, ident
 
     tokens = {
