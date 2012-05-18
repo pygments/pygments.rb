@@ -35,10 +35,10 @@ Pygments.css('.highlight')
 ```
 
 To use a custom python installation (like in ArchLinux), tell
-RubyPython where python lives:
+us where python lives:
 
 ``` ruby
-RubyPython.configure :python_exe => 'python2.7'
+Pygments.start nil, :python_exe => 'python2.7'
 ```
 
 To use a custom pygments installation, specify the path to
