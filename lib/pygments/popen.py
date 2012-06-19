@@ -5,10 +5,13 @@ if 'PYGMENTS_PATH' in os.environ:
   sys.path.insert(0, os.environ['PYGMENTS_PATH'])
 
 import pygments
-import pygments.lexers, pygments.formatters, pygments.styles, pygments.filters
+from pygments import lexers, formatters, styles, filters
 
 import re
-import json
+try: 
+    import json
+except ImportError: 
+    import simplejson as json
 
 def lexer_for(code=None, **opts):
   lexers = pygments.lexers
