@@ -28,16 +28,25 @@ class Dasm16Lexer(RegexLexer):
     mimetypes = ['text/x-dasm16']
 
     INSTRUCTIONS = [
-        'SET', 'ADD', 'SUB', 'MUL', 'DIV', 'MOD', 'SHL',
-        'SHR', 'AND', 'BOR', 'XOR', 'IFE', 'IFN', 'IFG', 'IFB',
-        'JSR'
+        'SET',
+        'ADD', 'SUB',
+        'MUL', 'MLI',
+        'DIV', 'DVI',
+        'MOD', 'MDI',
+        'AND', 'BOR', 'XOR',
+        'SHR', 'ASR', 'SHL',
+        'IFB', 'IFC', 'IFE', 'IFN', 'IFG', 'IFA', 'IFL', 'IFU',
+        'ADX', 'SBX',
+        'STI', 'STD',
+        'JSR',
+        'INT', 'IAG', 'IAS', 'RFI', 'IAQ', 'HWN', 'HWQ', 'HWI',
     ]
 
     REGISTERS = [
         'A', 'B', 'C',
         'X', 'Y', 'Z',
         'I', 'J',
-        'SP', 'PC',
+        'SP', 'PC', 'EX',
         'POP', 'PEEK', 'PUSH'
     ]
 
@@ -57,8 +66,9 @@ class Dasm16Lexer(RegexLexer):
         'root': [
             include('whitespace'),
             (':' + identifier, Name.Label),
+            (identifier + ':', Name.Label),
             (instruction, Name.Function, 'instruction-args'),
-            (r'(DAT|dat)', Name.Function, 'data-args'),
+            (r'\.?(DAT|dat)', Name.Function, 'data-args'),
             (r'[\r\n]+', Text)
         ],
 
