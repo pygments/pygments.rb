@@ -1,11 +1,11 @@
 # require 'pygments/c'
-require 'pygments/ffi'
+# require 'pygments/ffi'
+require 'pygments/popen'
 
 module Pygments
-  # include Pygments::C
-  include Pygments::FFI
+  # extend Pygments::C
+  # extend Pygments::FFI
+  extend Pygments::Popen
 
   autoload :Lexer, 'pygments/lexer'
-
-  extend self
 end
