@@ -4,8 +4,9 @@ module Pygments
   module FFI
     extend self
 
-    def start(pygments_path = File.expand_path('../../../vendor/pygments-main/', __FILE__))
-      RubyPython.start
+    def start(pygments_path = nil, opts = {})
+      pygments_path ||= File.expand_path('../../../vendor/pygments-main/', __FILE__)
+      RubyPython.start(opts)
       RubyPython.import('pkg_resources') rescue nil
       sys = RubyPython.import('sys')
       sys.path.insert(0, pygments_path)
