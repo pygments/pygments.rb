@@ -7,7 +7,7 @@ Gem::Specification.new do |s|
   s.summary = 'pygments wrapper for ruby'
   s.description = 'pygments.rb exposes the pygments syntax highlighter via embedded python'
 
-  s.homepage = 'http://github.com/tmm1/pygments.rb'
+  s.homepage = 'https://github.com/tmm1/pygments.rb'
   s.has_rdoc = false
 
   s.authors = ['Aman Gupta']
