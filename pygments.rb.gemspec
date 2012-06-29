@@ -13,8 +13,8 @@ Gem::Specification.new do |s|
   s.authors = ['Aman Gupta']
   s.email = ['aman@tmm1.net']
 
-  s.add_dependency 'rubypython', '~> 0.5.3'
-  s.add_development_dependency 'rake-compiler', '0.7.6'
+  s.add_dependency 'rubypython', '~> 0.5'
+  s.add_development_dependency 'rake-compiler', '~> 0.7'
 
   # s.extensions = ['ext/extconf.rb']
   s.require_paths = ['lib']
