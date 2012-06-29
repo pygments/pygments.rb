@@ -19,5 +19,5 @@ Gem::Specification.new do |s|
   # s.extensions = ['ext/extconf.rb']
   s.require_paths = ['lib']
 
-  s.files = `git ls-files`.split("\n")
+  s.files = `git ls-files`.split($/)
 end
