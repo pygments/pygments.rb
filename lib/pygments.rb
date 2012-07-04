@@ -1,10 +1,7 @@
-# require 'pygments/c'
-# require 'pygments/ffi'
-require 'pygments/popen'
+require File.join(File.dirname(__FILE__), 'pygments/popen')
+
 
 module Pygments
-  # extend Pygments::C
-  # extend Pygments::FFI
   extend Pygments::Popen
 
   autoload :Lexer, 'pygments/lexer'

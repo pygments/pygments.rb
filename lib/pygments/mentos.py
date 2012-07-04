@@ -30,12 +30,13 @@ class Mentos(object):
         """
         Accepting a variety of possible inputs, return a Lexer object.
 
-        The inputs argument should be a hash with a key of at least:
+        The inputs argument should be a hash with at least one of the following
+        keys:
 
-            - a lexer name ("python")
-            - mimetype ("text/x-ruby'")
-            - filename ("yeaaah.py")
-            - code ("import derp" etc)
+            - 'lexer' ("python")
+            - 'mimetype' ("text/x-ruby")
+            - 'filename' ("yeaaah.py")
+            - 'code' ("import derp" etc)
 
         The code guessing method is not especially great. It is advised that
         clients pass in a literal lexer name whenever possible, which provides
@@ -63,7 +64,7 @@ class Mentos(object):
             return lexers.guess_lexer(args[0])
 
         else:
-            return "No lexer"
+            return {"error": "No lexer"}
 
 
     def highlight_text(self, code, formatter_name, args, kwargs):
@@ -80,10 +81,15 @@ class Mentos(object):
             _format_name = "html"
 
         # Return a lexer object
+        args += code
         lexer = self.return_lexer(args, kwargs)
 
         # Make sure we sucessfuly got a lexer
         if lexer:
+            # If we have an error hash, return immediately
+            if isinstance(lexer, dict):
+                return lexer
+
             formatter = pygments.formatters.get_formatter_by_name(str.lower(_format_name), **kwargs)
 
             # Do the damn thing.
@@ -136,13 +142,17 @@ class Mentos(object):
             elif method == 'lexer_name_for':
                 lexer = self.return_lexer(args, kwargs)
 
-                if lexer:
-                    # We don't want the Lexer itself, just the name.
-                    # Take the first alias.
-                    res = lexer.aliases[0]
+                # Return error if its an error
+                if isinstance(lexer, dict):
+                    return lexer
+                else:
+                    if lexer:
+                        # We don't want the Lexer itself, just the name.
+                        # Take the first alias.
+                        res = lexer.aliases[0]
 
             else:
-                res = """{'Error': 'invalid method'}"""
+                return {"error": "Invalid method"}
 
             return res
 
@@ -162,15 +172,17 @@ class Mentos(object):
         while True:
             res = None
 
-            # Listen for transmissions
-            line = sys.stdin.readline()
+            # The loop begins by reading off a simple 32-arity string representing
+            # an integer of 32 bits. This is the length of our JSON header. Using
+            # this method allows to avoid worrying about newlines.
+            size = sys.stdin.read(32)
 
-            # If we're getting excess newlines, deal with it.
-            if line == "\n":
-                continue
+            # Read from stdin the amount of bytes we were told to expect.
+            header_bytes = int(size, 2)
+            line = sys.stdin.read(header_bytes)
 
-            # A message is in. Get the header. If we get bad input, don't die horribly.
-            # Set header` to None, an error will be sent, and he loop will continue.
+            # A message is in. Get the header. If we get bad input, don't die horribly,
+            # but do set the header to None.
             try:
                 header = json.loads(line)
             except:
@@ -200,11 +212,26 @@ class Mentos(object):
             # We return a header back to Rubyland also. If we don't have a result,
             # we need to send back some 'error json' in the header.
             if res == None:
-                res = '{"error": "Bad header/no data"}'
+                res = {"error": "Bad header/no data"}
 
-            # Including a newline, the size of the reponse.
-            res_bytes = len(res) + 1
-            out_header = json.dumps({"bytes": res_bytes, "method": method}).encode('utf-8')
+            # Base header. We'll build on this, adding keys as necessary.
+            header = {"method": method}
+
+            # Error handling: include the error in the header, if
+            # there's an error
+            error = False
+            if isinstance(res, dict) and "error" in res:
+                error = True
+                res_bytes = 0
+                header += res
+
+            if error == False:
+                # The size of the reponse, including a newline.
+                res_bytes = len(res) + 1
+                header["bytes"] = res_bytes
+
+            out_header = json.dumps(header).encode('utf-8')
+
             print out_header
             print res
             sys.stdout.flush()
@@ -221,4 +248,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
 

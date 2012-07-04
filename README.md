@@ -1,13 +1,22 @@
 # pygments.rb
 
-A ruby wrapper for the python [pygments syntax highlighter](http://pygments.org/).
+A Ruby wrapper for the Python [pygments syntax highlighter](http://pygments.org/).
 
-This library replaces [github/albino](https://github.com/github/albino).
-Instead of shelling out to `pygmentize`, it embeds the python
-interpreter inside ruby via FFI. This avoids the cost of setting up the
-python VM on every invocation and speeds up code highlighting from ruby by 10-15x.
+pygments.rb works by talking over a simple pipe to a long-lived 
+Python child process. This library replaces [github/albino](https://github.com/github/albino),
+as well as a version of pygments.rb that used an embedded Python
+interpreter. 
+
+Each Ruby process that runs has its own 'personal Python'; 
+for example, 4 Unicorn workers will have one Python process each. 
+If a Python process dies, a new one will be spawned on the next 
+pygments.rb request. 
 
 ## usage
+
+``` ruby 
+require 'pygments'
+``` 
 
 ``` ruby
 Pygments.highlight(File.read(__FILE__), :lexer => 'ruby')
@@ -20,29 +29,34 @@ options hash:
 Pygments.highlight('code', :options => {:encoding => 'utf-8'})
 ```
 
-To use a formatter other than html, specify it explicitly:
+pygments.rb defaults to using an HTML formatter. 
+To use a formatter other than `html`, specify it explicitly
+like so:
 
 ``` ruby
 Pygments.highlight('code', :formatter => 'bbcode')
 Pygments.highlight('code', :formatter => 'terminal')
 ```
 
-To generate CSS for html formatted code, use the css method:
+To generate CSS for HTML formatted code, use the `#css` method:
 
 ``` ruby
 Pygments.css
 Pygments.css('.highlight')
 ```
 
-To use a custom python installation (like in ArchLinux), tell
-RubyPython where python lives:
+Other Pygments high-level API methods are also available.
+These methods return arrays detailing all the available lexers, formatters, 
+and styles.
 
 ``` ruby
-RubyPython.configure :python_exe => 'python2.7'
+Pygments.lexers
+Pygments.formatters
+Pygments.styles
 ```
 
 To use a custom pygments installation, specify the path to
-Pygments.start:
+`Pygments#start`:
 
 ``` ruby
 Pygments.start("/path/to/pygments")
@@ -57,5 +71,4 @@ Pygments.start("/path/to/pygments")
     pygments::ffi + reload    11.350000   1.240000  12.590000 ( 12.692320)
     pygments::ffi              1.130000   0.010000   1.140000 (  1.171589)
 
-To run `bench.rb`, use a git checkout. The C extension is not included
-in gem releases.
+

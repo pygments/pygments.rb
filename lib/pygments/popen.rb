@@ -63,7 +63,7 @@ module Pygments
         begin
           Process.kill('KILL', @pid)
           Process.waitpid(@pid)
-        rescue Errno::ESRCH
+        rescue Errno::ESRCH, Errno::ECHILD
         end
       end
 
@@ -159,7 +159,7 @@ module Pygments
     def highlight(code, opts={})
       # If the caller didn't give us any code, we have nothing to do,
       # so return right away.
-      return code if code.nil? or code.empty?
+      return code if code.nil? || code.empty?
 
       # Callers pass along options in the hash
       opts[:options] ||= {}
@@ -168,7 +168,7 @@ module Pygments
       opts[:options][:outencoding] ||= 'utf-8'
 
       # Get back the string from mentos and force encoding if we can
-      str = mentos(:highlight, code, opts, code)
+      str = mentos(:highlight, [], opts, code)
       str.force_encoding(opts[:options][:outencoding]) if str.respond_to?(:force_encoding)
       str
     end
@@ -185,16 +185,42 @@ module Pygments
       # Of utmost importance, we need to send over the total number of bytes,
       # including newline, that we're sending to be highlighted, allowing mentos to
       # do its work properly.
-      kwargs.merge!("bytes" => code.size + 1) if code
+      kwargs.merge!("bytes" => code.bytesize) if code
 
       # Send the fd over for logging purposes
       kwargs.merge!("fd" => @out.to_i)
 
-      # This magic moment: we send the request through the pipe. If there's text/code
-      # to be highlighted, we send that after.
-      req = Yajl.dump(:method => method, :args => args, :kwargs => kwargs)
-      @in.puts(req)
-      @in.puts(code) if code
+      # Our 'pipe protocol' works like this. We sent over a fixed-length integer, indicating
+      # the size of the header. Mentos listens for that. Mentos continues to read up to the size
+      # of those bytes: that is our header. If the header indicates that more bytes are coming
+      # (i.e., there is text to highlight), it conitnues reading for the amount of bytes
+      # specified in the header.
+      #
+      # A GRAPHIC:
+      #
+      # Ruby:                             Python
+      #   Byte size of header      ->     Wait for header
+      #   Send JSON header         ->     Read header. Keep reading if code is coming
+      #   Code (if there is code)  ->     Read up to whatever the header says to
+      #                            <-     Return response
+      #   Get response and return
+      #
+
+      # First, generate the header
+      out_header = Yajl.dump(:method => method, :args => args, :kwargs => kwargs)
+
+      # Get the size of the header
+      bits = get_fixed_bits_from_header(out_header)
+
+      # Send it to mentos
+      @in.write(bits)
+
+      # At this point, mentos is waiting for the header. So we send the
+      # out_header through the pipe.
+      #
+      # If there's text/code to be highlighted, we send that after.
+      @in.write(out_header)
+      @in.write(code) if code
 
       # Get the response header
       header = @out.gets
@@ -206,24 +232,30 @@ module Pygments
         # Read more bytes (the actual response body)
         res = @out.read(bytes.to_i)
 
-        # This is hackish but works. Open to suggestions.
-        if res == "Bad header/no data"
-          res = nil
-        end
-
         # Some methods want arrays from json. Other methods just want us to return
         # the text (like highlighting), in which case we just pass the res right on through.
         if res
-          res = Yajl.load(res, :symbolize_keys => true) unless code || method == :lexer_name_for || method == :css
+          unless code || method == :lexer_name_for || method == :css
+            res = Yajl.load(res, :symbolize_keys => true)
+          end
           res = res.strip if code || method == :lexer_name_for || method == :css
           res
         end
       end
-    end
 
     rescue Errno::EPIPE, EOFError
     # Pipe error or end-of-file error, raise
-    raise IOException.new
+    stop
+    raise MentosError.new
+    end
+
+    def get_fixed_bits_from_header(out_header)
+      size = out_header.bytesize
+
+      # Fixed 32 bits to represent the int, represented as a string
+      # e.g, "00000000000000000000000000011110"
+      Array.new(32) { |i| size[i] }.reverse!.join
+    end
   end
 end
 
