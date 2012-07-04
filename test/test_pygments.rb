@@ -5,6 +5,50 @@ require 'pygments'
 
 P = Pygments
 
+class PygmentsHighlightTest < Test::Unit::TestCase
+  RUBY_CODE = "#!/usr/bin/ruby\nputs 'foo'"
+
+  def test_highlight_empty
+    P.highlight('')
+    P.highlight(nil)
+  end
+
+  def test_highlight_defaults_to_html
+    code = P.highlight(RUBY_CODE)
+    assert_match '<span class="c">#!/usr/bin/ruby</span>', code
+  end
+
+  def test_highlight_markdown_compatible_html
+    code = P.highlight(RUBY_CODE)
+    assert_no_match %r{</pre></div>\Z}, code
+  end
+
+  def test_highlight_works_with_null_bytes
+    code = P.highlight("\0hello", :lexer => 'rb')
+    assert_match "hello", code
+  end
+
+  def test_highlight_works_on_utf8
+    code = P.highlight('# ø', :lexer => 'rb', :options => {:encoding => 'utf-8'})
+    assert_match "# ø", code
+  end
+
+  def test_highlight_formatter_bbcode
+    code = P.highlight(RUBY_CODE, :formatter => 'bbcode')
+    assert_match '[i]#!/usr/bin/ruby[/i]', code
+  end
+
+  def test_highlight_formatter_terminal
+    code = P.highlight(RUBY_CODE, :formatter => 'terminal')
+    assert_match "\e[37m#!/usr/bin/ruby\e[39;49;00m", code
+  end
+
+  def test_highlight_options
+    code = P.highlight(RUBY_CODE, :options => {:full => true, :title => 'test'})
+    assert_match '<title>test</title>', code
+  end
+end
+
 class PygmentsLexerTest < Test::Unit::TestCase
   RUBY_CODE = "#!/usr/bin/ruby\nputs 'foo'"
 

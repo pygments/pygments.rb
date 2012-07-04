@@ -11,16 +11,6 @@ Rake::GemPackageTask.new(GEMSPEC) do |pkg|
 end
 
 # ==========================================================
-# Ruby Extension
-# ==========================================================
-
-require 'rake/extensiontask'
-Rake::ExtensionTask.new('pygments_ext', GEMSPEC) do |ext|
-  ext.ext_dir = 'ext'
-end
-task :build => :compile
-
-# ==========================================================
 # Testing
 # ==========================================================
 
@@ -29,7 +19,6 @@ Rake::TestTask.new 'test' do |t|
   t.test_files = FileList['test/test_*.rb']
   t.ruby_opts = ['-rubygems']
 end
-task :test => :build
 
 # ==========================================================
 # Vendor
