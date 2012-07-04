@@ -28,25 +28,36 @@ class Dasm16Lexer(RegexLexer):
     mimetypes = ['text/x-dasm16']
 
     INSTRUCTIONS = [
-        'SET', 'ADD', 'SUB', 'MUL', 'DIV', 'MOD', 'SHL',
-        'SHR', 'AND', 'BOR', 'XOR', 'IFE', 'IFN', 'IFG', 'IFB',
-        'JSR'
+        'SET',
+        'ADD', 'SUB',
+        'MUL', 'MLI',
+        'DIV', 'DVI',
+        'MOD', 'MDI',
+        'AND', 'BOR', 'XOR',
+        'SHR', 'ASR', 'SHL',
+        'IFB', 'IFC', 'IFE', 'IFN', 'IFG', 'IFA', 'IFL', 'IFU',
+        'ADX', 'SBX',
+        'STI', 'STD',
+        'JSR',
+        'INT', 'IAG', 'IAS', 'RFI', 'IAQ', 'HWN', 'HWQ', 'HWI',
     ]
 
     REGISTERS = [
         'A', 'B', 'C',
         'X', 'Y', 'Z',
         'I', 'J',
-        'SP', 'PC',
+        'SP', 'PC', 'EX',
         'POP', 'PEEK', 'PUSH'
     ]
 
     # Regexes yo
-    string = r'"(\\"|[^"])*"'
     char = r'[a-zA-Z$._0-9@]'
     identifier = r'(?:[a-zA-Z$_]' + char + '*|\.' + char + '+)'
-    number = r'(?:0[xX][a-zA-Z0-9]+|\d+)'
+    number = r'[+-]?(?:0[xX][a-zA-Z0-9]+|\d+)'
+    binary_number = r'0b[01_]+'
     instruction = r'(?i)(' + '|'.join(INSTRUCTIONS) + ')'
+    single_char = r"'\\?" + char + "'"
+    string = r'"(\\"|[^"])*"'
 
     def guess_identifier(lexer, match):
         ident = match.group(0)
@@ -57,14 +68,21 @@ class Dasm16Lexer(RegexLexer):
         'root': [
             include('whitespace'),
             (':' + identifier, Name.Label),
+            (identifier + ':', Name.Label),
             (instruction, Name.Function, 'instruction-args'),
-            (r'(DAT|dat)', Name.Function, 'data-args'),
+            (r'\.' + identifier, Name.Function, 'data-args'),
             (r'[\r\n]+', Text)
+        ],
+
+        'numeric' : [
+            (binary_number, Number.Integer),
+            (number, Number.Integer),
+            (single_char, String),
         ],
 
         'arg' : [
             (identifier, guess_identifier),
-            (number, Number.Integer),
+            include('numeric')
         ],
 
         'deref' : [
@@ -89,7 +107,7 @@ class Dasm16Lexer(RegexLexer):
 
         'data-args' : [
             (r',', Punctuation),
-            (number, Number.Integer),
+            include('numeric'),
             (string, String),
             include('instruction-line')
         ],
