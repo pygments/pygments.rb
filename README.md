@@ -64,11 +64,24 @@ Pygments.start("/path/to/pygments")
 
 ## benchmarks
 
-    $ ruby -rubygems bench.rb 50
-                                   user     system      total        real
-    albino                     0.050000   0.050000  12.830000 ( 13.180806)
-    pygments::c                1.000000   0.010000   1.010000 (  1.009348)
-    pygments::ffi + reload    11.350000   1.240000  12.590000 ( 12.692320)
-    pygments::ffi              1.130000   0.010000   1.140000 (  1.171589)
+
+ $ ruby bench.rb 50
+     Benchmarking....
+     Size: 698 bytes
+     Iterations: 50
+                                                     user     system      total        real
+     pygments popen                                0.010000   0.010000   0.020000 (  0.460370)
+     pygments popen (process already started)      0.010000   0.000000   0.010000 (  0.272975)
+     pygments popen (process already started 2)    0.000000   0.000000   0.000000 (  0.273589)
+
+ $ ruby bench.rb 10
+     Benchmarking....
+     Size: 15523 bytes
+     Iterations: 10
+                                                    user     system      total        real
+     pygments popen                               0.000000   0.000000   0.000000 (  0.819419)
+     pygments popen (process already started)     0.010000   0.000000   0.010000 (  0.676515)
+     pygments popen (process already started 2)   0.000000   0.010000   0.010000 (  0.674189)
+
 
 
