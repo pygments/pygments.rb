@@ -168,7 +168,7 @@ module Pygments
       opts[:options][:outencoding] ||= 'utf-8'
 
       # Get back the string from mentos and force encoding if we can
-      str = mentos(:highlight, [], opts, code)
+      str = mentos(:highlight, code, opts, code)
       str.force_encoding(opts[:options][:outencoding]) if str.respond_to?(:force_encoding)
       str
     end

@@ -81,7 +81,6 @@ class Mentos(object):
             _format_name = "html"
 
         # Return a lexer object
-        args += code
         lexer = self.return_lexer(args, kwargs)
 
         # Make sure we sucessfuly got a lexer

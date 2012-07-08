@@ -25,7 +25,7 @@ class PygmentsHighlightTest < Test::Unit::TestCase
     assert_match '>used_memory_peak_human<', code
   end
 
-  def test_highlight_markdown_compatible_html
+    def test_highlight_markdown_compatible_html
     code = P.highlight(RUBY_CODE)
     assert_no_match %r{</pre></div>\Z}, code
   end
@@ -94,6 +94,11 @@ class PygmentsHighlightTest < Test::Unit::TestCase
     code = P.highlight(RUBY_CODE_TRAILING_NEWLINE + "\r")
     assert_match '<span class="c">#!/usr/bin/ruby</span>', code
   end
+
+  def test_highlight_still_works_with_invalid_code
+    code = P.highlight("importr python;    wat?", :lexer => 'py')
+    assert_match ">importr</span>", code
+  end
 end
 
 class PygmentsLexerTest < Test::Unit::TestCase
@@ -105,14 +110,18 @@ class PygmentsLexerTest < Test::Unit::TestCase
 
   def test_lexer_by_mimetype
     assert_equal 'rb', P.lexer_name_for(:mimetype => 'text/x-ruby')
+    assert_equal 'json', P.lexer_name_for(:mimetype => 'application/json')
   end
 
   def test_lexer_by_filename
     assert_equal 'rb', P.lexer_name_for(:filename => 'test.rb')
+    assert_equal 'scala', P.lexer_name_for(:filename => 'test.scala')
   end
 
   def test_lexer_by_name
     assert_equal 'rb', P.lexer_name_for(:lexer => 'ruby')
+    assert_equal 'python', P.lexer_name_for(:lexer => 'python')
+    assert_equal 'c', P.lexer_name_for(:lexer => 'c')
   end
 
   def test_lexer_by_filename_and_content
