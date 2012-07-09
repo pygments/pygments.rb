@@ -256,7 +256,7 @@ module Pygments
     rescue Errno::EPIPE, EOFError
     # Pipe error or end-of-file error, raise
     stop
-    raise MentosError.new
+    raise MentosError.new("EPIPE")
     end
 
     def get_fixed_bits_from_header(out_header)
