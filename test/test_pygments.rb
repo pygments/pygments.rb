@@ -198,7 +198,7 @@ class PygmentsCssTest < Test::Unit::TestCase
   end
 
   def test_css_colorful
-    assert_match '.c { color: #808080 }', P.css(:style => 'colorful')
+    assert_match '.c { color: #888888 }', P.css(:style => 'colorful')
   end
 end
 

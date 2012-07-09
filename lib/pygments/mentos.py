@@ -2,6 +2,11 @@
 # -*- coding: utf-8 -*-
 
 import sys, re, os, signal
+import sys
+if 'PYGMENTS_PATH' in os.environ:
+  sys.path.insert(0, os.environ['PYGMENTS_PATH'])
+sys.path.append(os.getcwd() + "/vendor/")
+
 import pygments
 from pygments import lexers, formatters, styles, filters
 
@@ -9,9 +14,6 @@ try:
     import json
 except ImportError:
     import simplejson as json
-
-if 'PYGMENTS_PATH' in os.environ:
-  sys.path.insert(0, os.environ['PYGMENTS_PATH'])
 
 def _signal_handler(signal, frame):
     """
