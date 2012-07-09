@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import sys, re, os, signal
-import sys
+import traceback
 if 'PYGMENTS_PATH' in os.environ:
   sys.path.insert(0, os.environ['PYGMENTS_PATH'])
 sys.path.append(os.getcwd() + "/vendor/")
@@ -102,6 +102,9 @@ class Mentos(object):
 
             return res
 
+        else:
+            return {"error": "No lexer"}
+
     def get_data(self, method, args, kwargs, text=None):
         """
         Based on the method argument, determine the action we'd like pygments
@@ -190,25 +193,30 @@ class Mentos(object):
                 header = None
 
             if header:
-                method = header["method"]
+                try:
+                    method = header["method"]
 
-                # Default to empty array and empty dictionary if nothing is given. Default to
-                # no text and no further bytes to read.
-                args = header.get("args", [])
-                kwargs = header.get("kwargs", {})
-                text = ""
-                _bytes = 0
+                    # Default to empty array and empty dictionary if nothing is given. Default to
+                    # no text and no further bytes to read.
+                    args = header.get("args", [])
+                    kwargs = header.get("kwargs", {})
+                    text = ""
+                    _bytes = 0
 
-                # Check if we need to read additional bytes after the header.
-                _kwargs = header.get("kwargs", None)
-                if _kwargs:
-                    _bytes = _kwargs.get("bytes", 0)
+                    # Check if we need to read additional bytes after the header.
+                    _kwargs = header.get("kwargs", None)
+                    if _kwargs:
+                        _bytes = _kwargs.get("bytes", 0)
 
-                # Read up to the given number bytes (possibly 0)
-                text = sys.stdin.read(_bytes)
+                    # Read up to the given number bytes (possibly 0)
+                    text = sys.stdin.read(_bytes)
 
-                # And now get the actual data from pygments.
-                res = self.get_data(method, args, kwargs, text)
+                    # And now get the actual data from pygments.
+                    res = self.get_data(method, args, kwargs, text)
+
+                except:
+                    tb = traceback.format_exc()
+                    res = {"error": tb}
 
             # We return a header back to Rubyland also. If we don't have a result,
             # we need to send back some 'error json' in the header.
@@ -227,7 +235,7 @@ class Mentos(object):
                 header += res
 
             if error == False:
-                # The size of the reponse, including a newline.
+                # The size of the response, including a newline.
                 res_bytes = len(res) + 1
                 header["bytes"] = res_bytes
 

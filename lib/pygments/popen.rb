@@ -224,10 +224,20 @@ module Pygments
 
       # Get the response header
       header = @out.gets
+
       if header
         # The header comes in as JSON
         header = Yajl.load(header)
+
         bytes = header["bytes"]
+
+        # Check if the header indicates an error
+        if header["error"]
+          # Raise this as a Ruby exception of the MentosError class.
+          # Pythonland will return a traceback, or at least some information
+          # about the error, in the error key.
+          raise MentosError.new(header["error"])
+        end
 
         # Read more bytes (the actual response body)
         res = @out.read(bytes.to_i)
