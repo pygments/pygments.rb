@@ -227,8 +227,6 @@ module Pygments
 
       if header
         # The header comes in as JSON
-        f = File.open('log0', 'a')
-        f.write(header + "\n")
         header = Yajl.load(header)
         bytes = header["bytes"]
 
