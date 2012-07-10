@@ -6,6 +6,8 @@ import traceback
 if 'PYGMENTS_PATH' in os.environ:
   sys.path.insert(0, os.environ['PYGMENTS_PATH'])
 sys.path.append(os.getcwd() + "/vendor/")
+sys.path.append(os.getcwd() + "/vendor/pygments-main")
+sys.path.append(os.getcwd() + "/vendor/simplejson")
 
 import pygments
 from pygments import lexers, formatters, styles, filters
@@ -14,6 +16,12 @@ try:
     import json
 except ImportError:
     import simplejson as json
+
+def _convert_keys(dictionary):
+    if not isinstance(dictionary, dict):
+        return dictionary
+    return dict((str(k), _convert_keys(v))
+        for k, v in dictionary.items())
 
 def _signal_handler(signal, frame):
     """
@@ -137,9 +145,10 @@ class Mentos(object):
                 res = json.dumps(res)
 
             elif method == 'highlight':
-                res = self.highlight_text(text.decode('utf-8'), formatter_name, args, opts)
+                res = self.highlight_text(text.decode('utf-8'), formatter_name, args, _convert_keys(opts))
 
             elif method == 'css':
+                kwargs = _convert_keys(kwargs)
                 fmt = pygments.formatters.get_formatter_by_name(args[0], **kwargs)
                 res = fmt.get_style_defs(args[1])
 
@@ -192,7 +201,7 @@ class Mentos(object):
             except:
                 header = None
 
-            if header:
+            if header != None:
                 try:
                     method = header["method"]
 
