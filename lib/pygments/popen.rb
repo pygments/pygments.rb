@@ -227,12 +227,14 @@ module Pygments
 
       if header
         # The header comes in as JSON
+        f = File.open('log0', 'a')
+        f.write(header + "\n")
         header = Yajl.load(header)
-
         bytes = header["bytes"]
 
         # Check if the header indicates an error
         if header["error"]
+          f.write("an error")
           # Raise this as a Ruby exception of the MentosError class.
           # Pythonland will return a traceback, or at least some information
           # about the error, in the error key.

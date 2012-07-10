@@ -23,6 +23,12 @@ def _convert_keys(dictionary):
     return dict((str(k), _convert_keys(v))
         for k, v in dictionary.items())
 
+def _write_error(error):
+    res = {"error": error}
+    out_header = json.dumps(res).encode('utf-8')
+    print out_header
+    return
+
 def _signal_handler(signal, frame):
     """
     Handle the signal given in the first argument, exiting gracefully
@@ -200,8 +206,9 @@ class Mentos(object):
                 header = json.loads(line)
             except:
                 header = None
+                _write_error("Bad header/no data")
 
-            if header != None:
+            if header:
                 try:
                     method = header["method"]
 
@@ -225,7 +232,7 @@ class Mentos(object):
 
                 except:
                     tb = traceback.format_exc()
-                    res = {"error": tb}
+                    _write_error(tb)
 
             # We return a header back to Rubyland also. If we don't have a result,
             # we need to send back some 'error json' in the header.
