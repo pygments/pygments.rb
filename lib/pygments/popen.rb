@@ -1,5 +1,4 @@
 # coding: utf-8
-
 require 'posix/spawn'
 require 'yajl'
 
@@ -39,9 +38,8 @@ module Pygments
         # if an ECHILD (no children) is set by waitpid(), don't die horribly;
         # still set the @pid to nil.
         begin
-          @pid = nil if Process.waitpid == @pid
+          @pid = nil if @pid && Process.waitpid(@pid, Process::WNOHANG) == @pid
         rescue Errno::ECHILD
-          @pid = nil
         end
       end
     end
