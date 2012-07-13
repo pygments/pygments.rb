@@ -42,7 +42,7 @@ class Mentos(object):
     def __init__(self):
         pass
 
-    def return_lexer(self, args, inputs, code):
+    def return_lexer(self, args, inputs, code=None):
         """
         Accepting a variety of possible inputs, return a Lexer object.
 
