@@ -27,21 +27,6 @@ module Pygments
       # A pipe to the mentos python process. #POSIX::Spawn#popen4 gives us
       # the pid and three IO objects to write and read..
       @pid, @in, @out, @err = popen4(File.expand_path('../mentos.py', __FILE__))
-
-      # Deal with dying child processes.
-      Signal.trap('CHLD') do
-
-        # Once waitpid() returns the pid (i.e., the child process exited),
-        # we can safely set our pid variable to nil. Next time a Pygments.rb
-        # method gets called, the child will be spawned again, so we don't
-        # need to spawn a new child in this block right now. For extra safety,
-        # if an ECHILD (no children) is set by waitpid(), don't die horribly;
-        # still set the @pid to nil.
-        begin
-          @pid = nil if @pid && Process.waitpid(@pid, Process::WNOHANG) == @pid
-        rescue Errno::ECHILD
-        end
-      end
     end
 
     # Stop the child process by issuing a brutal kill.
@@ -230,7 +215,6 @@ module Pygments
 
         # Check if the header indicates an error
         if header["error"]
-          f.write("an error")
           # Raise this as a Ruby exception of the MentosError class.
           # Pythonland will return a traceback, or at least some information
           # about the error, in the error key.
@@ -249,6 +233,8 @@ module Pygments
           res = res.strip if code || method == :lexer_name_for || method == :css
           res
         end
+      else
+        raise MentosError.new("No header received back.")
       end
 
     rescue Errno::EPIPE, EOFError

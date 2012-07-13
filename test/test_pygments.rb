@@ -17,12 +17,12 @@ class PygmentsHighlightTest < Test::Unit::TestCase
 
   def test_highlight_defaults_to_html
     code = P.highlight(RUBY_CODE)
-    assert_match '<span class="c">#!/usr/bin/ruby</span>', code
+    assert_match '<span class="c1">#!/usr/bin/ruby</span>', code
   end
 
   def test_highlight_works_with_larger_files
     code = P.highlight(REDIS_CODE)
-    assert_match '>used_memory_peak_human<', code
+    assert_match 'used_memory_peak_human', code
   end
 
     def test_highlight_markdown_compatible_html
@@ -82,17 +82,17 @@ class PygmentsHighlightTest < Test::Unit::TestCase
 
   def test_highlight_works_with_trailing_newline
     code = P.highlight(RUBY_CODE_TRAILING_NEWLINE)
-    assert_match '<span class="c">#!/usr/bin/ruby</span>', code
+    assert_match '<span class="c1">#!/usr/bin/ruby</span>', code
   end
 
   def test_highlight_works_with_multiple_newlines
     code = P.highlight(RUBY_CODE_TRAILING_NEWLINE + "\n\n")
-    assert_match '<span class="c">#!/usr/bin/ruby</span>', code
+    assert_match '<span class="c1">#!/usr/bin/ruby</span>', code
   end
 
   def test_highlight_works_with_trailing_cr
     code = P.highlight(RUBY_CODE_TRAILING_NEWLINE + "\r")
-    assert_match '<span class="c">#!/usr/bin/ruby</span>', code
+    assert_match '<span class="c1">#!/usr/bin/ruby</span>', code
   end
 
   def test_highlight_still_works_with_invalid_code
@@ -103,10 +103,6 @@ end
 
 class PygmentsLexerTest < Test::Unit::TestCase
   RUBY_CODE = "#!/usr/bin/ruby\nputs 'foo'"
-
-  def test_lexer_by_content
-    assert_equal 'rb', P.lexer_name_for(RUBY_CODE)
-  end
 
   def test_lexer_by_mimetype
     assert_equal 'rb', P.lexer_name_for(:mimetype => 'text/x-ruby')
@@ -129,7 +125,9 @@ class PygmentsLexerTest < Test::Unit::TestCase
   end
 
   def test_lexer_by_nothing
-    assert_equal nil, P.lexer_name_for(:invalid => true)
+    assert_raise MentosError do
+      P.lexer_name_for(:invalid => true)
+    end
   end
 end
 

@@ -42,7 +42,7 @@ class Mentos(object):
     def __init__(self):
         pass
 
-    def return_lexer(self, args, inputs):
+    def return_lexer(self, args, inputs, code):
         """
         Accepting a variety of possible inputs, return a Lexer object.
 
@@ -70,14 +70,14 @@ class Mentos(object):
 
                 # If we have code and a filename, pygments allows us to guess
                 # with both. This is better than just guessing with code.
-                if 'code' in inputs:
-                    return lexers.guess_lexer_for_filename(name, inputs['code'])
+                if code:
+                    return lexers.guess_lexer_for_filename(name, code)
                 else:
                     return lexers.get_lexer_for_filename(name)
 
         # If all we got is code, try anyway.
         if args:
-            return lexers.guess_lexer(args[0])
+            return lexers.guess_lexer(code)
 
         else:
             return {"error": "No lexer"}
@@ -97,7 +97,7 @@ class Mentos(object):
             _format_name = "html"
 
         # Return a lexer object
-        lexer = self.return_lexer(args, kwargs)
+        lexer = self.return_lexer(args, kwargs, code)
 
         # Make sure we sucessfuly got a lexer
         if lexer:
@@ -159,7 +159,7 @@ class Mentos(object):
                 res = fmt.get_style_defs(args[1])
 
             elif method == 'lexer_name_for':
-                lexer = self.return_lexer(args, kwargs)
+                lexer = self.return_lexer(args, kwargs, text)
 
                 # Return error if its an error
                 if isinstance(lexer, dict):
