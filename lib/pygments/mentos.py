@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import sys, re, os, signal
+import sys, re, os, signal, codecs
 import traceback
 if 'PYGMENTS_PATH' in os.environ:
   sys.path.insert(0, os.environ['PYGMENTS_PATH'])
@@ -27,6 +27,7 @@ def _write_error(error):
     res = {"error": error}
     out_header = json.dumps(res).encode('utf-8')
     print out_header
+    sys.stdout.flush()
     return
 
 def _signal_handler(signal, frame):
@@ -42,7 +43,7 @@ class Mentos(object):
     def __init__(self):
         pass
 
-    def return_lexer(self, args, inputs, code=None):
+    def return_lexer(self, lexer, args, inputs, code=None):
         """
         Accepting a variety of possible inputs, return a Lexer object.
 
@@ -58,6 +59,10 @@ class Mentos(object):
         clients pass in a literal lexer name whenever possible, which provides
         the best probability of match (100 percent).
         """
+
+        if lexer:
+            return lexers.get_lexer_by_name(lexer)
+
         if inputs:
             if 'lexer' in inputs:
                 return lexers.get_lexer_by_name(inputs['lexer'])
@@ -76,14 +81,14 @@ class Mentos(object):
                     return lexers.get_lexer_for_filename(name)
 
         # If all we got is code, try anyway.
-        if args:
+        if code:
             return lexers.guess_lexer(code)
 
         else:
-            return {"error": "No lexer"}
+            _write_error("No lexer")
 
 
-    def highlight_text(self, code, formatter_name, args, kwargs):
+    def highlight_text(self, code, lexer, formatter_name, args, kwargs):
         """
         Highlight the relevant code, and return a result string.
         The default formatter is html, but alternate formatters can be passed in via
@@ -97,14 +102,10 @@ class Mentos(object):
             _format_name = "html"
 
         # Return a lexer object
-        lexer = self.return_lexer(args, kwargs, code)
+        lexer = self.return_lexer(lexer, args, kwargs, code)
 
         # Make sure we sucessfuly got a lexer
         if lexer:
-            # If we have an error hash, return immediately
-            if isinstance(lexer, dict):
-                return lexer
-
             formatter = pygments.formatters.get_formatter_by_name(str.lower(_format_name), **kwargs)
 
             # Do the damn thing.
@@ -117,15 +118,13 @@ class Mentos(object):
             return res
 
         else:
-            return {"error": "No lexer"}
+            _write_error("No lexer")
 
-    def get_data(self, method, args, kwargs, text=None):
+    def get_data(self, method, lexer, args, kwargs, text=None):
         """
         Based on the method argument, determine the action we'd like pygments
         to do. Then return the data generated from pygments.
         """
-
-        # If we've receivied a hash of kwargs, get the data we might want.
         if kwargs:
             formatter_name = kwargs.get("formatter", None)
             opts = kwargs.get("options", {})
@@ -151,7 +150,8 @@ class Mentos(object):
                 res = json.dumps(res)
 
             elif method == 'highlight':
-                res = self.highlight_text(text.decode('utf-8'), formatter_name, args, _convert_keys(opts))
+                text = text.decode('utf-8')
+                res = self.highlight_text(text, lexer, formatter_name, args, _convert_keys(opts))
 
             elif method == 'css':
                 kwargs = _convert_keys(kwargs)
@@ -159,19 +159,18 @@ class Mentos(object):
                 res = fmt.get_style_defs(args[1])
 
             elif method == 'lexer_name_for':
-                lexer = self.return_lexer(args, kwargs, text)
+                lexer = self.return_lexer(None, args, kwargs, text)
 
-                # Return error if its an error
-                if isinstance(lexer, dict):
-                    return lexer
+                if lexer:
+                    # We don't want the Lexer itself, just the name.
+                    # Take the first alias.
+                    res = lexer.aliases[0]
+
                 else:
-                    if lexer:
-                        # We don't want the Lexer itself, just the name.
-                        # Take the first alias.
-                        res = lexer.aliases[0]
+                    _write_error("No lexer")
 
             else:
-                return {"error": "Invalid method"}
+                _write_error("No lexer")
 
             return res
 
@@ -187,7 +186,6 @@ class Mentos(object):
         The header is of form:
             { "method": "highlight", "args": [], "kwargs": {"arg1": "v"}, "bytes": 128, "fd": "8"}
         """
-
         while True:
             res = None
 
@@ -206,7 +204,6 @@ class Mentos(object):
                 header = json.loads(line)
             except:
                 header = None
-                _write_error("Bad header/no data")
 
             if header:
                 try:
@@ -216,50 +213,42 @@ class Mentos(object):
                     # no text and no further bytes to read.
                     args = header.get("args", [])
                     kwargs = header.get("kwargs", {})
-                    text = ""
-                    _bytes = 0
+                    lexer = kwargs.get("lexer", None)
+                    if lexer:
+                        lexer = str(lexer)
 
-                    # Check if we need to read additional bytes after the header.
-                    _kwargs = header.get("kwargs", None)
-                    if _kwargs:
-                        _bytes = _kwargs.get("bytes", 0)
-
-                    # Read up to the given number bytes (possibly 0)
-                    text = sys.stdin.read(_bytes)
+                    if method == 'highlight':
+                        text = args.encode('utf-8')
+                    else:
+                        text = None
 
                     # And now get the actual data from pygments.
-                    res = self.get_data(method, args, kwargs, text)
+                    try:
+                        res = self.get_data(method, lexer, args, kwargs, text)
+                    except:
+                        tb = traceback.format_exc()
+                        _write_error(tb)
+                        return
+
+                    # Base header. We'll build on this, adding keys as necessary.
+                    header = {"method": method}
+
+                    res_bytes = len(res) + 1
+                    header["bytes"] = res_bytes
+
+                    out_header = json.dumps(header).encode('utf-8')
+
+                    print out_header
+                    print res
+                    sys.stdout.flush()
 
                 except:
                     tb = traceback.format_exc()
                     _write_error(tb)
 
-            # We return a header back to Rubyland also. If we don't have a result,
-            # we need to send back some 'error json' in the header.
-            if res == None:
-                res = {"error": "Bad header/no data"}
+            else:
+                _write_error("Bad header/no data")
 
-            # Base header. We'll build on this, adding keys as necessary.
-            header = {"method": method}
-
-            # Error handling: include the error in the header, if
-            # there's an error
-            error = False
-            if isinstance(res, dict) and "error" in res:
-                error = True
-                res_bytes = 0
-                header += res
-
-            if error == False:
-                # The size of the response, including a newline.
-                res_bytes = len(res) + 1
-                header["bytes"] = res_bytes
-
-            out_header = json.dumps(header).encode('utf-8')
-
-            print out_header
-            print res
-            sys.stdout.flush()
 
 def main():
 

@@ -50,11 +50,6 @@ class PygmentsHighlightTest < Test::Unit::TestCase
     assert_match "# ø ø ø", code
   end
 
-  def test_highlight_works_with_more_utf8
-    code = P.highlight("import λώσσα", :lexer => 'py')
-    assert_match "import</span> λώσσα", code
-  end
-
   def test_highlight_works_with_multiple_utf8_and_trailing_newline
     code = P.highlight("#!/usr/bin/ruby\nputs 'ø..ø'\n", :lexer => 'rb')
     assert_match "ø..ø", code
