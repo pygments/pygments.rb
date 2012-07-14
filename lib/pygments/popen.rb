@@ -140,7 +140,6 @@ module Pygments
     # in the standard 'rpc' call.
     #
     def highlight(code, opts={})
-      l = File.open('rubylog', 'a')
       # If the caller didn't give us any code, we have nothing to do,
       # so return right away.
       return code if code.nil? || code.empty?
@@ -150,7 +149,6 @@ module Pygments
 
       # Default to utf-8 for the output encoding, if not given.
       opts[:options][:outencoding] ||= 'utf-8'
-      l.write(opts.to_s + "\n")
 
       # Get back the string from mentos and force encoding if we can
       str = mentos(:highlight, code, opts, code)
@@ -205,7 +203,6 @@ module Pygments
       #
       # If there's text/code to be highlighted, we send that after.
       @in.write(out_header)
-      #@in.write(code) if code
 
       # Get the response header
       header = @out.gets
