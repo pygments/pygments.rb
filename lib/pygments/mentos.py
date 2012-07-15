@@ -5,9 +5,12 @@ import sys, re, os, signal, codecs
 import traceback
 if 'PYGMENTS_PATH' in os.environ:
   sys.path.insert(0, os.environ['PYGMENTS_PATH'])
-sys.path.append(os.getcwd() + "/vendor/")
-sys.path.append(os.getcwd() + "/vendor/pygments-main")
-sys.path.append(os.getcwd() + "/vendor/simplejson")
+
+dirname = os.path.dirname
+base_dir = dirname(dirname(dirname(__file__)))
+sys.path.append(base_dir + "/vendor")
+sys.path.append(base_dir + "/vendor/pygments-main")
+sys.path.append(base_dir + "/vendor/simplejson")
 
 import pygments
 from pygments import lexers, formatters, styles, filters
