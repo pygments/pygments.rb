@@ -213,17 +213,21 @@ class Mentos(object):
                     method = header["method"]
 
                     # Default to empty array and empty dictionary if nothing is given. Default to
-                    # no text and no further bytes to read.
+                    # no further bytes to read.
                     args = header.get("args", [])
                     kwargs = header.get("kwargs", {})
                     lexer = kwargs.get("lexer", None)
+                    _bytes = 0
                     if lexer:
                         lexer = str(lexer)
 
-                    if method == 'highlight':
-                        text = args.encode('utf-8')
-                    else:
-                        text = None
+                    # Read more bytes if necessary
+                    _kwargs = header.get("kwargs", None)
+                    if _kwargs:
+                        _bytes = _kwargs.get("bytes", 0)
+
+                    # Read up to the given number bytes (possibly 0)
+                    text = sys.stdin.read(_bytes)
 
                     # And now get the actual data from pygments.
                     try:

@@ -151,7 +151,7 @@ module Pygments
       opts[:options][:outencoding] ||= 'utf-8'
 
       # Get back the string from mentos and force encoding if we can
-      str = mentos(:highlight, code, opts, code)
+      str = mentos(:highlight, nil, opts, code)
       str.force_encoding(opts[:options][:outencoding]) if str.respond_to?(:force_encoding)
       str
     end
@@ -203,6 +203,7 @@ module Pygments
       #
       # If there's text/code to be highlighted, we send that after.
       @in.write(out_header)
+      @in.write(code) if code
 
       # Get the response header
       header = @out.gets
