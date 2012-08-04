@@ -1,7 +1,8 @@
-# coding: utf-8
+#coding: utf-8
 
 require 'test/unit'
 require File.join(File.dirname(__FILE__), '..', '/lib/pygments.rb')
+ENV['mentos-test'] = "yes"
 
 P = Pygments
 
@@ -10,24 +11,22 @@ class PygmentsHighlightTest < Test::Unit::TestCase
   RUBY_CODE_TRAILING_NEWLINE = "#!/usr/bin/ruby\nputs 'foo'\n"
   REDIS_CODE = File.read(File.join(File.dirname(__FILE__), '..', '/test/test_data.c'))
 
-  def test_highlight_empty
-    P.highlight('')
-    P.highlight(nil)
-  end
-
   def test_highlight_defaults_to_html
     code = P.highlight(RUBY_CODE)
     assert_match '<span class="c1">#!/usr/bin/ruby</span>', code
+    assert_equal '<div class', code[0..9]
   end
 
   def test_highlight_works_with_larger_files
     code = P.highlight(REDIS_CODE)
     assert_match 'used_memory_peak_human', code
+    assert_equal 454107, code.bytesize.to_i
   end
 
-    def test_highlight_markdown_compatible_html
-    code = P.highlight(RUBY_CODE)
-    assert_no_match %r{</pre></div>\Z}, code
+  def test_returns_nil_on_timeout
+    large_code = REDIS_CODE * 300
+    code = P.highlight(large_code) # a 30 mb highlight request will timeout
+    assert_equal nil, code
   end
 
   def test_highlight_works_with_null_bytes
@@ -45,6 +44,12 @@ class PygmentsHighlightTest < Test::Unit::TestCase
     assert_match "# ø", code
   end
 
+  def test_highlight_works_on_utf8_all_chars_automatically
+    code = P.highlight('def foo: # ø', :lexer => 'py')
+
+    assert_equal '<div class="highlight"><pre><span clas', code[0,38]
+  end
+
   def test_highlight_works_with_multiple_utf8
     code = P.highlight('# ø ø ø', :lexer => 'rb', :options => {:encoding => 'utf-8'})
     assert_match "# ø ø ø", code
@@ -57,12 +62,12 @@ class PygmentsHighlightTest < Test::Unit::TestCase
 
   def test_highlight_formatter_bbcode
     code = P.highlight(RUBY_CODE, :formatter => 'bbcode')
-    assert_match '[i]#!/usr/bin/ruby[/i]', code
+    assert_match 'color=#408080][i]#!/usr/bin/ruby[/i]', code
   end
 
   def test_highlight_formatter_terminal
     code = P.highlight(RUBY_CODE, :formatter => 'terminal')
-    assert_match "\e[37m#!/usr/bin/ruby\e[39;49;00m", code
+    assert_match '39;49;00m', code
   end
 
   def test_highlight_options
@@ -81,7 +86,7 @@ class PygmentsHighlightTest < Test::Unit::TestCase
   end
 
   def test_highlight_works_with_multiple_newlines
-    code = P.highlight(RUBY_CODE_TRAILING_NEWLINE + "\n\n")
+    code = P.highlight(RUBY_CODE_TRAILING_NEWLINE + "derp\n\n")
     assert_match '<span class="c1">#!/usr/bin/ruby</span>', code
   end
 
@@ -93,6 +98,53 @@ class PygmentsHighlightTest < Test::Unit::TestCase
   def test_highlight_still_works_with_invalid_code
     code = P.highlight("importr python;    wat?", :lexer => 'py')
     assert_match ">importr</span>", code
+  end
+end
+
+# Philosophically, I'm not the biggest fan of testing private
+# methods, but given the relative delicacy of validity checking
+# over the pipe I think it's necessary and informative.
+class PygmentsValidityTest < Test::Unit::TestCase
+  def test_add_ids_with_padding
+    res = P.send(:add_ids, "herp derp baz boo foo", "ABCDEFGH")
+    assert_equal "ABCDEFGH  herp derp baz boo foo  ABCDEFGH", res
+  end
+
+  def test_add_ids_on_empty_string
+    res = P.send(:add_ids, "", "ABCDEFGH")
+    assert_equal "ABCDEFGH    ABCDEFGH", res
+  end
+
+  def test_add_ids_with_unicode_data
+    res = P.send(:add_ids, "# ø ø ø", "ABCDEFGH")
+    assert_equal "ABCDEFGH  # ø ø ø  ABCDEFGH", res
+  end
+
+  def test_add_ids_with_starting_slashes
+    res = P.send(:add_ids, '\\# ø ø ø..//', "ABCDEFGH")
+    assert_equal "ABCDEFGH  \\# ø ø ø..//  ABCDEFGH", res
+  end
+
+  def test_get_fixed_bits_from_header
+    bits = P.send(:get_fixed_bits_from_header, '{"herp": "derp"}')
+    assert_equal "00000000000000000000000000010000", bits
+  end
+
+  def test_get_fixed_bits_from_header_works_with_large_headers
+    bits = P.send(:get_fixed_bits_from_header, '{"herp": "derp"}' * 10000)
+    assert_equal "00000000000000100111000100000000", bits
+  end
+
+  def test_size_check
+    size = "00000000000000000000000000100110"
+    res = P.send(:size_check, size)
+    assert_equal res, true
+  end
+
+  def test_size_check_bad
+    size = "some random thing"
+    res = P.send(:size_check, size)
+    assert_equal res, false
   end
 end
 

@@ -1,19 +1,22 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import sys, re, os, signal, codecs
+import sys, re, os, signal, resource
 import traceback
 if 'PYGMENTS_PATH' in os.environ:
-  sys.path.insert(0, os.environ['PYGMENTS_PATH'])
+    sys.path.insert(0, os.environ['PYGMENTS_PATH'])
 
 dirname = os.path.dirname
-base_dir = dirname(dirname(dirname(__file__)))
+
+base_dir = dirname(dirname(dirname(os.path.abspath(__file__))))
 sys.path.append(base_dir + "/vendor")
 sys.path.append(base_dir + "/vendor/pygments-main")
 sys.path.append(base_dir + "/vendor/simplejson")
 
 import pygments
 from pygments import lexers, formatters, styles, filters
+
+from threading import Lock
 
 try:
     import json
@@ -29,9 +32,16 @@ def _convert_keys(dictionary):
 def _write_error(error):
     res = {"error": error}
     out_header = json.dumps(res).encode('utf-8')
-    print out_header
+    bits = _get_fixed_bits_from_header(out_header)
+    sys.stdout.write(bits + "\n")
+    sys.stdout.flush()
+    sys.stdout.write(out_header + "\n")
     sys.stdout.flush()
     return
+
+def _get_fixed_bits_from_header(out_header):
+    size = len(out_header)
+    return "".join(map(lambda y:str((size>>y)&1), range(32-1, -1, -1)))
 
 def _signal_handler(signal, frame):
     """
@@ -114,10 +124,6 @@ class Mentos(object):
             # Do the damn thing.
             res = pygments.highlight(code, lexer, formatter)
 
-            # Fix up the formatting a bit for html.
-            if res and _format_name == 'html':
-                res = re.sub(r'</pre></div>\n?\Z', "</pre>\n</div>", res)
-
             return res
 
         else:
@@ -153,7 +159,11 @@ class Mentos(object):
                 res = json.dumps(res)
 
             elif method == 'highlight':
-                text = text.decode('utf-8')
+                try:
+                    text = text.decode('utf-8')
+                except UnicodeDecodeError:
+                    # The text may already be encoded
+                    text = text
                 res = self.highlight_text(text, lexer, formatter_name, args, _convert_keys(opts))
 
             elif method == 'css':
@@ -177,6 +187,61 @@ class Mentos(object):
 
             return res
 
+
+    def _send_data(self, res, method):
+
+        # Base header. We'll build on this, adding keys as necessary.
+        base_header = {"method": method}
+
+        res_bytes = len(res) + 1
+        base_header["bytes"] = res_bytes
+
+        out_header = json.dumps(base_header).encode('utf-8')
+
+        # Following the protocol, send over a fixed size represenation of the
+        # size of the JSON header
+        bits = _get_fixed_bits_from_header(out_header)
+
+        # Send it to Rubyland
+        sys.stdout.write(bits + "\n")
+        sys.stdout.flush()
+
+        # Send the header.
+        sys.stdout.write(out_header + "\n")
+        sys.stdout.flush()
+
+        # Finally, send the result
+        sys.stdout.write(res + "\n")
+        sys.stdout.flush()
+
+
+    def _get_ids(self, text):
+        start_id = text[:8]
+        end_id = text[-8:]
+        return start_id, end_id
+
+    def _check_and_return_text(self, text, start_id, end_id):
+
+        # Sanity check.
+        id_regex = re.compile('[A-Z]{8}')
+
+        if not id_regex.match(start_id) and not id_regex.match(end_id):
+            _write_error("ID check failed. Not a id.")
+
+        if not start_id == end_id:
+            _write_error("id check failed. id's did not match.")
+
+        # Passed the sanity check. Remove the id's and return
+        text = text[10:-10]
+        return text
+
+    def _parse_header(self, header):
+        method = header["method"]
+        args = header.get("args", [])
+        kwargs = header.get("kwargs", {})
+        lexer = kwargs.get("lexer", None)
+        return (method, args, kwargs, lexer)
+
     def start(self):
         """
         Main loop, waiting for inputs on stdin. When it gets some data,
@@ -187,75 +252,64 @@ class Mentos(object):
         pygmentized, this header will be followed by the text to be pygmentized.
 
         The header is of form:
-            { "method": "highlight", "args": [], "kwargs": {"arg1": "v"}, "bytes": 128, "fd": "8"}
+        { "method": "highlight", "args": [], "kwargs": {"arg1": "v"}, "bytes": 128, "fd": "8"}
         """
-        while True:
-            res = None
+        lock = Lock()
 
-            # The loop begins by reading off a simple 32-arity string representing
-            # an integer of 32 bits. This is the length of our JSON header. Using
-            # this method allows to avoid worrying about newlines.
+        while True:
+            # The loop begins by reading off a simple 32-arity string
+            # representing an integer of 32 bits. This is the length of
+            # our JSON header.
             size = sys.stdin.read(32)
 
-            # Read from stdin the amount of bytes we were told to expect.
-            header_bytes = int(size, 2)
-            line = sys.stdin.read(header_bytes)
+            lock.acquire()
 
-            # A message is in. Get the header. If we get bad input, don't die horribly,
-            # but do set the header to None.
             try:
+                # Read from stdin the amount of bytes we were told to expect.
+                header_bytes = int(size, 2)
+
+                # Sanity check the size
+                size_regex = re.compile('[0-1]{32}')
+                if not size_regex.match(size):
+                    _write_error("Size received is not valid.")
+
+                line = sys.stdin.read(header_bytes)
+
                 header = json.loads(line)
+
+                method, args, kwargs, lexer = self._parse_header(header)
+                _bytes = 0
+
+                if lexer:
+                    lexer = str(lexer)
+
+                # Read more bytes if necessary
+                if kwargs:
+                    _bytes = kwargs.get("bytes", 0)
+
+                # Read up to the given number bytes (possibly 0)
+                text = sys.stdin.read(_bytes)
+
+                # Sanity check the return.
+                if method == 'highlight':
+                    start_id, end_id = self._get_ids(text)
+                    text = self._check_and_return_text(text, start_id, end_id)
+
+                # Get the actual data from pygments.
+                res = self.get_data(method, lexer, args, kwargs, text)
+
+                # Put back the sanity check values.
+                if method == "highlight":
+                    res = start_id + "  " + res + "  " + end_id
+
+                self._send_data(res, method)
+
             except:
-                header = None
+                tb = traceback.format_exc()
+                _write_error(tb)
 
-            if header:
-                try:
-                    method = header["method"]
-
-                    # Default to empty array and empty dictionary if nothing is given. Default to
-                    # no further bytes to read.
-                    args = header.get("args", [])
-                    kwargs = header.get("kwargs", {})
-                    lexer = kwargs.get("lexer", None)
-                    _bytes = 0
-                    if lexer:
-                        lexer = str(lexer)
-
-                    # Read more bytes if necessary
-                    _kwargs = header.get("kwargs", None)
-                    if _kwargs:
-                        _bytes = _kwargs.get("bytes", 0)
-
-                    # Read up to the given number bytes (possibly 0)
-                    text = sys.stdin.read(_bytes)
-
-                    # And now get the actual data from pygments.
-                    try:
-                        res = self.get_data(method, lexer, args, kwargs, text)
-                    except:
-                        tb = traceback.format_exc()
-                        _write_error(tb)
-                        return
-
-                    # Base header. We'll build on this, adding keys as necessary.
-                    header = {"method": method}
-
-                    res_bytes = len(res) + 1
-                    header["bytes"] = res_bytes
-
-                    out_header = json.dumps(header).encode('utf-8')
-
-                    print out_header
-                    print res
-                    sys.stdout.flush()
-
-                except:
-                    tb = traceback.format_exc()
-                    _write_error(tb)
-
-            else:
-                _write_error("Bad header/no data")
-
+            finally:
+                lock.release()
 
 def main():
 
@@ -265,6 +319,24 @@ def main():
     signal.signal(signal.SIGHUP, _signal_handler)
 
     mentos = Mentos()
+
+    # close fd's. mentos is a long-running process
+    # and inherits fd's from its unicorn parent
+    # (and, thus, burdens like mysql) — we don't want that here.
+
+    # An optimization: we can check to see the max FD
+    # a process can open and run the os.close() iteration against that.
+    # If it's infinite, we default to 65536.
+    maxfd = resource.getrlimit(resource.RLIMIT_NOFILE)[1]
+    if maxfd == resource.RLIM_INFINITY:
+        maxfd = 65536
+
+    for fd in range(3, maxfd):
+        try:
+            os.close(fd)
+        except:
+            pass
+
     mentos.start()
 
 if __name__ == "__main__":
