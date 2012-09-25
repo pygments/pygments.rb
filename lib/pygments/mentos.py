@@ -74,14 +74,17 @@ class Mentos(object):
         """
 
         if lexer:
-            return lexers.get_lexer_by_name(lexer)
+            if inputs:
+                return lexers.get_lexer_by_name(lexer, **inputs)
+            else:
+                return lexers.get_lexer_by_name(lexer)
 
         if inputs:
             if 'lexer' in inputs:
-                return lexers.get_lexer_by_name(inputs['lexer'])
+                return lexers.get_lexer_by_name(inputs['lexer'], **inputs)
 
             elif 'mimetype' in inputs:
-                return lexers.get_lexer_for_mimetype(inputs['mimetype'])
+                return lexers.get_lexer_for_mimetype(inputs['mimetype'], **inputs)
 
             elif 'filename' in inputs:
                 name = inputs['filename']
@@ -89,13 +92,13 @@ class Mentos(object):
                 # If we have code and a filename, pygments allows us to guess
                 # with both. This is better than just guessing with code.
                 if code:
-                    return lexers.guess_lexer_for_filename(name, code)
+                    return lexers.guess_lexer_for_filename(name, code, **inputs)
                 else:
-                    return lexers.get_lexer_for_filename(name)
+                    return lexers.get_lexer_for_filename(name, **inputs)
 
         # If all we got is code, try anyway.
         if code:
-            return lexers.guess_lexer(code)
+            return lexers.guess_lexer(code, **inputs)
 
         else:
             _write_error("No lexer")
@@ -226,10 +229,10 @@ class Mentos(object):
         id_regex = re.compile('[A-Z]{8}')
 
         if not id_regex.match(start_id) and not id_regex.match(end_id):
-            _write_error("ID check failed. Not a id.")
+            _write_error("ID check failed. Not an ID.")
 
         if not start_id == end_id:
-            _write_error("id check failed. id's did not match.")
+            _write_error("ID check failed. ID's did not match.")
 
         # Passed the sanity check. Remove the id's and return
         text = text[10:-10]
@@ -320,13 +323,7 @@ def main():
 
     mentos = Mentos()
 
-    # close fd's. mentos is a long-running process
-    # and inherits fd's from its unicorn parent
-    # (and, thus, burdens like mysql) — we don't want that here.
-
-    # An optimization: we can check to see the max FD
-    # a process can open and run the os.close() iteration against that.
-    # If it's infinite, we default to 65536.
+    # close fd's inherited from the ruby parent
     maxfd = resource.getrlimit(resource.RLIMIT_NOFILE)[1]
     if maxfd == resource.RLIM_INFINITY:
         maxfd = 65536
