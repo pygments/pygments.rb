@@ -280,7 +280,7 @@ module Pygments
           if not (start_id == id and end_id == id)
             @log.error "[#{Time.now.iso8601}] ID's did not match. Aborting."
             stop "ID's did not match. Aborting."
-            raise MentosError, "ID's did not match. Aborting. " + res.to_s
+            raise MentosError, "ID's did not match. Aborting."
           else
             # We're good. Remove the padding
             res = res[10..-11]
@@ -335,9 +335,9 @@ module Pygments
 
         # Sanity check the size
         if not size_check(size)
-          @log.error "[#{Time.now.iso8601}] Size returned from Mentos invalid."
-          stop "Size returned from Mentos invalid."
-          raise MentosError, "Size returned from Mentos invalid."
+          @log.error "[#{Time.now.iso8601}] Size returned from mentos.py invalid."
+          stop "Size returned from mentos.py invalid."
+          raise MentosError, "Size returned from mentos.py invalid."
         end
 
         # Read the amount of bytes we should be expecting. We first
