@@ -1,55 +1,22 @@
-$:.unshift('lib')
-
+require File.join(File.dirname(__FILE__), '/lib/pygments.rb')
 require 'benchmark'
-require 'pygments/c'
-require 'pygments/ffi'
-require 'rubygems'
-require 'albino'
 
-num = ARGV[0] ? ARGV[0].to_i : 25
-code = File.read(__FILE__)
+include Benchmark
+# number of iterations
+num = ARGV[0] ? ARGV[0].to_i : 10
 
-albino, pygments, ffi =
-  Albino.new(code, :ruby, :html).colorize,
-  Pygments::C.highlight(code, :lexer => 'ruby'),
-  Pygments::FFI.highlight(code, :lexer => 'ruby')
+# we can also repeat the code itself
+repeats = ARGV[1] ? ARGV[1].to_i : 1
 
-unless albino == pygments and pygments == ffi
-  raise "incompatible implementations (#{albino.size} != #{pygments.size} != #{ffi.size})"
+code = File.open('test/test_data.py').read.to_s * repeats
+
+puts "Benchmarking....\n"
+puts "Size: " + code.bytesize.to_s + " bytes\n"
+puts "Iterations: " + num.to_s + "\n"
+
+Benchmark.bm(40) do |x|
+  x.report("pygments popen                             ")  { for i in 1..num; Pygments.highlight(code, :lexer => 'python'); end }
+  x.report("pygments popen (process already started)   ")  { for i in 1..num; Pygments.highlight(code, :lexer => 'python'); end }
+  x.report("pygments popen (process already started 2) ")  { for i in 1..num; Pygments.highlight(code, :lexer => 'python'); end }
 end
-
-Benchmark.bm(25) do |x|
-  x.report('albino') do
-    num.times do
-      Albino.new(code, :ruby, :html).colorize
-    end
-  end
-  x.report('pygments::c') do
-    num.times do
-      Pygments::C.highlight(code, :lexer => 'ruby')
-    end
-  end
-  x.report('pygments::ffi + reload') do
-    num.times do
-      Pygments::FFI.start
-      Pygments::FFI.highlight(code, :lexer => 'ruby')
-      Pygments::FFI.stop
-    end
-  end
-  Pygments::FFI.start
-  x.report('pygments::ffi') do
-    num.times do
-      Pygments::FFI.highlight(code, :lexer => 'ruby')
-    end
-  end
-end
-
-__END__
-
-$ ruby -rubygems bench.rb 50
-                               user     system      total        real
-albino                     0.050000   0.050000  12.830000 ( 13.180806)
-pygments::c                1.000000   0.010000   1.010000 (  1.009348)
-pygments::ffi + reload    11.350000   1.240000  12.590000 ( 12.692320)
-pygments::ffi              1.130000   0.010000   1.140000 (  1.171589)
 
