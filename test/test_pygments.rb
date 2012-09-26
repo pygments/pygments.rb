@@ -171,6 +171,10 @@ class PygmentsLexerTest < Test::Unit::TestCase
     assert_equal 'rb', P.lexer_name_for(RUBY_CODE, :filename => 'test.rb')
   end
 
+  def test_lexer_by_content
+    assert_equal 'rb', P.lexer_name_for(RUBY_CODE)
+  end
+
   def test_lexer_by_nothing
     assert_raise MentosError do
       P.lexer_name_for(:invalid => true)
