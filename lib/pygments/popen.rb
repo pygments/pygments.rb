@@ -158,7 +158,13 @@ module Pygments
         opts = {}
       end
 
-      mentos(:lexer_name_for, args, opts)
+      if args.last.is_a?(String)
+        code = args.pop
+      else
+        code = nil
+      end
+
+      mentos(:lexer_name_for, args, opts, code)
     end
 
     # Public: Highlight code.

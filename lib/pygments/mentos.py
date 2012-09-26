@@ -66,7 +66,8 @@ class Mentos(object):
             - 'lexer' ("python")
             - 'mimetype' ("text/x-ruby")
             - 'filename' ("yeaaah.py")
-            - 'code' ("import derp" etc)
+
+        The code argument should be a string, such as "import derp".
 
         The code guessing method is not especially great. It is advised that
         clients pass in a literal lexer name whenever possible, which provides
@@ -101,7 +102,7 @@ class Mentos(object):
             return lexers.guess_lexer(code, **inputs)
 
         else:
-            _write_error("No lexer")
+            return None
 
 
     def highlight_text(self, code, lexer, formatter_name, args, kwargs):
@@ -186,7 +187,7 @@ class Mentos(object):
                     _write_error("No lexer")
 
             else:
-                _write_error("No lexer")
+                _write_error("Invalid method " + method)
 
             return res
 
@@ -294,7 +295,7 @@ class Mentos(object):
                 text = sys.stdin.read(_bytes)
 
                 # Sanity check the return.
-                if method == 'highlight':
+                if _bytes:
                     start_id, end_id = self._get_ids(text)
                     text = self._check_and_return_text(text, start_id, end_id)
 
