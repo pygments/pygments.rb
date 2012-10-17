@@ -10,7 +10,11 @@ interpreter.
 Each Ruby process that runs has its own 'personal Python'; 
 for example, 4 Unicorn workers will have one Python process each. 
 If a Python process dies, a new one will be spawned on the next 
-pygments.rb request. 
+pygments.rb request.
+
+## system requirements
+
+- Python 2.5+
 
 ## usage
 
