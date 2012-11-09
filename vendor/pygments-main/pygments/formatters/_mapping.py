@@ -15,6 +15,7 @@
 
 # start
 from pygments.formatters.bbcode import BBCodeFormatter
+from pygments.formatters.gitlab import GitlabFormatter
 from pygments.formatters.html import HtmlFormatter
 from pygments.formatters.img import BmpImageFormatter
 from pygments.formatters.img import GifImageFormatter
@@ -32,6 +33,7 @@ FORMATTERS = {
     BBCodeFormatter: ('BBCode', ('bbcode', 'bb'), (), 'Format tokens with BBcodes. These formatting codes are used by many bulletin boards, so you can highlight your sourcecode with pygments before posting it there.'),
     BmpImageFormatter: ('img_bmp', ('bmp', 'bitmap'), ('*.bmp',), 'Create a bitmap image from source code. This uses the Python Imaging Library to generate a pixmap from the source code.'),
     GifImageFormatter: ('img_gif', ('gif',), ('*.gif',), 'Create a GIF image from source code. This uses the Python Imaging Library to generate a pixmap from the source code.'),
+    GitlabFormatter: ('GitLab', ('gitlab',), (), 'GitLab specific formatter for HTML output.'),
     HtmlFormatter: ('HTML', ('html',), ('*.html', '*.htm'), "Format tokens as HTML 4 ``<span>`` tags within a ``<pre>`` tag, wrapped in a ``<div>`` tag. The ``<div>``'s CSS class can be set by the `cssclass` option."),
     ImageFormatter: ('img', ('img', 'IMG', 'png'), ('*.png',), 'Create a PNG image from source code. This uses the Python Imaging Library to generate a pixmap from the source code.'),
     JpgImageFormatter: ('img_jpg', ('jpg', 'jpeg'), ('*.jpg',), 'Create a JPEG image from source code. This uses the Python Imaging Library to generate a pixmap from the source code.'),
