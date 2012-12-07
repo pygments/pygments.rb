@@ -14,7 +14,7 @@ pygments.rb request.
 
 ## system requirements
 
-- Python 2.5+
+- Python 2.5, Python 2.6, or Python 2.7
 
 ## usage
 
