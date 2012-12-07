@@ -27,7 +27,7 @@ def _convert_keys(dictionary):
     if not isinstance(dictionary, dict):
         return dictionary
     return dict((str(k), _convert_keys(v))
-        for k, v in dictionary.items())
+        for k, v in list(dictionary.items()))
 
 def _write_error(error):
     res = {"error": error}
@@ -41,7 +41,7 @@ def _write_error(error):
 
 def _get_fixed_bits_from_header(out_header):
     size = len(out_header)
-    return "".join(map(lambda y:str((size>>y)&1), range(32-1, -1, -1)))
+    return "".join([str((size>>y)&1) for y in range(32-1, -1, -1)])
 
 def _signal_handler(signal, frame):
     """
