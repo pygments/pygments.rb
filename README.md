@@ -14,7 +14,8 @@ pygments.rb request.
 
 ## system requirements
 
-- Python 2.5, Python 2.6, or Python 2.7
+- Python 2.5, Python 2.6, or Python 2.7. You can always use Python 2.x from a `virtualenv` if
+  your default Python install is 3.x.
 
 ## usage
 
