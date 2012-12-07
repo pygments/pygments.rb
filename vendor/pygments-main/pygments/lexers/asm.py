@@ -208,7 +208,7 @@ class LlvmLexer(RegexLexer):
             include('whitespace'),
 
             # Before keywords, because keywords are valid label names :(...
-            (r'^\s*' + identifier + '\s*:', Name.Label),
+            (identifier + '\s*:', Name.Label),
 
             include('keyword'),
 
@@ -240,7 +240,7 @@ class LlvmLexer(RegexLexer):
              r'|linkonce_odr|weak|weak_odr|appending|dllimport|dllexport'
              r'|common|default|hidden|protected|extern_weak|external'
              r'|thread_local|zeroinitializer|undef|null|to|tail|target|triple'
-             r'|deplibs|datalayout|volatile|nuw|nsw|exact|inbounds|align'
+             r'|datalayout|volatile|nuw|nsw|exact|inbounds|align'
              r'|addrspace|section|alias|module|asm|sideeffect|gc|dbg'
 
              r'|ccc|fastcc|coldcc|x86_stdcallcc|x86_fastcallcc|arm_apcscc'
