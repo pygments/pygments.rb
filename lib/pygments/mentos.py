@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 import sys, re, os, signal
@@ -27,21 +27,25 @@ def _convert_keys(dictionary):
     if not isinstance(dictionary, dict):
         return dictionary
     return dict((str(k), _convert_keys(v))
-        for k, v in dictionary.items())
+        for k, v in list(dictionary.items()))
 
 def _write_error(error):
     res = {"error": error}
-    out_header = json.dumps(res).encode('utf-8')
-    bits = _get_fixed_bits_from_header(out_header)
-    sys.stdout.write(bits + "\n")
+    out_header_bytes = json.dumps(res).encode('utf-8')
+    bits = _get_fixed_bits_from_header(out_header_bytes)
+    sys.stdout.buffer.write(bits + b"\n")
     sys.stdout.flush()
-    sys.stdout.write(out_header + "\n")
+    sys.stdout.buffer.write(out_header_bytes + b"\n")
     sys.stdout.flush()
     return
 
-def _get_fixed_bits_from_header(out_header):
-    size = len(out_header)
-    return "".join(map(lambda y:str((size>>y)&1), range(32-1, -1, -1)))
+def _get_fixed_bits_from_header(out_header_bytes):
+    """
+    Encode the length of the bytes-string `out_header` as a 32-long binary:
+    _get_fixed_bits_from_header(b'abcd') == b'00000000000000000000000000000100'
+    """
+    size = len(out_header_bytes)
+    return "".join([str((size>>y)&1) for y in range(32-1, -1, -1)]).encode('utf-8')
 
 def _signal_handler(signal, frame):
     """
@@ -163,12 +167,9 @@ class Mentos(object):
                 res = json.dumps(res)
 
             elif method == 'highlight':
-                try:
-                    text = text.decode('utf-8')
-                except UnicodeDecodeError:
-                    # The text may already be encoded
-                    text = text
                 res = self.highlight_text(text, lexer, formatter_name, args, _convert_keys(opts))
+                if type(res) is bytes:
+                    res = res.decode('utf-8')
 
             elif method == 'css':
                 kwargs = _convert_keys(kwargs)
@@ -197,25 +198,26 @@ class Mentos(object):
         # Base header. We'll build on this, adding keys as necessary.
         base_header = {"method": method}
 
-        res_bytes = len(res) + 1
-        base_header["bytes"] = res_bytes
+        res_bytes = res.encode("utf-8")
+        bytes = len(res_bytes) + 1
+        base_header["bytes"] = bytes
 
-        out_header = json.dumps(base_header).encode('utf-8')
+        out_header_bytes = json.dumps(base_header).encode('utf-8')
 
         # Following the protocol, send over a fixed size represenation of the
         # size of the JSON header
-        bits = _get_fixed_bits_from_header(out_header)
+        bits = _get_fixed_bits_from_header(out_header_bytes)
 
         # Send it to Rubyland
-        sys.stdout.write(bits + "\n")
+        sys.stdout.buffer.write(bits + b"\n")
         sys.stdout.flush()
 
         # Send the header.
-        sys.stdout.write(out_header + "\n")
+        sys.stdout.buffer.write(out_header_bytes + b"\n")
         sys.stdout.flush()
 
         # Finally, send the result
-        sys.stdout.write(res + "\n")
+        sys.stdout.buffer.write(res_bytes + b"\n")
         sys.stdout.flush()
 
 
@@ -264,7 +266,10 @@ class Mentos(object):
             # The loop begins by reading off a simple 32-arity string
             # representing an integer of 32 bits. This is the length of
             # our JSON header.
-            size = sys.stdin.read(32)
+            size = sys.stdin.buffer.read(32).decode('utf-8')
+
+            if not size:
+                break
 
             lock.acquire()
 
@@ -277,7 +282,7 @@ class Mentos(object):
                 if not size_regex.match(size):
                     _write_error("Size received is not valid.")
 
-                line = sys.stdin.read(header_bytes)
+                line = sys.stdin.buffer.read(header_bytes).decode('utf-8')
 
                 header = json.loads(line)
 
@@ -291,8 +296,8 @@ class Mentos(object):
                 if kwargs:
                     _bytes = kwargs.get("bytes", 0)
 
-                # Read up to the given number bytes (possibly 0)
-                text = sys.stdin.read(_bytes)
+                # Read up to the given number of *bytes* (not chars) (possibly 0)
+                text = sys.stdin.buffer.read(_bytes).decode('utf-8')
 
                 # Sanity check the return.
                 if _bytes:

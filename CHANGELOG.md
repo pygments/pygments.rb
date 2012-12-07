@@ -4,7 +4,10 @@ CHANGELOG
 Unreleased
 -----------------------------
 
-* add `:timeout` parameter to `Pygments.highlight`
+* Add `:timeout` parameter to `Pygments.highlight`
+* Modify `mentos.py` to run on Python 3.x instead of Python 2.7
+* Add `:timeout` keyword option to allow for configurabel timeouts
+* Add several Python 3.x versions to test matrix
 
 Version 1.2.1 (2017/12/07)
 -----------------------------

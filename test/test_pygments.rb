@@ -47,7 +47,6 @@ class PygmentsHighlightTest < Test::Unit::TestCase
   def test_supports_configurable_timeout
     code = P.highlight(REDIS_CODE)
     assert_match 'used_memory_peak_human', code
-    assert_equal 458511, code.bytesize.to_i
     # Assume highlighting a large file will take more than 1 millisecond
     code = P.highlight(REDIS_CODE, :timeout => 0.001)
     assert_equal nil, code
