@@ -20,12 +20,13 @@ module Pygments
     # Python process that talks to the Pygments library. We'll talk back and
     # forth across this pipe.
     def start(pygments_path = File.expand_path('../../../vendor/pygments-main/', __FILE__))
+      is_windows = RUBY_PLATFORM =~ /mswin|mingw/
       begin
-        @log = Logger.new(ENV['MENTOS_LOG'] ||= '/dev/null')
+        @log = Logger.new(ENV['MENTOS_LOG'] ||= is_windows ? 'NUL:' : '/dev/null')
         @log.level = Logger::INFO
         @log.datetime_format = "%Y-%m-%d %H:%M "
       rescue
-        @log = Logger.new('/dev/null')
+        @log = Logger.new(is_windows ? 'NUL:' : '/dev/null')
       end
 
       ENV['PYGMENTS_PATH'] = pygments_path
@@ -35,7 +36,9 @@ module Pygments
 
       # A pipe to the mentos python process. #popen4 gives us
       # the pid and three IO objects to write and read.
-      @pid, @in, @out, @err = popen4(File.expand_path('../mentos.py', __FILE__))
+      script = File.expand_path('../mentos.py', __FILE__)
+      script = 'python ' + script if is_windows
+      @pid, @in, @out, @err = popen4(script)
       @log.info "[#{Time.now.iso8601}] Starting pid #{@pid.to_s} with fd #{@out.to_i.to_s}."
     end
 

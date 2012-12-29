@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import sys, re, os, signal, resource
+import sys, re, os, signal
 import traceback
 if 'PYGMENTS_PATH' in os.environ:
     sys.path.insert(0, os.environ['PYGMENTS_PATH'])
@@ -320,20 +320,27 @@ def main():
     # Signal handlers to trap signals.
     signal.signal(signal.SIGINT, _signal_handler)
     signal.signal(signal.SIGTERM, _signal_handler)
-    signal.signal(signal.SIGHUP, _signal_handler)
+    if sys.platform != "win32":
+        signal.signal(signal.SIGHUP, _signal_handler)
 
     mentos = Mentos()
 
-    # close fd's inherited from the ruby parent
-    maxfd = resource.getrlimit(resource.RLIMIT_NOFILE)[1]
-    if maxfd == resource.RLIM_INFINITY:
-        maxfd = 65536
+    if sys.platform == "win32":
+        # disable CRLF
+        import msvcrt
+        msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
+    else:
+        # close fd's inherited from the ruby parent
+        import resource
+        maxfd = resource.getrlimit(resource.RLIMIT_NOFILE)[1]
+        if maxfd == resource.RLIM_INFINITY:
+            maxfd = 65536
 
-    for fd in range(3, maxfd):
-        try:
-            os.close(fd)
-        except:
-            pass
+        for fd in range(3, maxfd):
+            try:
+                os.close(fd)
+            except:
+                pass
 
     mentos.start()
 
