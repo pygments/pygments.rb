@@ -77,6 +77,7 @@ LEXERS = {
     'Dasm16Lexer': ('pygments.lexers.github', 'dasm16', ('DASM16',), ('*.dasm16', '*.dasm'), ('text/x-dasm16',)),
     'DObjdumpLexer': ('pygments.lexers.asm', 'd-objdump', ('d-objdump',), ('*.d-objdump',), ('text/x-d-objdump',)),
     'DarcsPatchLexer': ('pygments.lexers.text', 'Darcs Patch', ('dpatch',), ('*.dpatch', '*.darcspatch'), ()),
+    'Dasm16Lexer': ('pygments.lexers.github', 'dasm16', ('DASM16',), ('*.dasm16', '*.dasm'), ('text/x-dasm16',)),
     'DartLexer': ('pygments.lexers.web', 'Dart', ('dart',), ('*.dart',), ('text/x-dart',)),
     'DebianControlLexer': ('pygments.lexers.text', 'Debian Control file', ('control',), ('control',), ()),
     'DelphiLexer': ('pygments.lexers.compiled', 'Delphi', ('delphi', 'pas', 'pascal', 'objectpascal'), ('*.pas',), ('text/x-pascal',)),
