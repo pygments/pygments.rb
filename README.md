@@ -92,7 +92,7 @@ Pygments.start("/path/to/pygments")
 
 The MIT License (MIT)
 
-Copyright (c) Ted Nyman and Aman Gupta, 2012
+Copyright (c) Ted Nyman and Aman Gupta, 2012-2013
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and 
 associated documentation files (the "Software"), to deal in the Software without restriction, 
