@@ -1,7 +1,7 @@
 changelog
 ===========
 
-Version 0.3.7 (Jan 2, 2012)
+Version 0.3.7 (Jan 2, 2013)
 -----------------------------
 
 * Fixed missing custom lexers
