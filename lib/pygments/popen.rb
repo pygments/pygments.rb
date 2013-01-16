@@ -36,8 +36,7 @@ module Pygments
 
       # A pipe to the mentos python process. #popen4 gives us
       # the pid and three IO objects to write and read.
-      script = File.expand_path('../mentos.py', __FILE__)
-      script = 'python ' + script if is_windows
+      script = Pygments.python_path + ' ' + File.expand_path('../mentos.py', __FILE__)
       @pid, @in, @out, @err = popen4(script)
       @log.info "[#{Time.now.iso8601}] Starting pid #{@pid.to_s} with fd #{@out.to_i.to_s}."
     end
