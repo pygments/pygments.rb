@@ -210,7 +210,6 @@ class PygmentsLexerClassTest < Test::Unit::TestCase
     assert_equal P::Lexer['Groff'], P::Lexer.find_by_extname('.1')
     assert_equal P::Lexer['Groff'], P::Lexer.find_by_extname('.3')
     assert_equal P::Lexer['C'], P::Lexer.find_by_extname('.c')
-    assert_equal P::Lexer['C'], P::Lexer.find_by_extname('.h')
     assert_equal P::Lexer['Python'], P::Lexer.find_by_extname('.py')
     assert_equal P::Lexer['Java'], P::Lexer.find_by_extname('.java')
   end
