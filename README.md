@@ -50,6 +50,12 @@ Pygments.css
 Pygments.css('.highlight')
 ```
 
+To use a specific pygments style, pass the :style option to the `#css` method:
+
+``` ruby
+Pygments.css(:style => "monokai")
+```
+
 Other Pygments high-level API methods are also available.
 These methods return arrays detailing all the available lexers, formatters, 
 and styles.
