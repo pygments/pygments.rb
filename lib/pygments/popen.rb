@@ -364,7 +364,8 @@ module Pygments
       unless method == :lexer_name_for || method == :highlight || method == :css
         res = Yajl.load(res, :symbolize_keys => true)
       end
-      res = res[0..-2]
+      res = res.rstrip if res.class == String
+      res
     end
 
     # Convert a text header into JSON for easy access.
