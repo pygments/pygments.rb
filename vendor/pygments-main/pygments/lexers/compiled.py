@@ -29,7 +29,7 @@ __all__ = ['CLexer', 'CppLexer', 'DLexer', 'DelphiLexer', 'ECLexer', 'DylanLexer
            'FelixLexer', 'AdaLexer', 'Modula2Lexer', 'BlitzMaxLexer',
            'NimrodLexer', 'FantomLexer', 'RustLexer', 'CudaLexer', 'MonkeyLexer',
            'DylanLidLexer', 'DylanConsoleLexer', 'CobolLexer',
-           'CobolFreeformatLexer', 'LogosLexer']
+           'CobolFreeformatLexer', 'LogosLexer', 'OxygeneLexer']
 
 
 class CFamilyLexer(RegexLexer):
@@ -3494,3 +3494,179 @@ class LogosLexer(ObjectiveCppLexer):
         if LogosLexer._logos_keywords.search(text):
             return 1.0
         return 0
+
+		
+class OxygeneLexer(Lexer):
+    """
+    For `Oxygene <http://www.remobjects.com/oxygene/>`_ (RemObjects Oxygene),
+    source code.
+    """
+    name = 'Oxygene'
+    aliases = ['oxygene', 'prism']
+    filenames = ['*.pas']
+    mimetypes = ['text/x-oxygene']
+
+    OXYGENE_KEYWORDS = [
+        'abstract', 'add', 'and', 'array', 'as', 'asc', 'aspect', 'assembly', 
+        'async', 'begin', 'break', 'block', 'by', 'case', 'class', 'concat', 
+        'const', 'copy', 'constructor', 'continue', 'create', 'default', 
+        'delegate', 'desc', 'distinct', 'div', 'do', 'downto', 'dynamic', 
+        'each', 'else', 'empty', 'end', 'ensure', 'enum', 'equals', 'event', 
+        'except', 'exit', 'extension', 'external', 'false', 'final', 
+        'finalize', 'finalizer', 'finally', 'flags', 'for', 'forward', 
+        'from', 'function', 'future', 'global', 'group', 'has', 'if', 
+        'implementation', 'implements', 'implies', 'in', 'index', 'inherited',
+        'inline', 'interface', 'into', 'invariants', 'is', 'iterator', 'join', 
+        'locked', 'locking', 'loop', 'matching', 'method', 'mod', 'module', 
+        'namespace', 'nested', 'new', 'nil', 'not', 'notify', 'nullable', 'of',
+        'old', 'on', 'operator', 'or', 'order', 'out', 'override', 'parallel', 
+        'params', 'partial', 'pinned', 'private', 'procedure', 'property', 
+        'protected', 'public', 'queryable', 'raise', 'read', 'readonly', 
+        'record', 'reintroduce', 'remove', 'repeat', 'require', 'result', 
+        'reverse', 'sealed', 'select', 'self', 'sequence', 'set', 'shl', 
+        'shr', 'skip', 'static', 'step', 'soft', 'take', 'then', 'to', 'true', 
+        'try', 'tuple', 'type', 'union', 'unit', 'unsafe', 'until', 'uses', 
+        'using', 'var', 'virtual', 'raises', 'volatile', 'where', 'while', 
+        'with', 'write', 'xor', 'yield', 'await', 'mapped',  'deprecated', 
+        'autoreleasepool', 'selector', 'strong', 'weak', 'unretained',  
+    ]
+
+    BUILTIN_TYPES = set([
+        'object', 'string', 'nsobject', 'nsstring', 'integer', 'byte',
+        'cardinal', 'char', 'ansichar', 'double', 'single', 'longint',
+        'integer', 'int64', 'smallint', 'shortint', 'word', 'nativeint',
+        'pointer', 'nativeuint', 'uint64'
+    ])
+     
+    def __init__(self, **options):
+        Lexer.__init__(self, **options)
+        self.keywords = self.OXYGENE_KEYWORDS
+        self.builtins = set()
+
+    def get_tokens_unprocessed(self, text):
+        scanner = Scanner(text, re.DOTALL | re.MULTILINE | re.IGNORECASE)
+        stack = ['initial']
+        in_function_block = False
+        in_property_block = False
+        was_dot = False
+        next_token_is_function = False
+        next_token_is_property = False
+        brace_balance = [0, 0]
+
+        while not scanner.eos:
+            token = Error
+
+            if stack[-1] == 'initial':
+                if scanner.scan(r'\s+'):
+                    token = Text
+                elif scanner.scan(r'\{.*?\}|\(\*.*?\*\)'):
+                    if scanner.match.startswith('$'):
+                        token = Comment.Preproc
+                    else:
+                        token = Comment.Multiline
+                elif scanner.scan(r'//.*?$'):
+                    token = Comment.Single
+                elif scanner.scan(r'[-+*\/=<>:;,.@\^]'):
+                    token = Operator
+                    # stop label highlighting on next ";"
+                elif scanner.scan(r'[\(\)\[\]]+'):
+                    token = Punctuation
+                    # abort function naming ``foo = Function(...)``
+                    next_token_is_function = False
+                    # if we are in a function block we count the open
+                    # braces because ootherwise it's impossible to
+                    # determine the end of the modifier context
+                    if in_function_block or in_property_block:
+                        if scanner.match == '(':
+                            brace_balance[0] += 1
+                        elif scanner.match == ')':
+                            brace_balance[0] -= 1
+                        elif scanner.match == '[':
+                            brace_balance[1] += 1
+                        elif scanner.match == ']':
+                            brace_balance[1] -= 1
+                elif scanner.scan(r'[A-Za-z_][A-Za-z_0-9]*'):
+                    lowercase_name = scanner.match.lower()
+                    if lowercase_name == 'result':
+                        token = Name.Builtin.Pseudo
+                    elif lowercase_name in self.keywords:
+                        token = Keyword
+                        # if we are in a special block and a
+                        # block ending keyword occours (and the parenthesis
+                        # is balanced) we end the current block context
+                        if lowercase_name == 'property':
+                            in_property_block = True
+                            next_token_is_property = True
+                        elif lowercase_name in ('procedure', 'operator',
+                                                'function', 'constructor',
+												'method', 'constructor',
+                                                'destructor'):
+                            in_function_block = True
+                            next_token_is_function = True
+                    # if we are in a property highlight some more
+                    # modifiers
+                    elif in_property_block and \
+                         lowercase_name in ('read', 'write'):
+                        token = Keyword.Pseudo
+                        next_token_is_function = True
+                    # if the last iteration set next_token_is_function
+                    # to true we now want this name highlighted as
+                    # function. so do that and reset the state
+                    elif next_token_is_function:
+                        # Look if the next token is a dot. If yes it's
+                        # not a function, but a class name and the
+                        # part after the dot a function name
+                        if scanner.test(r'\s*\.\s*'):
+                            token = Name.Class
+                        # it's not a dot, our job is done
+                        else:
+                            token = Name.Function
+                            next_token_is_function = False
+                    # same for properties
+                    elif next_token_is_property:
+                        token = Name.Property
+                        next_token_is_property = False
+                    # name is in list of known labels
+                    elif lowercase_name in self.BUILTIN_TYPES:
+                        token = Keyword.Type
+                    # builtins are just builtins if the token
+                    # before isn't a dot
+                    elif not was_dot and lowercase_name in self.builtins:
+                        token = Name.Builtin
+                    else:
+                        token = Name
+                elif scanner.scan(r"'"):
+                    token = String
+                    stack.append('string')
+                elif scanner.scan(r'\#(\d+|\$[0-9A-Fa-f]+)'):
+                    token = String.Char
+                elif scanner.scan(r'\$[0-9A-Fa-f]+'):
+                    token = Number.Hex
+                elif scanner.scan(r'\d+(?![eE]|\.[^.])'):
+                    token = Number.Integer
+                elif scanner.scan(r'\d+(\.\d+([eE][+-]?\d+)?|[eE][+-]?\d+)'):
+                    token = Number.Float
+                else:
+                    # if the stack depth is deeper than once, pop
+                    if len(stack) > 1:
+                        stack.pop()
+                    scanner.get_char()
+
+            elif stack[-1] == 'string':
+                if scanner.scan(r"''"):
+                    token = String.Escape
+                elif scanner.scan(r"'"):
+                    token = String
+                    stack.pop()
+                elif scanner.scan(r"[^']*"):
+                    token = String
+                else:
+                    scanner.get_char()
+                    stack.pop()
+
+            # save the dot!!!11
+            if scanner.match.strip():
+                was_dot = scanner.match == '.'
+            yield scanner.start_pos, token, scanner.match or ''
+
+
