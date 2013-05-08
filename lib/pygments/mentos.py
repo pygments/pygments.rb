@@ -31,7 +31,9 @@ def _convert_keys(dictionary):
 
 def _write_error(error):
     res = {"error": error}
-    out_header = json.dumps(res).encode('utf-8')
+    out_header = json.dumps(res)
+    if sys.version_info[0] == 2:
+        out_header = out_header.encode('utf-8')
     bits = _get_fixed_bits_from_header(out_header)
     sys.stdout.write(bits + "\n")
     sys.stdout.flush()
@@ -163,12 +165,15 @@ class Mentos(object):
                 res = json.dumps(res)
 
             elif method == 'highlight':
-                try:
-                    text = text.decode('utf-8')
-                except UnicodeDecodeError:
-                    # The text may already be encoded
-                    text = text
+                if sys.version_info[0] == 2:
+                    try:
+                        text = text.decode('utf-8')
+                    except UnicodeDecodeError:
+                        # The text may already be encoded
+                        text = text
                 res = self.highlight_text(text, lexer, formatter_name, args, _convert_keys(opts))
+                if sys.version_info[0] > 2:
+                    res = res.decode('utf-8')
 
             elif method == 'css':
                 kwargs = _convert_keys(kwargs)
@@ -197,10 +202,15 @@ class Mentos(object):
         # Base header. We'll build on this, adding keys as necessary.
         base_header = {"method": method}
 
-        res_bytes = len(res) + 1
+        if sys.version_info[0] == 2:
+            res_bytes = len(res) + 1
+        else:
+            res_bytes = len(res.encode('utf-8')) + 1
         base_header["bytes"] = res_bytes
 
-        out_header = json.dumps(base_header).encode('utf-8')
+        out_header = json.dumps(base_header)
+        if sys.version_info[0] == 2:
+            out_header = out_header.encode('utf-8')
 
         # Following the protocol, send over a fixed size represenation of the
         # size of the JSON header
@@ -264,7 +274,10 @@ class Mentos(object):
             # The loop begins by reading off a simple 32-arity string
             # representing an integer of 32 bits. This is the length of
             # our JSON header.
-            size = sys.stdin.read(32)
+            if sys.version_info[0] == 2:
+                size = sys.stdin.read(32)
+            else:
+                size = sys.stdin.buffer.read(32).decode('utf-8')
 
             lock.acquire()
 
@@ -277,7 +290,10 @@ class Mentos(object):
                 if not size_regex.match(size):
                     _write_error("Size received is not valid.")
 
-                line = sys.stdin.read(header_bytes)
+                if sys.version_info[0] == 2:
+                    line = sys.stdin.read(header_bytes)
+                else:
+                    line = sys.stdin.buffer.read(header_bytes).decode('utf-8')
 
                 header = json.loads(line)
 
@@ -292,7 +308,10 @@ class Mentos(object):
                     _bytes = kwargs.get("bytes", 0)
 
                 # Read up to the given number bytes (possibly 0)
-                text = sys.stdin.read(_bytes)
+                if sys.version_info[0] == 2:
+                    text = sys.stdin.read(_bytes)
+                else:
+                    text = sys.stdin.buffer.read(_bytes).decode('utf-8')
 
                 # Sanity check the return.
                 if _bytes:

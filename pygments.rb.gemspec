@@ -17,7 +17,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'posix-spawn', '~> 0.3.6'
   s.add_development_dependency 'rake-compiler', '~> 0.7.6'
 
-  # s.extensions = ['ext/extconf.rb']
+  s.extensions = ['ext/extconf.rb']
   s.require_paths = ['lib']
 
   s.files = `git ls-files`.split("\n")
