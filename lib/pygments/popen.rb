@@ -36,10 +36,19 @@ module Pygments
 
       # A pipe to the mentos python process. #popen4 gives us
       # the pid and three IO objects to write and read.
-      script = File.expand_path('../mentos.py', __FILE__)
-      script = 'python ' + script if is_windows
+      script = "#{python_binary} #{File.expand_path('../mentos.py', __FILE__)}"
       @pid, @in, @out, @err = popen4(script)
       @log.info "[#{Time.now.iso8601}] Starting pid #{@pid.to_s} with fd #{@out.to_i.to_s}."
+    end
+
+    # Detect a suitable Python binary to use. We can't just use `python2`
+    # because apparently some old versions of Debian only have `python` or
+    # something like that.
+    def python_binary
+      @python_binary ||= begin
+        `which python2`
+        $?.success? ? "python2" : "python"
+      end
     end
 
     # Stop the child process by issuing a kill -9.
