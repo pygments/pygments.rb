@@ -1,6 +1,11 @@
 changelog
 ===========
 
+Version 0.5.1 (June 25, 2013)
+-----------------------------
+
+* Ensure compatability across distros by detecting if `python2` is available
+
 Version 0.5.0 (Apr 13, 2013)
 -----------------------------
 
