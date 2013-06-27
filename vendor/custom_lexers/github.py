@@ -168,7 +168,6 @@ class TOMLLexer(RegexLexer):
 
     tokens = {
         'root': [
-
             # Basics, comments, strings
             (r'\s+', Text),
             (r'#.*?$', Comment.Single),
@@ -190,8 +189,5 @@ class TOMLLexer(RegexLexer):
 
             # Operators
             (r'=', Operator)
-
         ]
     }
-
-
