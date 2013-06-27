@@ -222,7 +222,6 @@ LEXERS = {
     'PropertiesLexer': ('pygments.lexers.text', 'Properties', ('properties',), ('*.properties',), ('text/x-java-properties',)),
     'ProtoBufLexer': ('pygments.lexers.other', 'Protocol Buffer', ('protobuf',), ('*.proto',), ()),
     'PuppetLexer': ('pygments.lexers.github', 'Puppet', ('puppet',), ('*.pp',), ()),
-    'PuppetLexer': ('pygments.lexers.other', 'Puppet', ('puppet',), ('*.pp',), ()),
     'PyPyLogLexer': ('pygments.lexers.text', 'PyPy Log', ('pypylog', 'pypy'), ('*.pypylog',), ('application/x-pypylog',)),
     'Python3Lexer': ('pygments.lexers.agile', 'Python 3', ('python3', 'py3'), (), ('text/x-python3', 'application/x-python3')),
     'Python3TracebackLexer': ('pygments.lexers.agile', 'Python 3.0 Traceback', ('py3tb',), ('*.py3tb',), ('text/x-python3-traceback',)),
