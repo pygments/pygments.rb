@@ -1132,8 +1132,8 @@ class HaxeLexer(RegexLexer):
     *New in Pygments 1.3.*
     """
 
-    name = 'haXe'
-    aliases = ['hx', 'haXe']
+    name = 'Haxe'
+    aliases = ['hx', 'Haxe','haxe','haXe']
     filenames = ['*.hx']
     mimetypes = ['text/haxe']
 
