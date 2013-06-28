@@ -2290,7 +2290,7 @@ class ElixirLexer(RegexLexer):
         'root': [
             (r'\s+', Text),
             (r'#.*$', Comment.Single),
-            (r'\b(case|cond|end|bc|lc|if|unless|try|loop|receive|fn|defmodule|'
+            (r'\b(case|cond|end|bc|lc|inlist|if|unless|try|loop|receive|fn|defmodule|'
              r'defp?|defprotocol|defimpl|defrecord|defmacrop?|defdelegate|'
              r'defexception|exit|raise|throw|unless|after|rescue|catch|else)\b(?![?!])|'
              r'(?<!\.)\b(do|\-\>)\b\s*', Keyword),
