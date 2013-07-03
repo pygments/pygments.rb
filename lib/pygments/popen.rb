@@ -48,6 +48,8 @@ module Pygments
       @python_binary ||= begin
         `which python2`
         $?.success? ? "python2" : "python"
+      rescue
+        'python'
       end
     end
 
