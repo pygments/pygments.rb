@@ -1,5 +1,6 @@
 # coding: utf-8
 require 'posix/spawn'
+require 'cliver'
 require 'yajl'
 require 'timeout'
 require 'logger'
@@ -46,8 +47,7 @@ module Pygments
     # something like that.
     def python_binary
       @python_binary ||= begin
-        `which python2`
-        $?.success? ? "python2" : "python"
+        Cliver.detect('python2') || Cliver.detect!('python', '~> 2.0')
       end
     end
 
