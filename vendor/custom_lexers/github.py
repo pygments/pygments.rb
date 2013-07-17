@@ -408,7 +408,7 @@ class SlashLanguageLexer(ExtendedRegexLexer):
     def right_angle_bracket(lexer, match, ctx):
         if len(ctx.stack) > 1 and ctx.stack[-2] == "string":
             ctx.stack.pop()
-        yield match.start(), Punctuation, "}"
+        yield match.start(), String.Interpol, u"}"
         ctx.pos = match.end()
         pass
 
@@ -423,7 +423,7 @@ class SlashLanguageLexer(ExtendedRegexLexer):
         "string": [
             (r"\\",         String.Escape,      move_state("string_e")),
             (r"\"",         String,             move_state("slash")),
-            (r"#\{",        Punctuation,        "slash"),
+            (r"#\{",        String.Interpol,    "slash"),
             (r'.|\n',       String),
         ],
         "string_e": [
@@ -459,8 +459,14 @@ class SlashLanguageLexer(ExtendedRegexLexer):
             (r'true'+_nkw,              Name.Builtin),
             (r'false'+_nkw,             Name.Builtin),
             (r'self'+_nkw,              Name.Builtin),
+            (r'(class)(\s+)([A-Z][a-zA-Z0-9_\']*)',
+                bygroups(Keyword, Whitespace, Name.Class)),
             (r'class'+_nkw,             Keyword),
             (r'extends'+_nkw,           Keyword),
+            (r'(def)(\s+)(self)(\s*)(\.)(\s*)([a-z_][a-zA-Z0-9_\']*=?|<<|>>|==|<=>|<=|<|>=|>|\+|-(self)?|~(self)?|\*|/|%|^|&&|&|\||\[\]=?)',
+                bygroups(Keyword, Whitespace, Name.Builtin, Whitespace, Punctuation, Whitespace, Name.Function)),
+            (r'(def)(\s+)([a-z_][a-zA-Z0-9_\']*=?|<<|>>|==|<=>|<=|<|>=|>|\+|-(self)?|~(self)?|\*|/|%|^|&&|&|\||\[\]=?)',
+                bygroups(Keyword, Whitespace, Name.Function)),
             (r'def'+_nkw,               Keyword),
             (r'if'+_nkw,                Keyword),
             (r'elsif'+_nkw,             Keyword),
@@ -482,14 +488,14 @@ class SlashLanguageLexer(ExtendedRegexLexer):
             (r'throw'+_nkw,             Keyword),
             (r'use'+_nkw,               Keyword),
             (r'switch'+_nkw,            Keyword),
-            (r'\\'+_nkw,                Keyword),
-            (r'λ'+_nkw,                 Keyword),
+            (r'\\',                     Keyword),
+            (r'λ',                      Keyword),
             (r'__FILE__'+_nkw,          Name.Builtin.Pseudo),
             (r'__LINE__'+_nkw,          Name.Builtin.Pseudo),
-            (r'[A-Z][a-zA-Z0-9_]*'+_nkw, Name.Constant),
-            (r'[a-z_][a-zA-Z0-9_]*'+_nkw, Name.Variable),
-            (r'@[a-z_][a-zA-Z0-9_]*'+_nkw, Name.Variable.Instance),
-            (r'@@[a-z_][a-zA-Z0-9_]*'+_nkw, Name.Variable.Class),
+            (r'[A-Z][a-zA-Z0-9_\']*'+_nkw, Name.Constant),
+            (r'[a-z_][a-zA-Z0-9_\']*'+_nkw, Name),
+            (r'@[a-z_][a-zA-Z0-9_\']*'+_nkw, Name.Variable.Instance),
+            (r'@@[a-z_][a-zA-Z0-9_\']*'+_nkw, Name.Variable.Class),
             (r'\(',                     Punctuation),
             (r'\)',                     Punctuation),
             (r'\[',                     Punctuation),
@@ -540,7 +546,7 @@ class SlashLanguageLexer(ExtendedRegexLexer):
             (r'::',                     Operator),
             (r':',                      Operator),
             (r'(\s|\n)+',               Whitespace),
-            (r'[a-z_][a-zA-Z0-9_]*',    Name.Variable),
+            (r'[a-z_][a-zA-Z0-9_\']*',  Name.Variable),
         ],
     }
 
