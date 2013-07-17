@@ -408,7 +408,7 @@ class SlashLanguageLexer(ExtendedRegexLexer):
     def right_angle_bracket(lexer, match, ctx):
         if len(ctx.stack) > 1 and ctx.stack[-2] == "string":
             ctx.stack.pop()
-        yield match.start(), Punctuation, u"}"
+        yield match.start(), String.Interpol, u"}"
         ctx.pos = match.end()
         pass
 
@@ -423,7 +423,7 @@ class SlashLanguageLexer(ExtendedRegexLexer):
         "string": [
             (r"\\",         String.Escape,      move_state("string_e")),
             (r"\"",         String,             move_state("slash")),
-            (r"#\{",        Punctuation,        "slash"),
+            (r"#\{",        String.Interpol,    "slash"),
             (r'.|\n',       String),
         ],
         "string_e": [
