@@ -10,11 +10,12 @@
 """
 import re
 
-from pygments.lexer import RegexLexer, include, bygroups, using, DelegatingLexer
+from pygments.lexer import RegexLexer, ExtendedRegexLexer, include, bygroups, \
+    using, DelegatingLexer
 from pygments.token import Text, Name, Number, String, Comment, Punctuation, \
-     Other, Keyword, Operator, Literal
+     Other, Keyword, Operator, Literal, Whitespace
 
-__all__ = ['Dasm16Lexer', 'PuppetLexer', 'AugeasLexer', "TOMLLexer"]
+__all__ = ['Dasm16Lexer', 'PuppetLexer', 'AugeasLexer', "TOMLLexer", "SlashLexer"]
 
 class Dasm16Lexer(RegexLexer):
     """
@@ -398,4 +399,161 @@ class TOMLLexer(RegexLexer):
         ]
     }
 
+class SlashLanguageLexer(ExtendedRegexLexer):
+    _nkw = r'(?=[^a-zA-Z_0-9])'
+
+    def move_state(new_state):
+        return ("#pop", new_state)
+
+    def right_angle_bracket(lexer, match, ctx):
+        if len(ctx.stack) > 1 and ctx.stack[-2] == "string":
+            ctx.stack.pop()
+        yield match.start(), Punctuation, "}"
+        ctx.pos = match.end()
+        pass
+
+    tokens = {
+        "root": [
+            (r"<%=",        Comment.Preproc,    move_state("slash")),
+            (r"<%!!",       Comment.Preproc,    move_state("slash")),
+            (r"<%#.*?%>",   Comment.Multiline),
+            (r"<%",         Comment.Preproc,    move_state("slash")),
+            (r".|\n",       Other),
+        ],
+        "string": [
+            (r"\\",         String.Escape,      move_state("string_e")),
+            (r"\"",         String,             move_state("slash")),
+            (r"#\{",        Punctuation,        "slash"),
+            (r'.|\n',       String),
+        ],
+        "string_e": [
+            (r'n',                  String.Escape,      move_state("string")),
+            (r't',                  String.Escape,      move_state("string")),
+            (r'r',                  String.Escape,      move_state("string")),
+            (r'e',                  String.Escape,      move_state("string")),
+            (r'x[a-fA-F0-9]{2}',    String.Escape,      move_state("string")),
+            (r'.',                  String.Escape,      move_state("string")),
+        ],
+        "regexp": [
+            (r'}[a-z]*',            String.Regex,       move_state("slash")),
+            (r'\\(.|\n)',           String.Regex),
+            (r'{',                  String.Regex,       "regexp_r"),
+            (r'.|\n',               String.Regex),
+        ],
+        "regexp_r": [
+            (r'}[a-z]*',            String.Regex,       "#pop"),
+            (r'\\(.|\n)',           String.Regex),
+            (r'{',                  String.Regex,       "regexp_r"),
+        ],
+        "slash": [
+            (r"%>",                     Comment.Preproc,    move_state("root")),
+            (r"\"",                     String,             move_state("string")),
+            (r"'[a-zA-Z0-9_]+",         String),
+            (r'%r{',                    String.Regex,       move_state("regexp")),
+            (r'/\*.*?\*/',              Comment.Multiline),
+            (r"(#|//).*?\n",            Comment.Single),
+            (r'-?[0-9]+e[+-]?[0-9]+',   Number.Float),
+            (r'-?[0-9]+\.[0-9]+(e[+-]?[0-9]+)?', Number.Float),
+            (r'-?[0-9]+',               Number.Integer),
+            (r'nil'+_nkw,               Name.Builtin),
+            (r'true'+_nkw,              Name.Builtin),
+            (r'false'+_nkw,             Name.Builtin),
+            (r'self'+_nkw,              Name.Builtin),
+            (r'class'+_nkw,             Keyword),
+            (r'extends'+_nkw,           Keyword),
+            (r'def'+_nkw,               Keyword),
+            (r'if'+_nkw,                Keyword),
+            (r'elsif'+_nkw,             Keyword),
+            (r'else'+_nkw,              Keyword),
+            (r'unless'+_nkw,            Keyword),
+            (r'for'+_nkw,               Keyword),
+            (r'in'+_nkw,                Keyword),
+            (r'while'+_nkw,             Keyword),
+            (r'until'+_nkw,             Keyword),
+            (r'and'+_nkw,               Keyword),
+            (r'or'+_nkw,                Keyword),
+            (r'not'+_nkw,               Keyword),
+            (r'lambda'+_nkw,            Keyword),
+            (r'try'+_nkw,               Keyword),
+            (r'catch'+_nkw,             Keyword),
+            (r'return'+_nkw,            Keyword),
+            (r'next'+_nkw,              Keyword),
+            (r'last'+_nkw,              Keyword),
+            (r'throw'+_nkw,             Keyword),
+            (r'use'+_nkw,               Keyword),
+            (r'switch'+_nkw,            Keyword),
+            (r'\\'+_nkw,                Keyword),
+            (r'λ'+_nkw,                 Keyword),
+            (r'__FILE__'+_nkw,          Name.Builtin.Pseudo),
+            (r'__LINE__'+_nkw,          Name.Builtin.Pseudo),
+            (r'[A-Z][a-zA-Z0-9_]*'+_nkw, Name.Constant),
+            (r'[a-z_][a-zA-Z0-9_]*'+_nkw, Name.Variable),
+            (r'@[a-z_][a-zA-Z0-9_]*'+_nkw, Name.Variable.Instance),
+            (r'@@[a-z_][a-zA-Z0-9_]*'+_nkw, Name.Variable.Class),
+            (r'\(',                     Punctuation),
+            (r'\)',                     Punctuation),
+            (r'\[',                     Punctuation),
+            (r'\]',                     Punctuation),
+            (r'\{',                     Punctuation),
+            (r'\}',                     right_angle_bracket),
+            (r';',                      Punctuation),
+            (r',',                      Punctuation),
+            (r'<<=',                    Operator),
+            (r'>>=',                    Operator),
+            (r'<<',                     Operator),
+            (r'>>',                     Operator),
+            (r'==',                     Operator),
+            (r'!=',                     Operator),
+            (r'=>',                     Operator),
+            (r'=',                      Operator),
+            (r'<=>',                    Operator),
+            (r'<=',                     Operator),
+            (r'>=',                     Operator),
+            (r'<',                      Operator),
+            (r'>',                      Operator),
+            (r'\+\+',                   Operator),
+            (r'\+=',                    Operator),
+            (r'-=',                     Operator),
+            (r'\*\*=',                  Operator),
+            (r'\*=',                    Operator),
+            (r'\*\*',                   Operator),
+            (r'\*',                     Operator),
+            (r'/=',                     Operator),
+            (r'\+',                     Operator),
+            (r'-',                      Operator),
+            (r'/',                      Operator),
+            (r'%=',                     Operator),
+            (r'%',                      Operator),
+            (r'^=',                     Operator),
+            (r'&&=',                    Operator),
+            (r'&=',                     Operator),
+            (r'&&',                     Operator),
+            (r'&',                      Operator),
+            (r'\|\|=',                  Operator),
+            (r'\|=',                    Operator),
+            (r'\|\|',                   Operator),
+            (r'\|',                     Operator),
+            (r'!',                      Operator),
+            (r'\.\.\.',                 Operator),
+            (r'\.\.',                   Operator),
+            (r'\.',                     Operator),
+            (r'::',                     Operator),
+            (r':',                      Operator),
+            (r'(\s|\n)+',               Whitespace),
+            (r'[a-z_][a-zA-Z0-9_]*',    Name.Variable),
+        ],
+    }
+
+class SlashLexer(DelegatingLexer):
+    """
+    Lexer for the Slash programming language.
+    """
+
+    name = 'Slash'
+    aliases = ['slash']
+    filenames = ['*.sl']
+
+    def __init__(self, **options):
+        from pygments.lexers.web import HtmlLexer
+        super(SlashLexer, self).__init__(HtmlLexer, SlashLanguageLexer, **options)
 
