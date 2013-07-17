@@ -463,6 +463,8 @@ class SlashLanguageLexer(ExtendedRegexLexer):
                 bygroups(Keyword, Whitespace, Name.Class)),
             (r'class'+_nkw,             Keyword),
             (r'extends'+_nkw,           Keyword),
+            (r'(def)(\s+)(self)(\s*)(\.)(\s*)([a-z_][a-zA-Z0-9_\']*=?|<<|>>|==|<=>|<=|<|>=|>|\+|-(self)?|~(self)?|\*|/|%|^|&&|&|\||\[\]=?)',
+                bygroups(Keyword, Whitespace, Name.Builtin, Whitespace, Punctuation, Whitespace, Name.Function)),
             (r'(def)(\s+)([a-z_][a-zA-Z0-9_\']*=?|<<|>>|==|<=>|<=|<|>=|>|\+|-(self)?|~(self)?|\*|/|%|^|&&|&|\||\[\]=?)',
                 bygroups(Keyword, Whitespace, Name.Function)),
             (r'def'+_nkw,               Keyword),
