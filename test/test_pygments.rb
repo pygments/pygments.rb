@@ -263,6 +263,14 @@ class PygmentsCssTest < Test::Unit::TestCase
 end
 
 class PygmentsConfigTest < Test::Unit::TestCase
+  def test_python_missing
+    path_backup = ENV['PATH']
+    ENV['PATH'] = '/foo/bar:foo/bingo' # make python be not found.
+    assert_raise(Cliver::Dependency::NotFound) { P::Popen::python_binary }
+  ensure
+    ENV['PATH'] = path_backup
+  end
+
   def test_styles
     assert P.styles.include?('colorful')
   end
