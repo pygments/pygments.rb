@@ -13,7 +13,7 @@ Gem::Specification.new do |s|
   s.authors = ['Aman Gupta', 'Ted Nyman']
   s.email = ['aman@tmm1.net']
 
-  s.add_dependency 'yajl-ruby',   '~> 1.1.0'
+  s.add_dependency 'multi_json',  '~> 1.7'
   s.add_dependency 'posix-spawn', '~> 0.3.6'
   s.add_development_dependency 'rake-compiler', '~> 0.7.6'
 
