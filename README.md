@@ -73,6 +73,8 @@ To use a custom pygments installation, specify the path to
 Pygments.start("/path/to/pygments")
 ```
 
+If you'd like logging, set the environmental variable `MENTOS_LOG` to a file path for your logfile.
+
 ## benchmarks
 
 
