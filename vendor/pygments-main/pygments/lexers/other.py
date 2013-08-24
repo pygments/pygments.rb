@@ -35,7 +35,7 @@ __all__ = ['BrainfuckLexer', 'BefungeLexer', 'RedcodeLexer', 'MOOCodeLexer',
            'ECLLexer', 'UrbiscriptLexer', 'OpenEdgeLexer', 'BroLexer',
            'MscgenLexer', 'KconfigLexer', 'VGLLexer', 'SourcePawnLexer',
            'RobotFrameworkLexer', 'PuppetLexer', 'NSISLexer', 'RPMSpecLexer',
-           'CbmBasicV2Lexer', 'AutoItLexer']
+           'CbmBasicV2Lexer', 'AutoItLexer', 'IEC611313Lexer']
 
 
 class ECLLexer(RegexLexer):
@@ -3664,4 +3664,58 @@ class AutoItLexer(RegexLexer):
         'garbage': [
             (r'[^\S\n]', Text),
         ],
+    }
+
+class IEC611313Lexer(RegexLexer):
+    name = 'IEC 61131-3'
+    aliases = ['iec']
+    filenames = ['*.txt', '*.st', '*.stx', '*.awl', '*.stl', '*.il', '*.plc',
+                 '*.iec']
+    tokens = {
+        'root': [
+            (r'\n', Text),
+            (r'\s+', Text),
+            #(r'\\\n', Text), # line continuations
+            # Comments
+            (r'//(.*?)\n', Comment.Single),
+            (r'/(\\\n)?[*](.|\n)*?[*](\\\n)?/', Comment.Multiline),
+            (r'/\+', Comment.Multiline, 'nested_comment'),
+            #
+            (r'\w+\#[\w:-]+', Number.Float),
+            # Keywords
+            (r'(?i:ACTION|ADD|ANDN|AND|AT|BY|CALCN|CALC|CAL|CASE|CD|CLK|CONCAT'
+             r'|CONFIGURATION|CONSTANT|CU|DIV|DO|DT|ELSE|ELSIF|END_ACTION'
+             r'|END_CASE|END_CONFIGURATION|END_FOR|END_FUNCTION_BLOCK'
+             r'|END_FUNCTION|END_IF|END_PROGRAM|END_REPEAT|END_RESOURCE'
+             r'|END_STEP|END_STRUCT|END_TRANSITION|END_TYPE|END_VAR|END_WHILE'
+             r'|EQ|EXIT|EXPT|F_EDGE|FOR|FROM|FUNCTION_BLOCK|FUNCTION|GE'
+             r'|GT|IF|INITIAL_STEP|IN|INSERT|INTERVAL|JMPCN|JMPC|JMP|LD|LE'
+             r'|LIMIT|LT|MAX|MIN|MOD|MOVE|MUL|MUX|NE|NOT|OF|ON|ORN|OR|PRIORITY'
+             r'|PROGRAM|PT|PV|READ_ONLY|READ_WRITE|R_EDGE|REPEAT|RESOURCE'
+             r'|RETAIN|RETURN|R|SEL|SINGLE|S|STEP|ST|SUB|TASK|THEN|TO|TOD'
+             r'|TRANSITION|TYPE|VAR_ACCESS|VAR_EXTERNAL|VAR_GLOBAL'
+             r'|VAR_IN_OUT|VAR_INPUT|VAR_OUTPUT|VAR|WHILE|WITH|XORN|XOR'
+             r'|UNION|CLASS|OBJECT)\b',
+             Keyword
+            ),
+            (r'(?i:ANY|ANY_DATE|ANY_BIT|ANY_INT|ANY_REAL|ANY_NUM|INT|LREAL'
+             r'|LWORD|REAL|LINT|BYTE|SINT|STRING|STRUCT|DWORD|DATE_AND_TIME'
+             r'|DATE|ARRAY|TIME_OF_DAY|TIME|BOOL|WORD|DINT|UDINT|UINT|ULINT'
+             r'|UNTIL|USINT|SR|RS|TP|R_TRIG|F_TRIG|CTD|CTUD|CTU|TOF|TON)\b',
+             Keyword.Type
+            ),
+            #
+            (r'(?i:UNION|CLASS|END_UNION|END_CLASS)\b', Keyword.Reserved),
+            #
+            (r'(FALSE|TRUE)\b', Keyword.Constant),
+            #
+            (r'[-+=<>?,.;:\^&|*]', Operator),
+            (r'[0-9]+', Number.Integer),
+            (r'[0-9]+\.[0-9]+', Number.Float),
+            # TODO: Backslash escapes?
+            (r"'($.|[^'])*'", String.Single),
+            (r'"($.|[^"])*"', String.Double),
+            
+            (r'(?i:%[QIMR][XBWDL]\d+(\.\d+)?)', String.Other)
+        ]
     }
