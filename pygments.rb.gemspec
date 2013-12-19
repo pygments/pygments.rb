@@ -8,6 +8,7 @@ Gem::Specification.new do |s|
   s.description = 'pygments.rb exposes the pygments syntax highlighter to Ruby'
 
   s.homepage = 'http://github.com/tmm1/pygments.rb'
+  s.license = 'MIT'
   s.has_rdoc = false
 
   s.authors = ['Aman Gupta', 'Ted Nyman']
