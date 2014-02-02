@@ -101,7 +101,7 @@ module Pygments
       @alias_index[name]
     end
 
-    # Public: Look up Lexer by one of it's file extensions.
+    # Public: Look up Lexer by one of its file extensions.
     #
     # extname - A String file extension.
     #
@@ -115,7 +115,7 @@ module Pygments
       @extname_index[extname]
     end
 
-    # Public: Look up Lexer by one of it's mime types.
+    # Public: Look up Lexer by one of its mime types.
     #
     # type - A mime type String.
     #
