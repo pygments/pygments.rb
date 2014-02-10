@@ -19,15 +19,14 @@ module Pygments
     # Get things started by opening a pipe to mentos (the freshmaker), a
     # Python process that talks to the Pygments library. We'll talk back and
     # forth across this pipe.
-    def start(pygments_path = File.expand_path('../../../vendor/pygments-main/', __FILE__))
-      is_windows = RUBY_PLATFORM =~ /mswin|mingw/
-      begin
-        @log = Logger.new(ENV['MENTOS_LOG'] ||= is_windows ? 'NUL:' : '/dev/null')
-        @log.level = Logger::INFO
-        @log.datetime_format = "%Y-%m-%d %H:%M "
-      rescue
-        @log = Logger.new(is_windows ? 'NUL:' : '/dev/null')
+    def start(python_path, options)
+      pygments_path ||= File.expand_path('../../../vendor/pygments-main/', __FILE__)
+
+      if options.is_a?(Hash)
+        log = options.fetch(:logger, Logger)
       end
+
+      setup_logger(log)
 
       ENV['PYGMENTS_PATH'] = pygments_path
 
@@ -38,7 +37,7 @@ module Pygments
       # the pid and three IO objects to write and read.
       script = "#{python_binary} #{File.expand_path('../mentos.py', __FILE__)}"
       @pid, @in, @out, @err = popen4(script)
-      @log.info "[#{Time.now.iso8601}] Starting pid #{@pid.to_s} with fd #{@out.to_i.to_s}."
+      logger.info "[#{Time.now.iso8601}] Starting pid #{@pid.to_s} with fd #{@out.to_i.to_s}."
     end
 
     # Detect a suitable Python binary to use. We can't just use `python2`
@@ -71,7 +70,7 @@ module Pygments
         rescue Errno::ESRCH, Errno::ECHILD
         end
       end
-      @log.info "[#{Time.now.iso8601}] Killing pid: #{@pid.to_s}. Reason: #{reason}"
+      logger.info "[#{Time.now.iso8601}] Killing pid: #{@pid.to_s}. Reason: #{reason}"
       @pid = nil
     end
 
@@ -204,6 +203,11 @@ module Pygments
       str
     end
 
+    # Public: Return the logger currently configured
+    def logger
+      @logger
+    end
+
     private
 
     # Our 'rpc'-ish request to mentos. Requires a method name, and then optional
@@ -252,7 +256,7 @@ module Pygments
         end
       rescue Timeout::Error
         # If we timeout, we need to clear out the pipe and start over.
-        @log.error "[#{Time.now.iso8601}] Timeout on a mentos #{method} call"
+        logger.error "[#{Time.now.iso8601}] Timeout on a mentos #{method} call"
         stop "Timeout on mentos #{method} call."
       end
 
@@ -279,14 +283,14 @@ module Pygments
         if header["method"] == "highlight"
           # Make sure we have a result back; else consider this an error.
           if res.nil?
-            @log.warn "[#{Time.now.iso8601}] No highlight result back from mentos."
+            logger.warn "[#{Time.now.iso8601}] No highlight result back from mentos."
             stop "No highlight result back from mentos."
             raise MentosError, "No highlight result back from mentos."
           end
 
           # Remove the newline from Python
           res = res[0..-2]
-          @log.info "[#{Time.now.iso8601}] Highlight in process."
+          logger.info "[#{Time.now.iso8601}] Highlight in process."
 
           # Get the id's
           start_id = res[0..7]
@@ -294,19 +298,19 @@ module Pygments
 
           # Sanity check.
           if not (start_id == id and end_id == id)
-            @log.error "[#{Time.now.iso8601}] ID's did not match. Aborting."
+            logger.error "[#{Time.now.iso8601}] ID's did not match. Aborting."
             stop "ID's did not match. Aborting."
             raise MentosError, "ID's did not match. Aborting."
           else
             # We're good. Remove the padding
             res = res[10..-11]
-            @log.info "[#{Time.now.iso8601}] Highlighting complete."
+            logger.info "[#{Time.now.iso8601}] Highlighting complete."
             res
           end
         end
         res
       else
-        @log.error "[#{Time.now.iso8601}] No header data back."
+        logger.error "[#{Time.now.iso8601}] No header data back."
         stop "No header data back."
         raise MentosError, "No header received back."
       end
@@ -327,7 +331,7 @@ module Pygments
     # Returns nothing.
     def write_data(out_header, code=nil)
       @in.write(out_header)
-      @log.info "[#{Time.now.iso8601}] Out header: #{out_header.to_s}"
+      logger.info "[#{Time.now.iso8601}] Out header: #{out_header.to_s}"
       @in.write(code) if code
     end
 
@@ -351,7 +355,7 @@ module Pygments
 
         # Sanity check the size
         if not size_check(size)
-          @log.error "[#{Time.now.iso8601}] Size returned from mentos.py invalid."
+          logger.error "[#{Time.now.iso8601}] Size returned from mentos.py invalid."
           stop "Size returned from mentos.py invalid."
           raise MentosError, "Size returned from mentos.py invalid."
         end
@@ -359,10 +363,10 @@ module Pygments
         # Read the amount of bytes we should be expecting. We first
         # convert the string of bits into an integer.
         header_bytes = size.to_s.to_i(2) + 1
-        @log.info "[#{Time.now.iso8601}] Size in: #{size.to_s} (#{header_bytes.to_s})"
+        logger.info "[#{Time.now.iso8601}] Size in: #{size.to_s} (#{header_bytes.to_s})"
         @out.read(header_bytes)
       rescue
-        @log.error "[#{Time.now.iso8601}] Failed to get header."
+        logger.error "[#{Time.now.iso8601}] Failed to get header."
         stop "Failed to get header."
         raise MentosError, "Failed to get header."
       end
@@ -380,13 +384,13 @@ module Pygments
 
     # Convert a text header into JSON for easy access.
     def header_to_json(header)
-      @log.info "[#{Time.now.iso8601}] In header: #{header.to_s} "
+      logger.info "[#{Time.now.iso8601}] In header: #{header.to_s} "
       header = Yajl.load(header)
 
       if header["error"]
         # Raise this as a Ruby exception of the MentosError class.
         # Stop so we don't leave the pipe in an inconsistent state.
-        @log.error "[#{Time.now.iso8601}] Failed to convert header to JSON."
+        logger.error "[#{Time.now.iso8601}] Failed to convert header to JSON."
         stop header["error"]
         raise MentosError, header["error"]
       else
@@ -401,6 +405,22 @@ module Pygments
       # represenation: e.g, "00000000000000000000000000011110"
       Array.new(32) { |i| size[i] }.reverse!.join
     end
-  end
-end
 
+    # Private: Setup our logger
+    def setup_logger(log=nil)
+      is_windows = RUBY_PLATFORM =~ /mswin|mingw/
+      if log.nil? || log == Logger
+        begin
+          @logger = Logger.new(ENV['MENTOS_LOG'] ||= is_windows ? 'NUL:' : '/dev/null')
+          @logger.level = Logger::INFO
+          @logger.datetime_format = "%Y-%m-%d %H:%M "
+        rescue
+          @logger = Logger.new(is_windows ? 'NUL:' : '/dev/null')
+        end
+      else
+        @logger = log
+      end
+    end
+  end
+
+end
