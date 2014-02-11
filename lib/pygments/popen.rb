@@ -19,7 +19,7 @@ module Pygments
     # Get things started by opening a pipe to mentos (the freshmaker), a
     # Python process that talks to the Pygments library. We'll talk back and
     # forth across this pipe.
-    def start(python_path, options)
+    def start(python_path, options=nil)
       pygments_path ||= File.expand_path('../../../vendor/pygments-main/', __FILE__)
 
       if options.is_a?(Hash)
