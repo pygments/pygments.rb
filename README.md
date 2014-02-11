@@ -73,7 +73,25 @@ To use a custom pygments installation, specify the path to
 Pygments.start("/path/to/pygments")
 ```
 
-If you'd like logging, set the environmental variable `MENTOS_LOG` to a file path for your logfile.
+By default Pygments.rb logs to `/dev/null`. If you'd like to log directly to a file, you can set an environment variable `MENTOS_LOG` to a file path. You can also instrument Pygments.rb by supplying a logger to `#start`. The specified logger should respond to `Logger` methods.
+
+For example to use the new `Syslog::Logger` in Ruby 2.X:
+
+```ruby
+require 'syslog/logger'
+require 'pygments'
+
+code = "#!/usr/bin/ruby\nputs 'foo'"
+
+# Set our path
+path = "../../vendor/pygments-main"
+
+# Setup our options, including our logger
+logger = Syslog::Logger.new 'pygments'
+opts = {:logger => logger}
+
+Pygments.start(path, opts)
+```
 
 By default pygments.rb will timeout calls to pygments that take over 8 seconds. You can change this
 by setting the environmental variable `MENTOS_TIMEOUT` to a different positive integer value.
