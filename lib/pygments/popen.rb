@@ -111,11 +111,11 @@ module Pygments
 
 
     # Public: Get all lexers from a serialized array. This avoids needing to spawn
-    # mentos when it's not really needed (e.g,. one-off jobs, loading the Rails env, etc).
+    # mentos when it's not really needed (e.g., one-off jobs, loading the Rails env, etc).
     #
     # Should be preferred to #lexers!
     #
-    # Returns an array of lexers
+    # Returns an array of lexers.
     def lexers
       begin
         lexer_file = File.expand_path('../../../lexers', __FILE__)
@@ -128,7 +128,7 @@ module Pygments
 
     # Public: Get back all available lexers from mentos itself
     #
-    # Returns an array of lexers
+    # Returns an array of lexers.
     def lexers!
       mentos(:get_all_lexers).inject(Hash.new) do |hash, lxr|
         name = lxr[0]
@@ -186,7 +186,10 @@ module Pygments
     # Public: Highlight code.
     #
     # Takes a first-position argument of the code to be highlighted, and a
-    # second-position hash of various arguments specifiying highlighting properties.
+    # second-position hash of various arguments specifying highlighting properties.
+    #
+    # Returns the highlighted string
+    # or nil when the request to the Python process timed out.
     def highlight(code, opts={})
       # If the caller didn't give us any code, we have nothing to do,
       # so return right away.
@@ -265,7 +268,7 @@ module Pygments
     # Based on the header we receive, determine if we need
     # to read more bytes, and read those bytes if necessary.
     #
-    # Then, do a sanity check wih the ids.
+    # Then, do a sanity check with the ids.
     #
     # Returns a result — either highlighted text or metadata.
     def handle_header_and_return(header, id)
@@ -322,7 +325,7 @@ module Pygments
       code
     end
 
-    # Write data to mentos, the Python Process.
+    # Write data to mentos, the Python process.
     #
     # Returns nothing.
     def write_data(out_header, code=nil)
@@ -398,7 +401,7 @@ module Pygments
       size = out_header.bytesize
 
       # Fixed 32 bits to represent the int. We return a string
-      # represenation: e.g, "00000000000000000000000000011110"
+      # representation: e.g, "00000000000000000000000000011110"
       Array.new(32) { |i| size[i] }.reverse!.join
     end
   end
