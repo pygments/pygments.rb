@@ -1060,13 +1060,15 @@ class XsltLexer(XmlLexer):
     mimetypes = ['application/xsl+xml', 'application/xslt+xml']
 
     EXTRA_KEYWORDS = set([
-        'apply-imports', 'apply-templates', 'attribute',
-        'attribute-set', 'call-template', 'choose', 'comment',
-        'copy', 'copy-of', 'decimal-format', 'element', 'fallback',
-        'for-each', 'if', 'import', 'include', 'key', 'message',
-        'namespace-alias', 'number', 'otherwise', 'output', 'param',
-        'preserve-space', 'processing-instruction', 'sort',
-        'strip-space', 'stylesheet', 'template', 'text', 'transform',
+        'analyze-string', 'apply-imports', 'apply-templates', 'attribute',
+        'attribute-set', 'call-template', 'character-map', 'choose', 'comment',
+        'copy', 'copy-of', 'decimal-format', 'document', 'element', 'fallback',
+        'for-each', 'for-each-group', 'function', 'if', 'import', 'import-schema',
+        'include', 'key', 'matching-substring', 'message', 'namespace',
+        'namespace-alias', 'next-match', 'non-matching-substring', 'number',
+        'otherwise', 'output', 'output-character', 'param', 'perform-sort',
+        'preserve-space', 'processing-instruction', 'result-document', 'sequence',
+        'sort', 'strip-space', 'stylesheet', 'template', 'text', 'transform',
         'value-of', 'variable', 'when', 'with-param'
     ])
 
