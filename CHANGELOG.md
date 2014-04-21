@@ -1,6 +1,25 @@
 changelog
 ===========
 
+Version 0.5.5 (unreleased)
+-----------------------------
+* Upgrade to latest pygments (unreleased 2.0, See [pygments changelog](https://bitbucket.org/birkenfeld/pygments-main/src/33931e753e368c0393631356d9d652d4b3019ffe/CHANGES?at=default#cl-9) for details)
+  * Add Mathematica
+  * Add Nix
+  * Add Pike
+  * Add Hy
+  * Add Chapel
+  * Add Kal
+  * Add Eiffel
+  * Add Cirru
+  * Add ColdFusion
+  * Add Idris
+  * Add Intel
+  * Add MaskJS
+  * Add Inform
+  * Add MQL
+  * Add APL
+
 Version 0.5.4 (Nov 3, 2013)
 -----------------------------
 
@@ -67,5 +86,3 @@ Version 0.3.4 (Dec 28, 2012)
 
 * Add support for Windows
 * Add MIT license
-
-
