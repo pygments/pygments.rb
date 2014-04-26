@@ -26,48 +26,48 @@ pygments.rb request.
 
 ## usage
 
-``` ruby 
+```ruby
 require 'pygments'
-``` 
+```
 
-``` ruby
+```ruby
 Pygments.highlight(File.read(__FILE__), :lexer => 'ruby')
 ```
 
 Encoding and other lexer/formatter options can be passed in via an
 options hash:
 
-``` ruby
+```ruby
 Pygments.highlight('code', :options => {:encoding => 'utf-8'})
 ```
 
-pygments.rb defaults to using an HTML formatter. 
+pygments.rb defaults to using an HTML formatter.
 To use a formatter other than `html`, specify it explicitly
 like so:
 
-``` ruby
+```ruby
 Pygments.highlight('code', :formatter => 'bbcode')
 Pygments.highlight('code', :formatter => 'terminal')
 ```
 
 To generate CSS for HTML formatted code, use the `#css` method:
 
-``` ruby
+```ruby
 Pygments.css
 Pygments.css('.highlight')
 ```
 
 To use a specific pygments style, pass the `:style` option to the `#css` method:
 
-``` ruby
+```ruby
 Pygments.css(:style => "monokai")
 ```
 
 Other Pygments high-level API methods are also available.
-These methods return arrays detailing all the available lexers, formatters, 
+These methods return arrays detailing all the available lexers, formatters,
 and styles.
 
-``` ruby
+```ruby
 Pygments.lexers
 Pygments.formatters
 Pygments.styles
@@ -76,14 +76,19 @@ Pygments.styles
 To use a custom pygments installation, specify the path to
 `Pygments#start`:
 
-``` ruby
+```ruby
 Pygments.start("/path/to/pygments")
 ```
 
 If you'd like logging, set the environmental variable `MENTOS_LOG` to a file path for your logfile.
 
 By default pygments.rb will timeout calls to pygments that take over 8 seconds. You can change this
-by setting the environmental variable `MENTOS_TIMEOUT` to a different positive integer value.
+by setting the environmental variable `MENTOS_TIMEOUT` to a different positive integer value or by
+passing the `:timeout` option (taking precedence over `MENTOS_TIMEOUT`):
+
+```ruby
+Pygments.highlight('code', :timeout => 4)
+```
 
 ## benchmarks
 
@@ -112,17 +117,17 @@ The MIT License (MIT)
 
 Copyright (c) Ted Nyman and Aman Gupta, 2012-2013
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and 
-associated documentation files (the "Software"), to deal in the Software without restriction, 
-including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, 
-and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, 
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+associated documentation files (the "Software"), to deal in the Software without restriction,
+including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
+and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so,
 subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all copies or substantial 
+The above copyright notice and this permission notice shall be included in all copies or substantial
 portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT 
-LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, 
-WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE 
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

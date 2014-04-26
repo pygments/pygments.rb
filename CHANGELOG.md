@@ -1,6 +1,11 @@
 CHANGELOG
 ===========
 
+Unreleased
+-----------------------------
+
+* add `:timeout` parameter to `Pygments.highlight`
+
 Version 1.2.1 (2017/12/07)
 -----------------------------
 

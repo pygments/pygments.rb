@@ -249,7 +249,8 @@ module Pygments
       begin
         # Timeout requests that take too long.
         # Invalid MENTOS_TIMEOUT results in just using default.
-        timeout_time = Integer(ENV["MENTOS_TIMEOUT"]) rescue 8
+        timeout_time = kwargs.delete(:timeout)
+        timeout_time = Integer(ENV["MENTOS_TIMEOUT"]) rescue 8 if timeout_time.nil?
 
         Timeout::timeout(timeout_time) do
           # For sanity checking on both sides of the pipe when highlighting, we prepend and
