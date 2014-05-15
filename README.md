@@ -1,5 +1,7 @@
 # pygments.rb
 
+![travis-build-status](https://travis-ci.org/tmm1/pygments.rb.svg)
+
 A Ruby wrapper for the Python [pygments syntax highlighter](http://pygments.org/).
 
 pygments.rb works by talking over a simple pipe to a long-lived 
