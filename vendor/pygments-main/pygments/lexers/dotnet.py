@@ -5,16 +5,16 @@
 
     Lexers for .net languages.
 
-    :copyright: Copyright 2006-2013 by the Pygments team, see AUTHORS.
+    :copyright: Copyright 2006-2014 by the Pygments team, see AUTHORS.
     :license: BSD, see LICENSE for details.
 """
 import re
 
 from pygments.lexer import RegexLexer, DelegatingLexer, bygroups, include, \
-     using, this
+     using, this, default
 from pygments.token import Punctuation, \
      Text, Comment, Operator, Keyword, Name, String, Number, Literal, Other
-from pygments.util import get_choice_opt
+from pygments.util import get_choice_opt, iteritems
 from pygments import unistring as uni
 
 from pygments.lexers.web import XmlLexer
@@ -44,7 +44,7 @@ class CSharpLexer(RegexLexer):
 
       The default value is ``basic``.
 
-      *New in Pygments 0.8.*
+      .. versionadded:: 0.8
     """
 
     name = 'C#'
@@ -58,7 +58,7 @@ class CSharpLexer(RegexLexer):
     # see http://www.ecma-international.org/publications/files/ECMA-ST/Ecma-334.pdf
 
     levels = {
-        'none': '@?[_a-zA-Z][a-zA-Z0-9_]*',
+        'none': '@?[_a-zA-Z]\w*',
         'basic': ('@?[_' + uni.Lu + uni.Ll + uni.Lt + uni.Lm + uni.Nl + ']' +
                   '[' + uni.Lu + uni.Ll + uni.Lt + uni.Lm + uni.Nl +
                   uni.Nd + uni.Pc + uni.Cf + uni.Mn + uni.Mc + ']*'),
@@ -71,7 +71,7 @@ class CSharpLexer(RegexLexer):
     tokens = {}
     token_variants = True
 
-    for levelname, cs_ident in levels.items():
+    for levelname, cs_ident in iteritems(levels):
         tokens[levelname] = {
             'root': [
                 # method names
@@ -126,7 +126,7 @@ class CSharpLexer(RegexLexer):
         }
 
     def __init__(self, **options):
-        level = get_choice_opt(options, 'unicodelevel', self.tokens.keys(), 'basic')
+        level = get_choice_opt(options, 'unicodelevel', list(self.tokens), 'basic')
         if level not in self._all_tokens:
             # compile the regexes now
             self._tokens = self.__class__.process_tokendef(level)
@@ -156,7 +156,7 @@ class NemerleLexer(RegexLexer):
 
       The default value is ``basic``.
 
-    *New in Pygments 1.5.*
+    .. versionadded:: 1.5
     """
 
     name = 'Nemerle'
@@ -170,7 +170,7 @@ class NemerleLexer(RegexLexer):
     # http://www.ecma-international.org/publications/files/ECMA-ST/Ecma-334.pdf
 
     levels = dict(
-        none = '@?[_a-zA-Z][a-zA-Z0-9_]*',
+        none = '@?[_a-zA-Z]\w*',
         basic = ('@?[_' + uni.Lu + uni.Ll + uni.Lt + uni.Lm + uni.Nl + ']' +
                  '[' + uni.Lu + uni.Ll + uni.Lt + uni.Lm + uni.Nl +
                  uni.Nd + uni.Pc + uni.Cf + uni.Mn + uni.Mc + ']*'),
@@ -183,7 +183,7 @@ class NemerleLexer(RegexLexer):
     tokens = {}
     token_variants = True
 
-    for levelname, cs_ident in levels.items():
+    for levelname, cs_ident in iteritems(levels):
         tokens[levelname] = {
             'root': [
                 # method names
@@ -284,7 +284,7 @@ class NemerleLexer(RegexLexer):
         }
 
     def __init__(self, **options):
-        level = get_choice_opt(options, 'unicodelevel', self.tokens.keys(),
+        level = get_choice_opt(options, 'unicodelevel', list(self.tokens),
                                'basic')
         if level not in self._all_tokens:
             # compile the regexes now
@@ -336,7 +336,7 @@ class BooLexer(RegexLexer):
             (r'"""(\\\\|\\"|.*?)"""', String.Double),
             (r'"(\\\\|\\"|[^"]*?)"', String.Double),
             (r"'(\\\\|\\'|[^']*?)'", String.Single),
-            (r'[a-zA-Z_][a-zA-Z0-9_]*', Name),
+            (r'[a-zA-Z_]\w*', Name),
             (r'(\d+\.\d*|\d*\.\d+)([fF][+-]?[0-9]+)?', Number.Float),
             (r'[0-9][0-9\.]*(ms?|d|h|s)', Number),
             (r'0\d+', Number.Oct),
@@ -351,13 +351,13 @@ class BooLexer(RegexLexer):
             ('[*/]', Comment.Multiline)
         ],
         'funcname': [
-            ('[a-zA-Z_][a-zA-Z0-9_]*', Name.Function, '#pop')
+            ('[a-zA-Z_]\w*', Name.Function, '#pop')
         ],
         'classname': [
-            ('[a-zA-Z_][a-zA-Z0-9_]*', Name.Class, '#pop')
+            ('[a-zA-Z_]\w*', Name.Class, '#pop')
         ],
         'namespace': [
-            ('[a-zA-Z_][a-zA-Z0-9_.]*', Name.Namespace, '#pop')
+            ('[a-zA-Z_][\w.]*', Name.Namespace, '#pop')
         ]
     }
 
@@ -425,7 +425,7 @@ class VbNetLexer(RegexLexer):
              r'<=|>=|<>|[-&*/\\^+=<>]',
              Operator),
             ('"', String, 'string'),
-            ('[a-zA-Z_][a-zA-Z0-9_]*[%&@!#$]?', Name),
+            ('[a-z_]\w*[%&@!#$]?', Name),
             ('#.*?#', Literal.Date),
             (r'(\d+\.\d*|\d*\.\d+)([fF][+-]?[0-9]+)?', Number.Float),
             (r'\d+([SILDFR]|US|UI|UL)?', Number.Integer),
@@ -439,25 +439,30 @@ class VbNetLexer(RegexLexer):
             (r'[^"]+', String),
         ],
         'dim': [
-            (r'[a-z_][a-z0-9_]*', Name.Variable, '#pop'),
-            (r'', Text, '#pop'),  # any other syntax
+            (r'[a-z_]\w*', Name.Variable, '#pop'),
+            default('#pop'),  # any other syntax
         ],
         'funcname': [
-            (r'[a-z_][a-z0-9_]*', Name.Function, '#pop'),
+            (r'[a-z_]\w*', Name.Function, '#pop'),
         ],
         'classname': [
-            (r'[a-z_][a-z0-9_]*', Name.Class, '#pop'),
+            (r'[a-z_]\w*', Name.Class, '#pop'),
         ],
         'namespace': [
-            (r'[a-z_][a-z0-9_.]*', Name.Namespace, '#pop'),
+            (r'[a-z_][\w.]*', Name.Namespace, '#pop'),
         ],
         'end': [
             (r'\s+', Text),
             (r'(Function|Sub|Property|Class|Structure|Enum|Module|Namespace)\b',
              Keyword, '#pop'),
-            (r'', Text, '#pop'),
+            default('#pop'),
         ]
     }
+
+    def analyse_text(text):
+        if re.search(r'^\s*(#If|Module|Namespace)', text,
+                     re.IGNORECASE | re.MULTILINE):
+            return 0.5
 
 
 class GenericAspxLexer(RegexLexer):
@@ -531,7 +536,10 @@ class FSharpLexer(RegexLexer):
     """
     For the F# language (version 3.0).
 
-    *New in Pygments 1.5.*
+    AAAAACK Strings
+    http://research.microsoft.com/en-us/um/cambridge/projects/fsharp/manual/spec.html#_Toc335818775
+
+    .. versionadded:: 1.5
     """
 
     name = 'FSharp'
@@ -589,9 +597,9 @@ class FSharpLexer(RegexLexer):
         'root': [
             (r'\s+', Text),
             (r'\(\)|\[\]', Name.Builtin.Pseudo),
-            (r'\b(?<!\.)([A-Z][A-Za-z0-9_\']*)(?=\s*\.)',
+            (r'\b(?<!\.)([A-Z][\w\']*)(?=\s*\.)',
              Name.Namespace, 'dotted'),
-            (r'\b([A-Z][A-Za-z0-9_\']*)', Name),
+            (r'\b([A-Z][\w\']*)', Name),
             (r'///.*?\n', String.Doc),
             (r'//.*?\n', Comment.Single),
             (r'\(\*(?!\))', Comment, 'comment'),
@@ -600,13 +608,13 @@ class FSharpLexer(RegexLexer):
             (r'"""', String, 'tqs'),
             (r'"', String, 'string'),
 
-            (r'\b(open|module)(\s+)([a-zA-Z0-9_.]+)',
+            (r'\b(open|module)(\s+)([\w.]+)',
              bygroups(Keyword, Text, Name.Namespace)),
-            (r'\b(let!?)(\s+)([a-zA-Z0-9_]+)',
+            (r'\b(let!?)(\s+)(\w+)',
              bygroups(Keyword, Text, Name.Variable)),
-            (r'\b(type)(\s+)([a-zA-Z0-9_]+)',
+            (r'\b(type)(\s+)(\w+)',
              bygroups(Keyword, Text, Name.Class)),
-            (r'\b(member|override)(\s+)([a-zA-Z0-9_]+)(\.)([a-zA-Z0-9_]+)',
+            (r'\b(member|override)(\s+)(\w+)(\.)(\w+)',
              bygroups(Keyword, Text, Name, Punctuation, Name.Function)),
             (r'\b(%s)\b' % '|'.join(keywords), Keyword),
             (r'(%s)' % '|'.join(keyopts), Operator),
@@ -621,7 +629,7 @@ class FSharpLexer(RegexLexer):
             (r'\d[\d_]*[uU]?[yslLnQRZINGmM]?', Number.Integer),
             (r'0[xX][\da-fA-F][\da-fA-F_]*[uU]?[yslLn]?[fF]?', Number.Hex),
             (r'0[oO][0-7][0-7_]*[uU]?[yslLn]?', Number.Oct),
-            (r'0[bB][01][01_]*[uU]?[yslLn]?', Number.Binary),
+            (r'0[bB][01][01_]*[uU]?[yslLn]?', Number.Bin),
             (r'-?\d[\d_]*(.[\d_]*)?([eE][+\-]?\d[\d_]*)[fFmM]?',
              Number.Float),
 
@@ -630,14 +638,18 @@ class FSharpLexer(RegexLexer):
             (r"'.'", String.Char),
             (r"'", Keyword), # a stray quote is another syntax element
 
+            (r'@?"', String.Double, 'string'),
+
             (r'[~?][a-z][\w\']*:', Name.Variable),
         ],
         'dotted': [
             (r'\s+', Text),
             (r'\.', Punctuation),
-            (r'[A-Z][A-Za-z0-9_\']*(?=\s*\.)', Name.Namespace),
-            (r'[A-Z][A-Za-z0-9_\']*', Name, '#pop'),
-            (r'[a-z_][A-Za-z0-9_\']*', Name, '#pop'),
+            (r'[A-Z][\w\']*(?=\s*\.)', Name.Namespace),
+            (r'[A-Z][\w\']*', Name, '#pop'),
+            (r'[a-z_][\w\']*', Name, '#pop'),
+            # e.g. dictionary index access
+            default('#pop'),
         ],
         'comment': [
             (r'[^(*)@"]+', Comment),
