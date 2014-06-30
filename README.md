@@ -1,6 +1,6 @@
 # pygments.rb
 
-![travis-build-status](https://travis-ci.org/tmm1/pygments.rb.svg)
+[![travis-build-status](https://travis-ci.org/tmm1/pygments.rb.svg?branch=master)](https://travis-ci.org/tmm1/pygments.rb)
 
 A Ruby wrapper for the Python [pygments syntax highlighter](http://pygments.org/).
 
