@@ -215,7 +215,7 @@ module Pygments
 
       begin
         # Timeout requests that take too long.
-        timeout_time = ENV["MENTOS_TIMEOUT"] || 8
+        timeout_time = ENV["MENTOS_TIMEOUT"].to_i || 8
 
         Timeout::timeout(timeout_time) do
           # For sanity checking on both sides of the pipe when highlighting, we prepend and
