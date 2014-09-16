@@ -41,13 +41,19 @@ module Pygments
       @log.info "[#{Time.now.iso8601}] Starting pid #{@pid.to_s} with fd #{@out.to_i.to_s}."
     end
 
-    # Detect a suitable Python binary to use. We can't just use `python2`
-    # because apparently some old versions of Debian only have `python` or
-    # something like that.
+    # Detect a suitable Python binary to use.
     def python_binary
       @python_binary ||= begin
-        `which python2`
-        $?.success? ? "python2" : "python"
+        # pypy is faster than CPython, so use that if it's available.
+        `which pypy`
+        if $?.success?
+          "pypy"
+        else
+          # We can't just use `python2` because apparently some old versions of
+          # Debian only have `python` or something like that.
+          `which python2`
+          $?.success? ? "python2" : "python"
+        end
       end
     end
 
