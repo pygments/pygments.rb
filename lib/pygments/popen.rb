@@ -131,7 +131,7 @@ module Pygments
     def lexers
       begin
         lexer_file = File.expand_path('../../../lexers', __FILE__)
-        raw = File.open(lexer_file, "r").read
+        raw = File.open(lexer_file, "rb").read
         Marshal.load(raw)
       rescue Errno::ENOENT
         raise MentosError, "Error loading lexer file. Was it created and vendored?"
