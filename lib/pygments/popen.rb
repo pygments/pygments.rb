@@ -215,7 +215,8 @@ module Pygments
 
       begin
         # Timeout requests that take too long.
-        timeout_time = ENV["MENTOS_TIMEOUT"] || 8
+        # Invalid MENTOS_TIMEOUT results in just using default.
+        timeout_time = Integer(ENV["MENTOS_TIMEOUT"]) rescue 8
 
         Timeout::timeout(timeout_time) do
           # For sanity checking on both sides of the pipe when highlighting, we prepend and
