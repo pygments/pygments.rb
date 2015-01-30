@@ -45,6 +45,9 @@ module Pygments
     # because apparently some old versions of Debian only have `python` or
     # something like that.
     def python_binary
+      if RUBY_PLATFORM =~ /(mswin|mingw|cygwin|bccwin)/
+        return 'python'
+      end
       @python_binary ||= begin
         `which python2`
         $?.success? ? "python2" : "python"
@@ -119,7 +122,7 @@ module Pygments
     def lexers
       begin
         lexer_file = File.expand_path('../../../lexers', __FILE__)
-        raw = File.open(lexer_file, "r").read
+        raw = File.open(lexer_file, "rb").read
         Marshal.load(raw)
       rescue Errno::ENOENT
         raise MentosError, "Error loading lexer file. Was it created and vendored?"
