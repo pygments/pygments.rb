@@ -36,19 +36,31 @@ module Pygments
 
       # A pipe to the mentos python process. #popen4 gives us
       # the pid and three IO objects to write and read.
-      script = "#{python_binary} #{File.expand_path('../mentos.py', __FILE__)}"
+      python_path = python_binary(is_windows)
+      script = "#{python_path} #{File.expand_path('../mentos.py', __FILE__)}"
       @pid, @in, @out, @err = popen4(script)
       @log.info "[#{Time.now.iso8601}] Starting pid #{@pid.to_s} with fd #{@out.to_i.to_s}."
     end
 
-    # Detect a suitable Python binary to use. We can't just use `python2`
-    # because apparently some old versions of Debian only have `python` or
-    # something like that.
-    def python_binary
-      @python_binary ||= begin
-        `which python2`
-        $?.success? ? "python2" : "python"
+    # Detect a suitable Python binary to use.
+    def python_binary(is_windows)
+      if is_windows && which('py')
+        return 'py -2'
       end
+      return which('python2') || 'python'
+    end
+
+    # Cross platform which command
+    # from http://stackoverflow.com/a/5471032/284795
+    def which(command)
+      exts = ENV['PATHEXT'] ? ENV['PATHEXT'].split(';') : ['']
+      ENV['PATH'].split(File::PATH_SEPARATOR).each do |dir|
+        exts.each { |ext|
+          path = File.join(dir, "#{command}#{ext}")
+          return path if File.executable?(path) && !File.directory?(path)
+        }
+      end
+      return nil
     end
 
     # Stop the child process by issuing a kill -9.
@@ -119,7 +131,7 @@ module Pygments
     def lexers
       begin
         lexer_file = File.expand_path('../../../lexers', __FILE__)
-        raw = File.open(lexer_file, "r").read
+        raw = File.open(lexer_file, "rb").read
         Marshal.load(raw)
       rescue Errno::ENOENT
         raise MentosError, "Error loading lexer file. Was it created and vendored?"
