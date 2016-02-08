@@ -255,6 +255,8 @@ module Pygments
           # mentos is now waiting for the header, and, potentially, code.
           write_data(out_header, code)
 
+          check_for_error
+
           # mentos will now return data to us. First it sends the header.
           header = get_header
 
@@ -273,6 +275,25 @@ module Pygments
     rescue Errno::EPIPE, EOFError
     stop "EPIPE"
     raise MentosError, "EPIPE"
+    end
+
+    def check_for_error
+      return if @err.closed?
+
+      timeout_time = 0.25 # set a very little timeout so that we do not hang the parser
+
+      Timeout::timeout(timeout_time) do
+        error_msg = @err.read
+
+        unless error_msg.empty?
+          @log.error "[#{Time.now.iso8601}] Error running python script: #{error_msg}"
+          stop "Error running python script: #{error_msg}"
+          raise MentosError, error_msg
+        end
+      end
+    rescue Timeout::Error
+      # during the specified time no error were found
+      @err.close
     end
 
 
