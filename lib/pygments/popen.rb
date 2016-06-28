@@ -97,7 +97,7 @@ module Pygments
     #
     # Returns true if the child is alive.
     def alive?
-      return true if @pid && Process.kill(0, @pid)
+      return true if defined?(@pid) && @pid && Process.kill(0, @pid)
       false
     rescue Errno::ENOENT, Errno::ESRCH
       false
