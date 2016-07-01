@@ -1,6 +1,11 @@
 # coding: utf-8
-require 'posix/spawn'
-require 'yajl'
+if RUBY_ENGINE == 'jruby'
+  require 'open3'
+  require 'multi_json'
+else
+  require 'posix/spawn'
+  require 'yajl'
+end
 require 'timeout'
 require 'logger'
 require 'time'
@@ -13,8 +18,15 @@ end
 # Python process.
 module Pygments
   module Popen
-    include POSIX::Spawn
+    (Yajl = ::MultiJson).engine = 'json_gem' unless defined?(::Yajl)
+    include POSIX::Spawn if defined?(::POSIX::Spawn)
     extend self
+
+    def popen4(script)
+      streams = Open3.popen3(script)
+      streams.unshift(streams.pop[:pid])
+      streams
+    end unless defined?(::POSIX::Spawn)
 
     # Get things started by opening a pipe to mentos (the freshmaker), a
     # Python process that talks to the Pygments library. We'll talk back and
