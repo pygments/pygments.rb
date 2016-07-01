@@ -230,7 +230,7 @@ class PygmentsLexerClassTest < Test::Unit::TestCase
     assert_equal P::Lexer['Ruby'], P::Lexer.find_by_mimetype('text/x-ruby')
     assert_equal P::Lexer['JSON'], P::Lexer.find_by_mimetype('application/json')
     assert_equal P::Lexer['Python'], P::Lexer.find_by_mimetype('text/x-python')
-  end
+ end
 end
 
 
@@ -238,19 +238,19 @@ class PygmentsCssTest < Test::Unit::TestCase
   include Pygments
 
   def test_css
-    assert_match /^\.err \{/, P.css
+    assert_match(/^\.err \{/, P.css)
   end
 
   def test_css_prefix
-    assert_match /^\.highlight \.err \{/, P.css('.highlight')
+    assert_match(/^\.highlight \.err \{/, P.css('.highlight'))
   end
 
   def test_css_options
-    assert_match /^\.codeerr \{/, P.css(:classprefix => 'code')
+    assert_match(/^\.codeerr \{/, P.css(:classprefix => 'code'))
   end
 
   def test_css_prefix_and_options
-    assert_match /^\.mycode \.codeerr \{/, P.css('.mycode', :classprefix => 'code')
+    assert_match(/^\.mycode \.codeerr \{/, P.css('.mycode', :classprefix => 'code'))
   end
 
   def test_css_default
