@@ -4,21 +4,6 @@
 Using Pygments in various scenarios
 ===================================
 
-PyGtk
------
-
-Armin has written a piece of sample code that shows how to create a Gtk
-`TextBuffer` object containing Pygments-highlighted text.
-
-See the article here: http://lucumr.pocoo.org/cogitations/2007/05/30/pygments-gtk-rendering/
-
-Wordpress
----------
-
-He also has a snippet that shows how to use Pygments in WordPress:
-
-http://lucumr.pocoo.org/cogitations/2007/05/30/pygments-in-wordpress/
-
 Markdown
 --------
 
@@ -42,3 +27,14 @@ Bash completion
 
 The source distribution contains a file ``external/pygments.bashcomp`` that
 sets up completion for the ``pygmentize`` command in bash.
+
+Wrappers for other languages
+----------------------------
+
+These libraries provide Pygments highlighting for users of other languages
+than Python:
+
+* `pygments.rb <https://github.com/tmm1/pygments.rb>`_, a pygments wrapper for Ruby
+* `Clygments <https://github.com/bfontaine/clygments>`_, a pygments wrapper for
+  Clojure
+* `PHPygments <https://github.com/capynet/PHPygments>`_, a pygments wrapper for PHP

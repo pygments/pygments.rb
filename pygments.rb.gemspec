@@ -17,6 +17,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'yajl-ruby',   '~> 1.2'
   s.add_dependency 'posix-spawn', '~> 0.3.6'
   s.add_development_dependency 'rake-compiler', '~> 0.7.6'
+  s.add_development_dependency 'test-unit', '~> 3.0.0'
 
   # s.extensions = ['ext/extconf.rb']
   s.require_paths = ['lib']

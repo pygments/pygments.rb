@@ -5,7 +5,7 @@
 
     Formatter for LaTeX fancyvrb output.
 
-    :copyright: Copyright 2006-2014 by the Pygments team, see AUTHORS.
+    :copyright: Copyright 2006-2015 by the Pygments team, see AUTHORS.
     :license: BSD, see LICENSE for details.
 """
 
@@ -236,6 +236,13 @@ class LatexFormatter(Formatter):
         set. (default: ``''``).
 
         .. versionadded:: 2.0
+
+    `envname`
+        Allows you to pick an alternative environment name replacing Verbatim.
+        The alternate environment still has to support Verbatim's option syntax.
+        (default: ``'Verbatim'``).
+
+        .. versionadded:: 2.0
     """
     name = 'LaTeX'
     aliases = ['latex', 'tex']
@@ -254,15 +261,14 @@ class LatexFormatter(Formatter):
         self.texcomments = get_bool_opt(options, 'texcomments', False)
         self.mathescape = get_bool_opt(options, 'mathescape', False)
         self.escapeinside = options.get('escapeinside', '')
-
         if len(self.escapeinside) == 2:
             self.left = self.escapeinside[0]
             self.right = self.escapeinside[1]
         else:
             self.escapeinside = ''
+        self.envname = options.get('envname', u'Verbatim')
 
         self._create_stylesheet()
-
 
     def _create_stylesheet(self):
         t2n = self.ttype2name = {Token: ''}
@@ -271,7 +277,7 @@ class LatexFormatter(Formatter):
 
         def rgbcolor(col):
             if col:
-                return ','.join(['%.2f' %(int(col[i] + col[i + 1], 16) / 255.0)
+                return ','.join(['%.2f' % (int(col[i] + col[i + 1], 16) / 255.0)
                                  for i in (0, 2, 4)])
             else:
                 return '1,1,1'
@@ -331,7 +337,7 @@ class LatexFormatter(Formatter):
             realoutfile = outfile
             outfile = StringIO()
 
-        outfile.write(u'\\begin{Verbatim}[commandchars=\\\\\\{\\}')
+        outfile.write(u'\\begin{' + self.envname + u'}[commandchars=\\\\\\{\\}')
         if self.linenos:
             start, step = self.linenostart, self.linenostep
             outfile.write(u',numbers=left' +
@@ -354,7 +360,7 @@ class LatexFormatter(Formatter):
                         start += value[i]
 
                     value = value[len(start):]
-                    start = escape_tex(start, self.commandprefix)
+                    start = escape_tex(start, cp)
 
                     # ... but do not escape inside comment.
                     value = start + value
@@ -364,26 +370,26 @@ class LatexFormatter(Formatter):
                     in_math = False
                     for i, part in enumerate(parts):
                         if not in_math:
-                            parts[i] = escape_tex(part, self.commandprefix)
+                            parts[i] = escape_tex(part, cp)
                         in_math = not in_math
                     value = '$'.join(parts)
                 elif self.escapeinside:
                     text = value
                     value = ''
-                    while len(text) > 0:
-                        a,sep1,text = text.partition(self.left)
-                        if len(sep1) > 0:
-                            b,sep2,text = text.partition(self.right)
-                            if len(sep2) > 0:
-                                value += escape_tex(a, self.commandprefix) + b
+                    while text:
+                        a, sep1, text = text.partition(self.left)
+                        if sep1:
+                            b, sep2, text = text.partition(self.right)
+                            if sep2:
+                                value += escape_tex(a, cp) + b
                             else:
-                                value += escape_tex(a + sep1 + b, self.commandprefix)
+                                value += escape_tex(a + sep1 + b, cp)
                         else:
-                            value = value + escape_tex(a, self.commandprefix)
+                            value += escape_tex(a, cp)
                 else:
-                    value = escape_tex(value, self.commandprefix)
+                    value = escape_tex(value, cp)
             elif ttype not in Token.Escape:
-                value = escape_tex(value, self.commandprefix)
+                value = escape_tex(value, cp)
             styles = []
             while ttype is not Token:
                 try:
@@ -404,21 +410,27 @@ class LatexFormatter(Formatter):
             else:
                 outfile.write(value)
 
-        outfile.write(u'\\end{Verbatim}\n')
+        outfile.write(u'\\end{' + self.envname + u'}\n')
 
         if self.full:
+            encoding = self.encoding or 'utf8'
+            # map known existings encodings from LaTeX distribution
+            encoding = {
+                'utf_8': 'utf8',
+                'latin_1': 'latin1',
+                'iso_8859_1': 'latin1',
+            }.get(encoding.replace('-', '_'), encoding)
             realoutfile.write(DOC_TEMPLATE %
                 dict(docclass  = self.docclass,
                      preamble  = self.preamble,
                      title     = self.title,
-                     encoding  = self.encoding or 'latin1',
+                     encoding  = encoding,
                      styledefs = self.get_style_defs(),
                      code      = outfile.getvalue()))
 
 
 class LatexEmbeddedLexer(Lexer):
-    r"""
-
+    """
     This lexer takes one lexer as argument, the lexer for the language
     being formatted, and the left and right delimiters for escaped text.
 
@@ -436,6 +448,7 @@ class LatexEmbeddedLexer(Lexer):
 
     def get_tokens_unprocessed(self, text):
         buf = ''
+        idx = 0
         for i, t, v in self.lang.get_tokens_unprocessed(text):
             if t in Token.Comment or t in Token.String:
                 if buf:
@@ -467,4 +480,3 @@ class LatexEmbeddedLexer(Lexer):
                     yield index, Token.Error, sep1
                     index += len(sep1)
                     text = b
-

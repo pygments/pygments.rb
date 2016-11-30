@@ -3,7 +3,7 @@
     Pygments HTML formatter tests
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    :copyright: Copyright 2006-2014 by the Pygments team, see AUTHORS.
+    :copyright: Copyright 2006-2015 by the Pygments team, see AUTHORS.
     :license: BSD, see LICENSE for details.
 """
 
@@ -25,11 +25,8 @@ import support
 
 TESTFILE, TESTDIR = support.location(__file__)
 
-fp = io.open(TESTFILE, encoding='utf-8')
-try:
+with io.open(TESTFILE, encoding='utf-8') as fp:
     tokensource = list(PythonLexer().get_tokens(fp.read()))
-finally:
-    fp.close()
 
 
 class HtmlFormatterTest(unittest.TestCase):
@@ -71,14 +68,31 @@ class HtmlFormatterTest(unittest.TestCase):
             pass
 
     def test_all_options(self):
-        for optdict in [dict(nowrap=True),
-                        dict(linenos=True),
-                        dict(linenos=True, full=True),
-                        dict(linenos=True, full=True, noclasses=True)]:
-
+        def check(optdict):
             outfile = StringIO()
             fmt = HtmlFormatter(**optdict)
             fmt.format(tokensource, outfile)
+
+        for optdict in [
+            dict(nowrap=True),
+            dict(linenos=True, full=True),
+            dict(linenos=True, linespans='L'),
+            dict(hl_lines=[1, 5, 10, 'xxx']),
+            dict(hl_lines=[1, 5, 10], noclasses=True),
+        ]:
+            check(optdict)
+
+        for linenos in [False, 'table', 'inline']:
+            for noclasses in [False, True]:
+                for linenospecial in [0, 5]:
+                    for anchorlinenos in [False, True]:
+                        optdict = dict(
+                            linenos=linenos,
+                            noclasses=noclasses,
+                            linenospecial=linenospecial,
+                            anchorlinenos=anchorlinenos,
+                        )
+                        check(optdict)
 
     def test_linenos(self):
         optdict = dict(linenos=True)
@@ -102,7 +116,7 @@ class HtmlFormatterTest(unittest.TestCase):
         fmt = HtmlFormatter(**optdict)
         fmt.format(tokensource, outfile)
         html = outfile.getvalue()
-        self.assertTrue(re.search("<pre><a name=\"foo-1\">", html))
+        self.assertTrue(re.search("<pre><span></span><a name=\"foo-1\">", html))
 
     def test_lineanchors_with_startnum(self):
         optdict = dict(lineanchors="foo", linenostart=5)
@@ -110,7 +124,7 @@ class HtmlFormatterTest(unittest.TestCase):
         fmt = HtmlFormatter(**optdict)
         fmt.format(tokensource, outfile)
         html = outfile.getvalue()
-        self.assertTrue(re.search("<pre><a name=\"foo-5\">", html))
+        self.assertTrue(re.search("<pre><span></span><a name=\"foo-5\">", html))
 
     def test_valid_output(self):
         # test all available wrappers
@@ -178,3 +192,11 @@ class HtmlFormatterTest(unittest.TestCase):
             fmt.format(tokensource, outfile)
             self.assertTrue('<a href="test_html_formatter.py#L-165">test_ctags</a>'
                             in outfile.getvalue())
+
+    def test_filename(self):
+        optdict = dict(filename="test.py")
+        outfile = StringIO()
+        fmt = HtmlFormatter(**optdict)
+        fmt.format(tokensource, outfile)
+        html = outfile.getvalue()
+        self.assertTrue(re.search("<span class=\"filename\">test.py</span><pre>", html))

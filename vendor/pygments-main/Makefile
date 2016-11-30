@@ -4,7 +4,7 @@
 #
 # Combines scripts for common tasks.
 #
-# :copyright: Copyright 2006-2014 by the Pygments team, see AUTHORS.
+# :copyright: Copyright 2006-2015 by the Pygments team, see AUTHORS.
 # :license: BSD, see LICENSE for details.
 #
 
@@ -19,9 +19,9 @@ all: clean-pyc check test
 
 check:
 	@$(PYTHON) scripts/detect_missing_analyse_text.py || true
+	@pyflakes pygments | grep -v 'but unused' || true
 	@$(PYTHON) scripts/check_sources.py -i build -i dist -i pygments/lexers/_mapping.py \
-		   -i docs/build -i pygments/formatters/_mapping.py -i pygments/unistring.py \
-		   -i pygments/lexers/_vimbuiltins.py
+		   -i docs/build -i pygments/formatters/_mapping.py -i pygments/unistring.py
 
 clean: clean-pyc
 	-rm -rf build
@@ -40,8 +40,8 @@ docs:
 	make -C doc html
 
 mapfiles:
-	(cd pygments/lexers; $(PYTHON) _mapping.py)
 	(cd pygments/formatters; $(PYTHON) _mapping.py)
+	(cd pygments/lexers; $(PYTHON) _mapping.py)
 
 pylint:
 	@pylint --rcfile scripts/pylintrc pygments
@@ -50,7 +50,16 @@ reindent:
 	@$(PYTHON) scripts/reindent.py -r -B .
 
 test:
-	@$(PYTHON) tests/run.py $(TEST)
+	@$(PYTHON) tests/run.py -d $(TEST)
 
 test-coverage:
-	@$(PYTHON) tests/run.py -C $(TEST)
+	@$(PYTHON) tests/run.py -d --with-coverage --cover-package=pygments --cover-erase $(TEST)
+
+test-examplefiles:
+	nosetests tests/test_examplefiles.py
+
+tox-test:
+	@tox -- $(TEST)
+
+tox-test-coverage:
+	@tox -- --with-coverage --cover-package=pygments --cover-erase $(TEST)
