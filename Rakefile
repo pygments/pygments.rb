@@ -62,5 +62,14 @@ namespace :vendor do
     FileUtils.cd(LEXERS_DIR) { sh "python _mapping.py" }
   end
 
-  task :update => [:clobber, 'vendor/pygments-main', :load_lexers]
+  # Load all the custom formatters in the `vendor/custom_formatters` folder
+  # and stick them in our custom Pygments vendor
+  task :load_formatters do
+    FORMATTERS_DIR = 'vendor/pygments-main/pygments/formatters'
+    formatters = FileList['vendor/custom_formatters/*.py']
+    formatters.each { |f| FileUtils.copy f, FORMATTERS_DIR }
+    FileUtils.cd(FORMATTERS_DIR) { sh "python _mapping.py" }
+  end
+
+  task :update => [:clobber, 'vendor/pygments-main', :load_lexers, :load_formatters]
 end

@@ -1,0 +1,171 @@
+# -*- coding: utf-8 -*-
+"""
+    pygments.formatters.gitlab
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    GitLab specific formatter for HTML output.
+    Based on the standard HTML formatter.
+
+    :copyright: Copyright 2012 by the GitLab team (http://www.gitlab.org).
+    :license: BSD, see LICENSE for details.
+"""
+
+import os
+import sys
+import StringIO
+
+from pygments.formatter import Formatter
+from pygments.token import Token, Text, STANDARD_TYPES
+from pygments.util import get_bool_opt, get_int_opt
+
+
+__all__ = ['GitlabFormatter']
+
+
+_escape_html_table = {
+    ord('&'): u'&amp;',
+    ord('<'): u'&lt;',
+    ord('>'): u'&gt;',
+    ord('"'): u'&quot;',
+    ord("'"): u'&#39;',
+}
+
+def escape_html(text, table=_escape_html_table):
+    """Escape &, <, > as well as single and double quotes for HTML."""
+    return text.translate(table)
+
+
+def _get_ttype_class(ttype):
+    fname = STANDARD_TYPES.get(ttype)
+    if fname:
+        return fname
+    aname = ''
+    while fname is None:
+        aname = '-' + ttype[-1] + aname
+        ttype = ttype.parent
+        fname = STANDARD_TYPES.get(ttype)
+    return fname + aname
+
+
+class GitlabFormatter(Formatter):
+    r"""
+    GitLab specific formatter for HTML output.
+
+    Additional options accepted:
+
+    `show_line_numbers`
+        Determines whether the line number column should be shown (default:
+        ``True``).
+
+    `first_line_number`
+        The line number for the first line (default: ``1``).
+    """
+
+    name = 'GitLab'
+    aliases = ['gitlab']
+    filenames = []
+
+    def __init__(self, **options):
+        Formatter.__init__(self, **options)
+        self.show_line_numbers = get_bool_opt(options, 'show_line_numbers', True)
+        self.first_line_number = abs(get_int_opt(options, 'first_line_number', 1))
+
+    def _wrap_table(self, inner):
+        """
+        Wrap the whole thing into a table and add line numbers
+        """
+        dummyoutfile = StringIO.StringIO()
+        lncount = 0
+        for line in inner:
+            lncount += 1
+            dummyoutfile.write(line)
+
+        sln = self.show_line_numbers
+        if sln:
+          fl = self.first_line_number
+          mw = len(str(lncount + fl - 1))
+
+          lines = []
+          for i in range(fl, fl+lncount):
+              lines.append('<a id="L%d" href="#L%d" rel="#L%d">' % (i, i, i) +
+                            '<i class="icon-link"></i> %*d' % (mw, i) +
+                            '</a>')
+          ls = '\n'.join(lines)
+
+        yield '<table class="lines"><tr>'
+        if sln:
+          yield '<td><pre class="line_numbers">' + ls + '</pre></td>'
+        yield '<td><div class="highlight"><pre>'
+        yield dummyoutfile.getvalue()
+        yield '</pre></div></td></tr></table>'
+
+    def _wrap_code_lines(self, inner):
+        """
+        Wrap each line in a <div class="line">
+        """
+        # subtract 1 since we have to increment i *before* yielding
+        i = self.first_line_number - 1
+
+        for line in inner:
+            i += 1
+            yield '<div id="LC%d" class="line">%s</div>' % (i, line)
+
+    def _format_code_lines(self, tokensource):
+        """
+        Just format the tokens, without any wrapping tags.
+        Yield individual lines.
+        """
+        # for <span style=""> lookup only
+        escape_table = _escape_html_table
+
+        lspan = ''
+        line = ''
+        for ttype, value in tokensource:
+            cls = _get_ttype_class(ttype)
+            cspan = cls and '<span class="%s">' % cls or ''
+
+            parts = escape_html(value).split('\n')
+
+            # for all but the last line
+            for part in parts[:-1]:
+                if line:
+                    if lspan != cspan:
+                        line += (lspan and '</span>') + cspan + part + \
+                                (cspan and '</span>')
+                    else: # both are the same
+                        line += part + (lspan and '</span>')
+                    yield line
+                    line = ''
+                elif part:
+                    yield cspan + part + (cspan and '</span>')
+                else:
+                    yield '<br/>'
+            # for the last line
+            if line and parts[-1]:
+                if lspan != cspan:
+                    line += (lspan and '</span>') + cspan + parts[-1]
+                    lspan = cspan
+                else:
+                    line += parts[-1]
+            elif parts[-1]:
+                line = cspan + parts[-1]
+                lspan = cspan
+            # else we neither have to open a new span nor set lspan
+
+        if line:
+            yield line + (lspan and '</span>')
+
+    def format_unencoded(self, tokensource, outfile):
+        """
+        The formatting process uses several nested generators; which of
+        them are used is determined by the user's options.
+
+        Each generator should take at least one argument, ``inner``,
+        and wrap the pieces of text generated by this.
+        """
+        source = self._format_code_lines(tokensource)
+        source = self._wrap_code_lines(source)
+        source = self._wrap_table(source)
+
+        for piece in source:
+            outfile.write(piece)
