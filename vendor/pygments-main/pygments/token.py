@@ -181,6 +181,7 @@ STANDARD_TYPES = {
     Comment:                       'c',
     Comment.Multiline:             'cm',
     Comment.Preproc:               'cp',
+    Comment.PreprocFile:           'cpf',
     Comment.Single:                'c1',
     Comment.Special:               'cs',
 
