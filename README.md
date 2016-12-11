@@ -1,15 +1,15 @@
-# pygments.rb
+# pygments.rb [![CircleCI](https://circleci.com/gh/tmm1/pygments.rb.svg?style=svg)](https://circleci.com/gh/tmm1/pygments.rb) [![Gem Version](https://badge.fury.io/rb/pygments.rb.svg)](https://badge.fury.io/rb/pygments.rb)
 
 A Ruby wrapper for the Python [pygments syntax highlighter](http://pygments.org/).
 
-pygments.rb works by talking over a simple pipe to a long-lived 
+pygments.rb works by talking over a simple pipe to a long-lived
 Python child process. This library replaces [github/albino](https://github.com/github/albino),
 as well as a version of pygments.rb that used an embedded Python
-interpreter. 
+interpreter.
 
-Each Ruby process that runs has its own 'personal Python'; 
-for example, 4 Unicorn workers will have one Python process each. 
-If a Python process dies, a new one will be spawned on the next 
+Each Ruby process that runs has its own 'personal Python';
+for example, 4 Unicorn workers will have one Python process each.
+If a Python process dies, a new one will be spawned on the next
 pygments.rb request.
 
 ## system requirements
