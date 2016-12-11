@@ -17,6 +17,20 @@ pygments.rb request.
 - Python 2.5, Python 2.6, or Python 2.7. You can always use Python 2.x from a `virtualenv` if
   your default Python install is 3.x.
 
+## installation
+
+Get it as a gem:
+
+```
+gem install pygments.rb
+```
+
+Or, if you're using bundler, add this to your Gemfile:
+
+```ruby
+gem 'pygments.rb'
+```
+
 ## usage
 
 ``` ruby 
