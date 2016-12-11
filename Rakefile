@@ -9,7 +9,7 @@ task :default => :test
 
 GEMSPEC = eval(File.read('pygments.rb.gemspec'))
 
-require 'rubygems/package_task' 
+require 'rubygems/package_task'
 
 # ==========================================================
 # Testing
@@ -47,6 +47,7 @@ namespace :vendor do
     sh "hg clone https://bitbucket.org/birkenfeld/pygments-main #{f.name}"
     sh "hg --repository #{f.name} identify --id > #{f.name}/REVISION"
     rm_rf Dir["#{f.name}/.hg*"]
+    rm_rf Dir["#{f.name}/tests"]
   end
 
   task :clobber do
