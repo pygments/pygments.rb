@@ -47,7 +47,7 @@ module Pygments
       if is_windows && which('py')
         return 'py -2'
       end
-      return which('python2') || 'python'
+      return which('python2') || which('python25') || which('python26') || which('python27') || 'python'
     end
 
     # Cross platform which command
