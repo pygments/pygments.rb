@@ -3,7 +3,7 @@
     Pygments string assert utility tests
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    :copyright: Copyright 2006-2014 by the Pygments team, see AUTHORS.
+    :copyright: Copyright 2006-2015 by the Pygments team, see AUTHORS.
     :license: BSD, see LICENSE for details.
 """
 
@@ -17,23 +17,19 @@ class TestStringTests(StringTests, unittest.TestCase):
 
     # @unittest.expectedFailure not supported by nose
     def test_startswith_incorrect(self):
-        with self.assertRaises(AssertionError):
-            self.assertStartsWith("AAA", "B")
+        self.assertRaises(AssertionError, self.assertStartsWith, "AAA", "B")
 
     # @unittest.expectedFailure not supported by nose
     def test_startswith_short(self):
-        with self.assertRaises(AssertionError):
-            self.assertStartsWith("A", "AA")
+        self.assertRaises(AssertionError, self.assertStartsWith, "A", "AA")
 
     def test_endswith_correct(self):
         self.assertEndsWith("AAA", "A")
 
     # @unittest.expectedFailure not supported by nose
     def test_endswith_incorrect(self):
-        with self.assertRaises(AssertionError):
-            self.assertEndsWith("AAA", "B")
+        self.assertRaises(AssertionError, self.assertEndsWith, "AAA", "B")
 
     # @unittest.expectedFailure not supported by nose
     def test_endswith_short(self):
-        with self.assertRaises(AssertionError):
-            self.assertEndsWith("A", "AA")
+        self.assertRaises(AssertionError, self.assertEndsWith, "A", "AA")

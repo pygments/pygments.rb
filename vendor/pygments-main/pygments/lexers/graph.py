@@ -5,15 +5,15 @@
 
     Lexers for graph query languages.
 
-    :copyright: Copyright 2006-2014 by the Pygments team, see AUTHORS.
+    :copyright: Copyright 2006-2015 by the Pygments team, see AUTHORS.
     :license: BSD, see LICENSE for details.
 """
 
 import re
 
 from pygments.lexer import RegexLexer, include, bygroups, using, this
-from pygments.token import Keyword, Punctuation, Text, Comment, Operator, Name,\
-    String, Number, Generic, Whitespace
+from pygments.token import Keyword, Punctuation, Comment, Operator, Name,\
+    String, Number, Whitespace
 
 
 __all__ = ['CypherLexer']
@@ -30,7 +30,7 @@ class CypherLexer(RegexLexer):
     """
     name = 'Cypher'
     aliases = ['cypher']
-    filenames = ['*.cyp','*.cypher']
+    filenames = ['*.cyp', '*.cypher']
 
     flags = re.MULTILINE | re.IGNORECASE
 
@@ -43,7 +43,7 @@ class CypherLexer(RegexLexer):
             include('strings'),
             include('whitespace'),
             include('barewords'),
-            ],
+        ],
         'comment': [
             (r'^.*//.*\n', Comment.Single),
         ],
@@ -61,12 +61,13 @@ class CypherLexer(RegexLexer):
         'relations': [
             (r'(-\[)(.*?)(\]->)', bygroups(Operator, using(this), Operator)),
             (r'(<-\[)(.*?)(\]-)', bygroups(Operator, using(this), Operator)),
+            (r'(-\[)(.*?)(\]-)', bygroups(Operator, using(this), Operator)),
             (r'-->|<--|\[|\]', Operator),
             (r'<|>|<>|=|<=|=>|\(|\)|\||:|,|;', Punctuation),
             (r'[.*{}]', Punctuation),
         ],
         'strings': [
-            (r'"(?:\\[tbnrf\'\"\\]|[^\\"])*"', String),
+            (r'"(?:\\[tbnrf\'"\\]|[^\\"])*"', String),
             (r'`(?:``|[^`])+`', Name.Variable),
         ],
         'whitespace': [
@@ -77,5 +78,3 @@ class CypherLexer(RegexLexer):
             (r'\d+', Number),
         ],
     }
-
-

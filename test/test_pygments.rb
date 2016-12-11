@@ -13,26 +13,26 @@ class PygmentsHighlightTest < Test::Unit::TestCase
 
   def test_highlight_defaults_to_html
     code = P.highlight(RUBY_CODE)
-    assert_match '<span class="c1">#!/usr/bin/ruby</span>', code
+    assert_match '<span class="ch">#!/usr/bin/ruby</span>', code
     assert_equal '<div class', code[0..9]
   end
 
   def test_full_html_highlight
     code = P.highlight(RUBY_CODE)
-    assert_match '<span class="c1">#!/usr/bin/ruby</span>', code
-    assert_equal "<div class=\"highlight\"><pre><span class=\"c1\">#!/usr/bin/ruby</span>\n<span class=\"nb\">puts</span> <span class=\"s1\">&#39;foo&#39;</span>\n</pre></div>", code
+    assert_match '<span class="ch">#!/usr/bin/ruby</span>', code
+    assert_equal "<div class=\"highlight\"><pre><span></span><span class=\"ch\">#!/usr/bin/ruby</span>\n<span class=\"nb\">puts</span> <span class=\"s1\">&#39;foo&#39;</span>\n</pre></div>", code
   end
 
   def test_full_table_highlight
     code = P.highlight(RUBY_CODE, :options => {:linenos => true})
-    assert_match '<span class="c1">#!/usr/bin/ruby</span>', code
-    assert_equal "<table class=\"highlighttable\"><tr><td class=\"linenos\"><div class=\"linenodiv\"><pre>1\n2</pre></div></td><td class=\"code\"><div class=\"highlight\"><pre><span class=\"c1\">#!/usr/bin/ruby</span>\n<span class=\"nb\">puts</span> <span class=\"s1\">&#39;foo&#39;</span>\n</pre></div>\n</td></tr></table>", code
+    assert_match '<span class="ch">#!/usr/bin/ruby</span>', code
+    assert_equal "<table class=\"highlighttable\"><tr><td class=\"linenos\"><div class=\"linenodiv\"><pre>1\n2</pre></div></td><td class=\"code\"><div class=\"highlight\"><pre><span></span><span class=\"ch\">#!/usr/bin/ruby</span>\n<span class=\"nb\">puts</span> <span class=\"s1\">&#39;foo&#39;</span>\n</pre></div>\n</td></tr></table>", code
   end
 
   def test_highlight_works_with_larger_files
     code = P.highlight(REDIS_CODE)
     assert_match 'used_memory_peak_human', code
-    assert_equal 455203, code.bytesize.to_i
+    assert_equal 458511, code.bytesize.to_i
   end
 
   def test_returns_nil_on_timeout
@@ -59,7 +59,7 @@ class PygmentsHighlightTest < Test::Unit::TestCase
   def test_highlight_works_on_utf8_all_chars_automatically
     code = P.highlight('def foo: # ø', :lexer => 'py')
 
-    assert_equal '<div class="highlight"><pre><span clas', code[0,38]
+    assert_equal "<div class=\"highlight\"><pre><span></sp", code[0,38]
   end
 
   def test_highlight_works_with_multiple_utf8
@@ -89,22 +89,22 @@ class PygmentsHighlightTest < Test::Unit::TestCase
 
   def test_highlight_works_with_single_character_input
     code = P.highlight("a")
-    assert_match 'a</span>', code
+    assert_match "a\n</pre>", code
   end
 
   def test_highlight_works_with_trailing_newline
     code = P.highlight(RUBY_CODE_TRAILING_NEWLINE)
-    assert_match '<span class="c1">#!/usr/bin/ruby</span>', code
+    assert_match '<span class="ch">#!/usr/bin/ruby</span>', code
   end
 
   def test_highlight_works_with_multiple_newlines
     code = P.highlight(RUBY_CODE_TRAILING_NEWLINE + "derp\n\n")
-    assert_match '<span class="c1">#!/usr/bin/ruby</span>', code
+    assert_match '<span class="ch">#!/usr/bin/ruby</span>', code
   end
 
   def test_highlight_works_with_trailing_cr
     code = P.highlight(RUBY_CODE_TRAILING_NEWLINE + "\r")
-    assert_match '<span class="c1">#!/usr/bin/ruby</span>', code
+    assert_match '<span class="ch">#!/usr/bin/ruby</span>', code
   end
 
   def test_highlight_still_works_with_invalid_code

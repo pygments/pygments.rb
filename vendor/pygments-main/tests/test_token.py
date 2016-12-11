@@ -3,10 +3,11 @@
     Test suite for the token module
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    :copyright: Copyright 2006-2014 by the Pygments team, see AUTHORS.
+    :copyright: Copyright 2006-2015 by the Pygments team, see AUTHORS.
     :license: BSD, see LICENSE for details.
 """
 
+import copy
 import unittest
 
 from pygments import token
@@ -44,3 +45,10 @@ class TokenTest(unittest.TestCase):
         for k, v in t.items():
             if len(v) > 1:
                 self.fail("%r has more than one key: %r" % (k, v))
+
+    def test_copying(self):
+        # Token instances are supposed to be singletons, so copying or even
+        # deepcopying should return themselves
+        t = token.String
+        self.assertIs(t, copy.copy(t))
+        self.assertIs(t, copy.deepcopy(t))

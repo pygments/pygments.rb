@@ -26,12 +26,15 @@ Programming languages
 * Common Lisp
 * Coq
 * Cryptol (incl. Literate Cryptol)
+* `Crystal <http://crystal-lang.org>`_
 * `Cython <http://cython.org>`_
-* `D <http://digitalmars.com/d>`_
+* `D <http://dlang.org>`_
 * Dart
 * Delphi
 * Dylan
+* `Elm <http://elm-lang.org/>`_
 * Erlang
+* `Ezhil <http://ezhillang.org>`_ Ezhil - A Tamil programming language
 * Factor
 * Fancy
 * Fortran
@@ -45,6 +48,7 @@ Programming languages
 * Io
 * Java
 * JavaScript
+* Lasso
 * LLVM
 * Logtalk
 * `Lua <http://www.lua.org>`_
@@ -85,7 +89,6 @@ Programming languages
 * Visual FoxPro
 * XQuery
 * Zephir
-  </ul>
 
 Template languages
 ------------------
@@ -97,8 +100,8 @@ Template languages
 * `Genshi <http://genshi.edgewall.org>`_ (the Trac template language)
 * JSP (Java Server Pages)
 * `Myghty <http://www.myghty.org>`_ (the HTML::Mason based framework)
-* `Mako <http://www.makotemplates.org/>`_ (the Myghty successor)
-* `Smarty <http://smarty.php.net>`_ templates (PHP templating)
+* `Mako <http://www.makotemplates.org>`_ (the Myghty successor)
+* `Smarty <http://www.smarty.net>`_ templates (PHP templating)
 * Tea
 
 Other markup
@@ -143,9 +146,9 @@ Other markup
 ... that's all?
 ---------------
 
-Well, why not write your own? Contributing to Pygments is easy and fun.  Look
-:doc:`here <docs/lexerdevelopment>` for the docs on lexer development and
-:ref:`here <contribute>` for contact details.
+Well, why not write your own? Contributing to Pygments is easy and fun.  Take a look at the
+:doc:`docs on lexer development <docs/lexerdevelopment>` and
+:ref:`contact details <contribute>`.
 
 Note: the languages listed here are supported in the development version. The
 latest release may lack a few of them.

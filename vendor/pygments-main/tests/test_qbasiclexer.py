@@ -3,7 +3,7 @@
     Tests for QBasic
     ~~~~~~~~~~~~~~~~
 
-    :copyright: Copyright 2006-2014 by the Pygments team, see AUTHORS.
+    :copyright: Copyright 2006-2015 by the Pygments team, see AUTHORS.
     :license: BSD, see LICENSE for details.
 """
 
@@ -12,7 +12,8 @@ import os
 import unittest
 
 from pygments.token import Token
-from pygments.lexers.qbasic import QBasicLexer
+from pygments.lexers.basic import QBasicLexer
+
 
 class QBasicTest(unittest.TestCase):
     def setUp(self):
@@ -40,4 +41,3 @@ class QBasicTest(unittest.TestCase):
             (Token.Text, u'\n'),
         ]
         self.assertEqual(expected, list(self.lexer.get_tokens(fragment)))
-

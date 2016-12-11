@@ -27,11 +27,11 @@ Currently, **all lexers** support these options:
 `encoding`
     If given, must be an encoding name (such as ``"utf-8"``). This encoding
     will be used to convert the input string to Unicode (if it is not already
-    a Unicode string). The default is ``"latin1"``.
+    a Unicode string). The default is ``"guess"``.
 
     If this option is set to ``"guess"``, a simple UTF-8 vs. Latin-1
     detection is used, if it is set to ``"chardet"``, the
-    `chardet library <http://chardet.feedparser.org/>`__ is used to
+    `chardet library <https://chardet.github.io/>`_ is used to
     guess the encoding of the input.
 
     .. versionadded:: 0.6

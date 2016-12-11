@@ -3,16 +3,15 @@
     Tests for other lexers
     ~~~~~~~~~~~~~~~~~~~~~~
 
-    :copyright: Copyright 2006-2014 by the Pygments team, see AUTHORS.
+    :copyright: Copyright 2006-2015 by the Pygments team, see AUTHORS.
     :license: BSD, see LICENSE for details.
 """
-
 import glob
 import os
 import unittest
 
 from pygments.lexers import guess_lexer
-from pygments.lexers.other import RexxLexer
+from pygments.lexers.scripting import EasytrieveLexer, JclLexer, RexxLexer
 
 
 def _exampleFilePath(filename):
@@ -26,32 +25,45 @@ class AnalyseTextTest(unittest.TestCase):
         for pattern in lexer.filenames:
             exampleFilesPattern = _exampleFilePath(pattern)
             for exampleFilePath in glob.glob(exampleFilesPattern):
-                exampleFile = open(exampleFilePath, 'rb')
-                try:
-                    text = exampleFile.read().decode('utf-8')
-                    probability = lexer.analyse_text(text)
-                    self.assertTrue(probability > 0,
-                        '%s must recognize %r' % (
-                        lexer.name, exampleFilePath))
-                    guessedLexer = guess_lexer(text)
-                    self.assertEqual(guessedLexer.name, lexer.name)
-                finally:
-                    exampleFile.close()
+                with open(exampleFilePath, 'rb') as fp:
+                    text = fp.read().decode('utf-8')
+                probability = lexer.analyse_text(text)
+                self.assertTrue(probability > 0,
+                                '%s must recognize %r' % (
+                                    lexer.name, exampleFilePath))
+                guessedLexer = guess_lexer(text)
+                self.assertEqual(guessedLexer.name, lexer.name)
 
     def testCanRecognizeAndGuessExampleFiles(self):
-        self._testCanRecognizeAndGuessExampleFiles(RexxLexer)
+        LEXERS_TO_TEST = [
+            EasytrieveLexer,
+            JclLexer,
+            RexxLexer,
+        ]
+        for lexerToTest in LEXERS_TO_TEST:
+            self._testCanRecognizeAndGuessExampleFiles(lexerToTest)
+
+
+class EasyTrieveLexerTest(unittest.TestCase):
+    def testCanGuessFromText(self):
+        self.assertTrue(EasytrieveLexer.analyse_text('MACRO'))
+        self.assertTrue(EasytrieveLexer.analyse_text('\nMACRO'))
+        self.assertTrue(EasytrieveLexer.analyse_text(' \nMACRO'))
+        self.assertTrue(EasytrieveLexer.analyse_text(' \n MACRO'))
+        self.assertTrue(EasytrieveLexer.analyse_text('*\nMACRO'))
+        self.assertTrue(EasytrieveLexer.analyse_text(
+            '*\n *\n\n \n*\n MACRO'))
 
 
 class RexxLexerTest(unittest.TestCase):
     def testCanGuessFromText(self):
-        self.assertAlmostEqual(0.01,
-            RexxLexer.analyse_text('/* */'))
+        self.assertAlmostEqual(0.01, RexxLexer.analyse_text('/* */'))
         self.assertAlmostEqual(1.0,
-            RexxLexer.analyse_text('''/* Rexx */
+                               RexxLexer.analyse_text('''/* Rexx */
                 say "hello world"'''))
         val = RexxLexer.analyse_text('/* */\n'
-                'hello:pRoceduRe\n'
-                '  say "hello world"')
+                                     'hello:pRoceduRe\n'
+                                     '  say "hello world"')
         self.assertTrue(val > 0.5, val)
         val = RexxLexer.analyse_text('''/* */
                 if 1 > 0 then do
