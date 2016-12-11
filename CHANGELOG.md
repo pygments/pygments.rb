@@ -1,6 +1,17 @@
 changelog
 ===========
 
+Version 1.0.0 (2016/12/11)
+-----------------------------
+
+* Upgrade bundled pygments to 2.2.0-HEAD [#167](https://github.com/tmm1/pygments.rb/pull/167)
+  * This includes **incompatible changes* because of upgrade of pygments.
+    See http://pygments.org/ for details.
+* Relax yajl-ruby dependency to "~> 1.2" [#164](https://github.com/tmm1/pygments.rb/pull/164)
+* Python binary can be configured by `PYTMENTS_RB_PYTHON` env [#168](https://github.com/tmm1/pygments.rb/pull/168)
+* Improved error messages when python binary is missing [#158](https://github.com/tmm1/pygments.rb/pull/158)
+
+
 Version 0.5.4 (Nov 3, 2013)
 -----------------------------
 
