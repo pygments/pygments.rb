@@ -5,13 +5,13 @@
 
     Lexers for Inferno os and all the related stuff.
 
-    :copyright: Copyright 2006-2014 by the Pygments team, see AUTHORS.
+    :copyright: Copyright 2006-2015 by the Pygments team, see AUTHORS.
     :license: BSD, see LICENSE for details.
 """
 
 import re
 
-from pygments.lexer import RegexLexer, include, bygroups
+from pygments.lexer import RegexLexer, include, bygroups, default
 from pygments.token import Punctuation, Text, Comment, Operator, Keyword, \
     Name, String, Number
 
@@ -74,7 +74,7 @@ class LimboLexer(RegexLexer):
         ],
         'root': [
             include('whitespace'),
-            ('', Text, 'statement'),
+            default('statement'),
         ],
     }
 

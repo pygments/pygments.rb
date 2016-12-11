@@ -5,7 +5,7 @@
 
     Pygments lexers for Dalvik VM-related languages.
 
-    :copyright: Copyright 2006-2014 by the Pygments team, see AUTHORS.
+    :copyright: Copyright 2006-2015 by the Pygments team, see AUTHORS.
     :license: BSD, see LICENSE for details.
 """
 
@@ -13,7 +13,7 @@ import re
 
 from pygments.lexer import RegexLexer, include, bygroups
 from pygments.token import Keyword, Text, Comment, Name, String, Number, \
-                           Punctuation
+    Punctuation
 
 __all__ = ['SmaliLexer']
 
@@ -65,8 +65,8 @@ class SmaliLexer(RegexLexer):
             (r'\s+', Text),
         ],
         'instruction': [
-            (r'\b[vp]\d+\b', Name.Builtin), # registers
-            (r'\b[a-z][A-Za-z0-9/-]+\s+', Text), # instructions
+            (r'\b[vp]\d+\b', Name.Builtin),  # registers
+            (r'\b[a-z][A-Za-z0-9/-]+\s+', Text),  # instructions
         ],
         'literal': [
             (r'".*"', String),
@@ -79,7 +79,7 @@ class SmaliLexer(RegexLexer):
              bygroups(Punctuation, Name.Variable, Punctuation)),
         ],
         'method': [
-            (r'<(?:cl)?init>', Name.Function), # constructor
+            (r'<(?:cl)?init>', Name.Function),  # constructor
             (r'(\$?\b)([\w$]*)(\()',
              bygroups(Punctuation, Name.Function, Punctuation)),
         ],
@@ -95,7 +95,7 @@ class SmaliLexer(RegexLexer):
         ],
         'punctuation': [
             (r'->', Punctuation),
-            (r'[{},\(\):=\.-]', Punctuation),
+            (r'[{},():=.-]', Punctuation),
         ],
         'type': [
             (r'[ZBSCIJFDV\[]+', Keyword.Type),

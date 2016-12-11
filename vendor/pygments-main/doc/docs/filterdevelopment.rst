@@ -8,7 +8,7 @@ Write your own filter
 
 Writing own filters is very easy. All you have to do is to subclass
 the `Filter` class and override the `filter` method. Additionally a
-filter is instanciated with some keyword arguments you can use to
+filter is instantiated with some keyword arguments you can use to
 adjust the behavior of your filter.
 
 
@@ -58,7 +58,7 @@ You can also use the `simplefilter` decorator from the `pygments.filter` module:
 
 
     @simplefilter
-    def uncolor(lexer, stream, options):
+    def uncolor(self, lexer, stream, options):
         class_too = get_bool_opt(options, 'classtoo')
         for ttype, value in stream:
             if ttype is Name.Function or (class_too and
@@ -67,4 +67,5 @@ You can also use the `simplefilter` decorator from the `pygments.filter` module:
             yield ttype, value
 
 The decorator automatically subclasses an internal filter class and uses the
-decorated function for filtering.
+decorated function as a method for filtering.  (That's why there is a `self`
+argument that you probably won't end up using in the method.)
