@@ -282,6 +282,8 @@ class PygmentsConfigTest < Test::Unit::TestCase
     assert list.has_key?('Html')
     assert list['Html'][:aliases].include?('html')
   end
+
+  def test_logger
+    assert P.logger.respond_to?(:info)
+  end
 end
-
-
