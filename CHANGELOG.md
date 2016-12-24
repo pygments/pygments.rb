@@ -1,6 +1,13 @@
 changelog
 ===========
 
+
+Version 1.1.0 (2016/12/24)
+-----------------------------
+
+* Support JRuby [#170](https://github.com/tmm1/pygments.rb/pull/170)
+* Make pygments.rb thread safe [#171](https://github.com/tmm1/pygments.rb/pull/171)
+
 Version 1.0.0 (2016/12/11)
 -----------------------------
 
