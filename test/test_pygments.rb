@@ -111,6 +111,17 @@ class PygmentsHighlightTest < Test::Unit::TestCase
     code = P.highlight("importr python;    wat?", :lexer => 'py')
     assert_match ">importr</span>", code
   end
+
+  def test_highlight_on_multi_threads
+    10.times.map do
+      Thread.new do
+        test_full_html_highlight
+      end
+    end.each do |thread|
+      thread.join
+    end
+  end
+
 end
 
 # Philosophically, I'm not the biggest fan of testing private

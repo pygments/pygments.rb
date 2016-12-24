@@ -12,8 +12,7 @@ end
 # Pygments provides access to the Pygments library via a pipe and a long-running
 # Python process.
 module Pygments
-  module Popen
-    extend self
+  class Popen
 
     def popen4(cmd)
       stdin, stdout, stderr, wait_thr = Open3.popen3(cmd)
