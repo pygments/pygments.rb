@@ -1,6 +1,6 @@
 # coding: utf-8
-require 'posix/spawn'
-require 'yajl'
+require 'open3'
+require 'multi_json'
 require 'timeout'
 require 'logger'
 require 'time'
@@ -13,8 +13,12 @@ end
 # Python process.
 module Pygments
   module Popen
-    include POSIX::Spawn
     extend self
+
+    def popen4(cmd)
+      stdin, stdout, stderr, wait_thr = Open3.popen3(cmd)
+      [wait_thr[:pid], stdin, stdout, stderr]
+    end
 
     # Get things started by opening a pipe to mentos (the freshmaker), a
     # Python process that talks to the Pygments library. We'll talk back and
@@ -262,7 +266,7 @@ module Pygments
 
           kwargs.freeze
           kwargs = kwargs.merge("fd" => @out.to_i, "id" => id, "bytes" => bytesize)
-          out_header = Yajl.dump(:method => method, :args => args, :kwargs => kwargs)
+          out_header = MultiJson.dump(:method => method, :args => args, :kwargs => kwargs)
 
           # Get the size of the header itself and write that.
           bits = get_fixed_bits_from_header(out_header)
@@ -322,12 +326,12 @@ module Pygments
     def handle_header_and_return(header, id)
       if header
         header = header_to_json(header)
-        bytes = header["bytes"]
+        bytes = header[:bytes]
 
         # Read more bytes (the actual response body)
         res = @out.read(bytes.to_i)
 
-        if header["method"] == "highlight"
+        if header[:method] == "highlight"
           # Make sure we have a result back; else consider this an error.
           if res.nil?
             @log.warn "No highlight result back from mentos."
@@ -423,7 +427,7 @@ module Pygments
     # want them, text otherwise.
     def return_result(res, method)
       unless method == :lexer_name_for || method == :highlight || method == :css
-        res = Yajl.load(res, :symbolize_keys => true)
+        res = MultiJson.load(res, :symbolize_keys => true)
       end
       res = res.rstrip if res.class == String
       res
@@ -432,14 +436,14 @@ module Pygments
     # Convert a text header into JSON for easy access.
     def header_to_json(header)
       @log.info "[In header: #{header} "
-      header = Yajl.load(header)
+      header = MultiJson.load(header, :symbolize_keys => true)
 
-      if header["error"]
+      if header[:error]
         # Raise this as a Ruby exception of the MentosError class.
         # Stop so we don't leave the pipe in an inconsistent state.
         @log.error "Failed to convert header to JSON."
-        stop header["error"]
-        raise MentosError, header["error"]
+        stop header[:error]
+        raise MentosError, header[:error]
       else
         header
       end
