@@ -1,4 +1,5 @@
-#coding: utf-8
+# coding: utf-8
+# frozen_string_literal: true
 
 require 'test/unit'
 require File.join(File.dirname(__FILE__), '..', '/lib/pygments.rb')

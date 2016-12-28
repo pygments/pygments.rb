@@ -1,4 +1,6 @@
 # coding: utf-8
+# frozen_string_literal: true
+
 require 'open3'
 require 'multi_json'
 require 'timeout'
@@ -371,9 +373,7 @@ module Pygments
     # id, with two padding also. This means we are sending over the 8 characters +
     # code + 8 characters.
     def add_ids(code, id)
-      code.freeze
-      code = id + "  #{code}  #{id}"
-      code
+      (id + "  #{code}  #{id}").freeze
     end
 
     # Write data to mentos, the Python process.
