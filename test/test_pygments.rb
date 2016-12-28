@@ -4,7 +4,9 @@ require 'test/unit'
 require File.join(File.dirname(__FILE__), '..', '/lib/pygments.rb')
 ENV['mentos-test'] = "yes"
 
+
 P = Pygments
+PE = Pygments.engine
 
 class PygmentsHighlightTest < Test::Unit::TestCase
   RUBY_CODE = "#!/usr/bin/ruby\nputs 'foo'"
@@ -129,44 +131,44 @@ end
 # over the pipe I think it's necessary and informative.
 class PygmentsValidityTest < Test::Unit::TestCase
   def test_add_ids_with_padding
-    res = P.send(:add_ids, "herp derp baz boo foo", "ABCDEFGH")
+    res = PE.send(:add_ids, "herp derp baz boo foo", "ABCDEFGH")
     assert_equal "ABCDEFGH  herp derp baz boo foo  ABCDEFGH", res
   end
 
   def test_add_ids_on_empty_string
-    res = P.send(:add_ids, "", "ABCDEFGH")
+    res = PE.send(:add_ids, "", "ABCDEFGH")
     assert_equal "ABCDEFGH    ABCDEFGH", res
   end
 
   def test_add_ids_with_unicode_data
-    res = P.send(:add_ids, "# ø ø ø", "ABCDEFGH")
+    res = PE.send(:add_ids, "# ø ø ø", "ABCDEFGH")
     assert_equal "ABCDEFGH  # ø ø ø  ABCDEFGH", res
   end
 
   def test_add_ids_with_starting_slashes
-    res = P.send(:add_ids, '\\# ø ø ø..//', "ABCDEFGH")
+    res = PE.send(:add_ids, '\\# ø ø ø..//', "ABCDEFGH")
     assert_equal "ABCDEFGH  \\# ø ø ø..//  ABCDEFGH", res
   end
 
   def test_get_fixed_bits_from_header
-    bits = P.send(:get_fixed_bits_from_header, '{"herp": "derp"}')
+    bits = PE.send(:get_fixed_bits_from_header, '{"herp": "derp"}')
     assert_equal "00000000000000000000000000010000", bits
   end
 
   def test_get_fixed_bits_from_header_works_with_large_headers
-    bits = P.send(:get_fixed_bits_from_header, '{"herp": "derp"}' * 10000)
+    bits = PE.send(:get_fixed_bits_from_header, '{"herp": "derp"}' * 10000)
     assert_equal "00000000000000100111000100000000", bits
   end
 
   def test_size_check
     size = "00000000000000000000000000100110"
-    res = P.send(:size_check, size)
+    res = PE.send(:size_check, size)
     assert_equal res, true
   end
 
   def test_size_check_bad
     size = "some random thing"
-    res = P.send(:size_check, size)
+    res = PE.send(:size_check, size)
     assert_equal res, false
   end
 end
