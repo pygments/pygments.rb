@@ -1,6 +1,11 @@
 changelog
 ===========
 
+Version 1.1.1 (2016/12/28)
+-----------------------------
+
+* Suppress Ruby 2.4.0's warnings [#172](https://github.com/tmm1/pygments.rb/pull/172)
+* Enable `frozen_string_literal` [#173](https://github.com/tmm1/pygments.rb/pull/173)
 
 Version 1.1.0 (2016/12/24)
 -----------------------------
