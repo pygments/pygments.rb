@@ -21,5 +21,6 @@ Gem::Specification.new do |s|
   # s.extensions = ['ext/extconf.rb']
   s.require_paths = ['lib']
 
-  s.files = `git ls-files`.split("\n")
+  exclude = `find . -type l -printf '%P\\0'`.split("\0").map {|f| "':!#{f}'" } * ' '
+  s.files = `git ls-files -- . #{exclude}`.split("\n")
 end
