@@ -9,7 +9,7 @@ module Pygments
     @extname_index   = {}
     @mimetypes_index = {}
 
-    # Internal: Create a new Lexer object
+    # Internal: Create a new Lexer object.
     #
     # hash - A hash of attributes
     #
@@ -51,9 +51,9 @@ module Pygments
       lexer
     end
 
-    # Public: Get all Lexers
+    # Public: Get all Lexers.
     #
-    # Returns an Array of Lexers
+    # Returns an Array of Lexers.
     def self.all
       @lexers
     end
@@ -103,9 +103,9 @@ module Pygments
       @alias_index[name]
     end
 
-    # Public: Look up Lexer by one of it's file extensions.
+    # Public: Look up Lexer by one of its file extensions.
     #
-    # extname - A String file extension.
+    # extname - A String file extension
     #
     # Examples
     #
@@ -117,9 +117,9 @@ module Pygments
       @extname_index[extname]
     end
 
-    # Public: Look up Lexer by one of it's mime types.
+    # Public: Look up Lexer by one of its mime types.
     #
-    # type - A mime type String.
+    # type - A mime type String
     #
     # Examples
     #
@@ -131,12 +131,12 @@ module Pygments
       @mimetypes_index[type]
     end
 
-    # Public: Highlight syntax of text
+    # Public: Highlight syntax of text.
     #
     # text    - String of code to be highlighted
     # options - Hash of options (defaults to {})
     #
-    # Returns html String
+    # Returns html String.
     def highlight(text, options = {})
       options[:lexer] = aliases.first
       Pygments.highlight(text, options)
