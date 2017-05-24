@@ -153,6 +153,8 @@ module Pygments
         Marshal.load(raw)
       rescue Errno::ENOENT
         raise MentosError, "Error loading lexer file. Was it created and vendored?"
+      rescue ArgumentError
+        lexers!
       end
     end
 
