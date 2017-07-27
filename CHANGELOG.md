@@ -1,7 +1,8 @@
-changelog
+CHANGELOG
 ===========
 
 Version 1.1.2 (2017/04/03)
+-----------------------------
 
 * Resolves #176 exclude find_error.py symlink from gem [#177](https://github.com/tmm1/pygments.rb/pull/177)
 
