@@ -1,6 +1,12 @@
 CHANGELOG
 ===========
 
+Version 1.2.0 (2017/09/13)
+-----------------------------
+
+* Exclude symlinks from the gem package to solve Windows issues [#181](https://github.com/tmm1/pygments.rb/pull/181)
+* Upgrade pygments to 2.0.0 [#180](https://github.com/tmm1/pygments.rb/pull/180)
+
 Version 1.1.2 (2017/04/03)
 -----------------------------
 
