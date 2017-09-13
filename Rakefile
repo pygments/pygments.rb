@@ -63,5 +63,6 @@ namespace :vendor do
     FileUtils.cd(LEXERS_DIR) { sh "python _mapping.py" }
   end
 
+  desc 'update vendor/pygments-main'
   task :update => [:clobber, 'vendor/pygments-main', :load_lexers]
 end
