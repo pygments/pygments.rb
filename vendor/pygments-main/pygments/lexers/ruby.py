@@ -5,7 +5,7 @@
 
     Lexers for Ruby and related languages.
 
-    :copyright: Copyright 2006-2015 by the Pygments team, see AUTHORS.
+    :copyright: Copyright 2006-2017 by the Pygments team, see AUTHORS.
     :license: BSD, see LICENSE for details.
 """
 
@@ -44,9 +44,6 @@ class RubyLexer(ExtendedRegexLexer):
     def heredoc_callback(self, match, ctx):
         # okay, this is the hardest part of parsing Ruby...
         # match: 1 = <<-?, 2 = quote? 3 = name 4 = quote? 5 = rest of line
-        #
-        # Ruby >=2.3 has squiggly heredoc
-        # match: 1 = <<~?, 2 = quote? 3 = name 4 = quote? 5 = rest of line
 
         start = match.start(1)
         yield start, Operator, match.group(1)        # <<-?
@@ -56,7 +53,7 @@ class RubyLexer(ExtendedRegexLexer):
 
         heredocstack = ctx.__dict__.setdefault('heredocstack', [])
         outermost = not bool(heredocstack)
-        heredocstack.append(((match.group(1) == '<<-' or match.group(1) == '<<~'), match.group(3)))
+        heredocstack.append((match.group(1) == '<<-', match.group(3)))
 
         ctx.pos = match.start(5)
         ctx.end = match.end(5)
@@ -254,11 +251,6 @@ class RubyLexer(ExtendedRegexLexer):
              heredoc_callback),
             # empty string heredocs
             (r'(<<-?)("|\')()(\2)(.*?\n)', heredoc_callback),
-            # squiggly heredocs, Ruby >=2.3
-            (r'(?<!\w)(<<~?)(["`\']?)([a-zA-Z_]\w*)(\2)(.*?\n)',
-             heredoc_callback),
-            # empty string squiggly heredocs, Ruby >2.3
-            (r'(<<~?)("|\')()(\2)(.*?\n)', heredoc_callback),
             (r'__END__', Comment.Preproc, 'end-part'),
             # multiline regex (after keywords or assignments)
             (r'(?:^|(?<=[=<>~!:])|'
