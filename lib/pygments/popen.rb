@@ -6,6 +6,7 @@ require 'multi_json'
 require 'timeout'
 require 'logger'
 require 'time'
+require 'shellwords'
 
 # Error class
 class MentosError < IOError
@@ -40,7 +41,7 @@ module Pygments
 
       # A pipe to the mentos python process. #popen4 gives us
       # the pid and three IO objects to write and read.
-      script = "#{python_binary} #{File.expand_path('../mentos.py', __FILE__)}"
+      script = "#{python_binary} #{Shellwords.escape(File.expand_path('../mentos.py', __FILE__))}"
       @pid, @in, @out, @err = popen4(script)
       @log.info "Starting pid #{@pid} with fd #{@out.to_i} and python #{python_binary}."
     end
@@ -457,4 +458,3 @@ module Pygments
     end
   end
 end
-
