@@ -38,8 +38,8 @@ task :lexers do
   sh "ruby cache-lexers.rb"
 end
 
-task test: :lexers
-task release: :lexers
+task(:test).enhance([:lexers])
+task(:build).enhance([:lexers])
 
 # ==========================================================
 # Vendor
