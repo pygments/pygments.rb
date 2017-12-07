@@ -21,5 +21,5 @@ Gem::Specification.new do |s|
   # s.extensions = ['ext/extconf.rb']
   s.require_paths = ['lib']
 
-  s.files = `git ls-files`.split("\n").select { |f| !File.symlink?(f) }
+  s.files = `git ls-files`.split("\n").select { |f| !File.symlink?(f) } + ['lexers']
 end
