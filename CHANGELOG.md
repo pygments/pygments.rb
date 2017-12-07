@@ -1,6 +1,12 @@
 CHANGELOG
 ===========
 
+Version 1.2.1 (2017/12/07)
+-----------------------------
+
+* Automatically update `lexers` cache on build [186](https://github.com/tmm1/pygments.rb/pull/186)
+  * See [#185](https://github.com/tmm1/pygments.rb/pull/185) for the reason
+
 Version 1.2.0 (2017/09/13)
 -----------------------------
 
