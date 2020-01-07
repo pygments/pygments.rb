@@ -1,4 +1,11 @@
-# pygments.rb [![CircleCI](https://circleci.com/gh/tmm1/pygments.rb.svg?style=svg)](https://circleci.com/gh/tmm1/pygments.rb) [![Gem Version](https://badge.fury.io/rb/pygments.rb.svg)](https://badge.fury.io/rb/pygments.rb)
+# pygments.rb [![CircleCI][circleci_badge]][circleci_url] [![GitHub Actions][gh-actions_badge]][gh-actions_url] [![Gem Version][gem_badge]][gem_url]
+
+[circleci_badge]: https://circleci.com/gh/tmm1/pygments.rb.svg?style=svg
+[circleci_url]: https://circleci.com/gh/tmm1/pygments.rb
+[gh-actions_badge]: https://github.com/tmm1/pygments.rb/workflows/CI/badge.svg
+[gh-actions_url]: https://github.com/tmm1/pygments.rb/actions?query=workflow%3ACI
+[gem_badge]: https://badge.fury.io/rb/pygments.rb.svg
+[gem_url]: https://badge.fury.io/rb/pygments.rb
 
 A Ruby wrapper for the Python [pygments syntax highlighter](http://pygments.org/).
 
