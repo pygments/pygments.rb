@@ -63,9 +63,9 @@ module Pygments
       if ENV['PYGMENTS_RB_PYTHON']
         return which(ENV['PYGMENTS_RB_PYTHON'])
       elsif windows? && which('py')
-        return 'py -2'
+        return 'py -3'
       end
-      return which('python2') || which('python')
+      return which('python3')
     end
 
     # Cross platform which command

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 import sys, re, os, signal
@@ -163,12 +163,9 @@ class Mentos(object):
                 res = json.dumps(res)
 
             elif method == 'highlight':
-                try:
-                    text = text.decode('utf-8')
-                except UnicodeDecodeError:
-                    # The text may already be encoded
-                    text = text
                 res = self.highlight_text(text, lexer, formatter_name, args, _convert_keys(opts))
+                if type(res) is bytes:
+                    res = res.decode('utf-8')
 
             elif method == 'css':
                 kwargs = _convert_keys(kwargs)
@@ -197,7 +194,7 @@ class Mentos(object):
         # Base header. We'll build on this, adding keys as necessary.
         base_header = {"method": method}
 
-        res_bytes = len(res) + 1
+        res_bytes = len(res.encode("utf-8")) + 1
         base_header["bytes"] = res_bytes
 
         out_header = json.dumps(base_header)
@@ -264,7 +261,7 @@ class Mentos(object):
             # The loop begins by reading off a simple 32-arity string
             # representing an integer of 32 bits. This is the length of
             # our JSON header.
-            size = sys.stdin.read(32)
+            size = sys.stdin.buffer.read(32).decode('utf-8')
 
             if not size:
                 break
@@ -280,7 +277,7 @@ class Mentos(object):
                 if not size_regex.match(size):
                     _write_error("Size received is not valid.")
 
-                line = sys.stdin.read(header_bytes)
+                line = sys.stdin.buffer.read(header_bytes).decode('utf-8')
 
                 header = json.loads(line)
 
@@ -294,8 +291,8 @@ class Mentos(object):
                 if kwargs:
                     _bytes = kwargs.get("bytes", 0)
 
-                # Read up to the given number bytes (possibly 0)
-                text = sys.stdin.read(_bytes)
+                # Read up to the given number of *bytes* (not chars) (possibly 0)
+                text = sys.stdin.buffer.read(_bytes).decode('utf-8')
 
                 # Sanity check the return.
                 if _bytes:
