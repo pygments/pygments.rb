@@ -243,7 +243,6 @@ class PygmentsLexerClassTest < Test::Unit::TestCase
  def test_find_lexer_by_mimetype
     assert_equal P::Lexer['Ruby'], P::Lexer.find_by_mimetype('text/x-ruby')
     assert_equal P::Lexer['JSON'], P::Lexer.find_by_mimetype('application/json')
-    assert_equal P::Lexer['Python'], P::Lexer.find_by_mimetype('text/x-python')
  end
 end
 
