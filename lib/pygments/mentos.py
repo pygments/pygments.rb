@@ -31,7 +31,7 @@ def _convert_keys(dictionary):
 
 def _write_error(error):
     res = {"error": error}
-    out_header = json.dumps(res).encode('utf-8')
+    out_header = json.dumps(res)
     bits = _get_fixed_bits_from_header(out_header)
     sys.stdout.write(bits + "\n")
     sys.stdout.flush()
@@ -40,7 +40,7 @@ def _write_error(error):
     return
 
 def _get_fixed_bits_from_header(out_header):
-    size = len(out_header)
+    size = len(out_header.encode('utf-8'))
     return "".join([str((size>>y)&1) for y in range(32-1, -1, -1)])
 
 def _signal_handler(signal, frame):
@@ -200,7 +200,7 @@ class Mentos(object):
         res_bytes = len(res) + 1
         base_header["bytes"] = res_bytes
 
-        out_header = json.dumps(base_header).encode('utf-8')
+        out_header = json.dumps(base_header)
 
         # Following the protocol, send over a fixed size represenation of the
         # size of the JSON header
