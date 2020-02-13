@@ -266,6 +266,9 @@ class Mentos(object):
             # our JSON header.
             size = sys.stdin.read(32)
 
+            if not size:
+                break
+
             lock.acquire()
 
             try:
