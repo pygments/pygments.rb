@@ -31,17 +31,21 @@ def _convert_keys(dictionary):
 
 def _write_error(error):
     res = {"error": error}
-    out_header = json.dumps(res)
-    bits = _get_fixed_bits_from_header(out_header)
-    sys.stdout.write(bits + "\n")
+    out_header_bytes = json.dumps(res).encode('utf-8')
+    bits = _get_fixed_bits_from_header(out_header_bytes)
+    sys.stdout.buffer.write(bits + b"\n")
     sys.stdout.flush()
-    sys.stdout.write(out_header + "\n")
+    sys.stdout.buffer.write(out_header_bytes + b"\n")
     sys.stdout.flush()
     return
 
-def _get_fixed_bits_from_header(out_header):
-    size = len(out_header.encode('utf-8'))
-    return "".join([str((size>>y)&1) for y in range(32-1, -1, -1)])
+def _get_fixed_bits_from_header(out_header_bytes):
+    """
+    Encode the length of the bytes-string `out_header` as a 32-long binary:
+    _get_fixed_bits_from_header(b'abcd') == b'00000000000000000000000000000100'
+    """
+    size = len(out_header_bytes)
+    return "".join([str((size>>y)&1) for y in range(32-1, -1, -1)]).encode('utf-8')
 
 def _signal_handler(signal, frame):
     """
@@ -194,25 +198,26 @@ class Mentos(object):
         # Base header. We'll build on this, adding keys as necessary.
         base_header = {"method": method}
 
-        res_bytes = len(res.encode("utf-8")) + 1
-        base_header["bytes"] = res_bytes
+        res_bytes = res.encode("utf-8")
+        bytes = len(res_bytes) + 1
+        base_header["bytes"] = bytes
 
-        out_header = json.dumps(base_header)
+        out_header_bytes = json.dumps(base_header).encode('utf-8')
 
         # Following the protocol, send over a fixed size represenation of the
         # size of the JSON header
-        bits = _get_fixed_bits_from_header(out_header)
+        bits = _get_fixed_bits_from_header(out_header_bytes)
 
         # Send it to Rubyland
-        sys.stdout.write(bits + "\n")
+        sys.stdout.buffer.write(bits + b"\n")
         sys.stdout.flush()
 
         # Send the header.
-        sys.stdout.write(out_header + "\n")
+        sys.stdout.buffer.write(out_header_bytes + b"\n")
         sys.stdout.flush()
 
         # Finally, send the result
-        sys.stdout.write(res + "\n")
+        sys.stdout.buffer.write(res_bytes + b"\n")
         sys.stdout.flush()
 
 

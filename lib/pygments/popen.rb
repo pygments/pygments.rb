@@ -65,7 +65,7 @@ module Pygments
       elsif windows? && which('py')
         return 'py -3'
       end
-      return which('python3')
+      return which('python3') || which('python')
     end
 
     # Cross platform which command
