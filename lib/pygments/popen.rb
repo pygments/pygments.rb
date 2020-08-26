@@ -160,7 +160,7 @@ module Pygments
     #
     # Returns an array of lexers.
     def lexers!
-      mentos(:get_all_lexers).inject(Hash.new) do |hash, lxr|
+      mentos(:get_all_lexers, nil, {:timeout => 16}).inject(Hash.new) do |hash, lxr|
         name = lxr[0]
         hash[name] = {
           :name => name,
@@ -249,7 +249,7 @@ module Pygments
       begin
         # Timeout requests that take too long.
         # Invalid MENTOS_TIMEOUT results in just using default.
-        timeout_time = Integer(ENV["MENTOS_TIMEOUT"]) rescue 8
+        timeout_time = Float(kwargs.delete(:timeout) || ENV["MENTOS_TIMEOUT"] || 8)
 
         Timeout::timeout(timeout_time) do
           # For sanity checking on both sides of the pipe when highlighting, we prepend and
