@@ -248,8 +248,8 @@ module Pygments
 
       begin
         # Timeout requests that take too long.
-        # Invalid MENTOS_TIMEOUT results in just using default.
-        timeout_time = Float(kwargs.delete(:timeout) || ENV["MENTOS_TIMEOUT"] || 8)
+        # If :timeout and MENTOS_TIMEOUT not set we use the default of 10 sec.
+        timeout_time = Float(kwargs.delete(:timeout) || ENV["MENTOS_TIMEOUT"] || 10)
 
         Timeout::timeout(timeout_time) do
           # For sanity checking on both sides of the pipe when highlighting, we prepend and
