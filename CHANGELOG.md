@@ -1,6 +1,13 @@
 CHANGELOG
 ===========
 
+Version 1.3.0 (2020/??/??)
+-----------------------------
+
+* Modified `mentos.py` to run on Python 3.x instead of Python 2.7
+* Added `:timeout` keyword option to allow for configurabel timeouts
+* Added several Python 3.x versions to test matrix
+
 Version 1.2.1 (2017/12/07)
 -----------------------------
 
