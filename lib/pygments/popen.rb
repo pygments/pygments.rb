@@ -63,9 +63,9 @@ module Pygments
       if ENV['PYGMENTS_RB_PYTHON']
         return which(ENV['PYGMENTS_RB_PYTHON'])
       elsif windows? && which('py')
-        return 'py -2'
+        return 'py -3'
       end
-      return which('python2') || which('python')
+      return which('python3') || which('python')
     end
 
     # Cross platform which command
@@ -160,7 +160,7 @@ module Pygments
     #
     # Returns an array of lexers.
     def lexers!
-      mentos(:get_all_lexers).inject(Hash.new) do |hash, lxr|
+      mentos(:get_all_lexers, nil, {:timeout => 30}).inject(Hash.new) do |hash, lxr|
         name = lxr[0]
         hash[name] = {
           :name => name,
@@ -250,7 +250,7 @@ module Pygments
         # Timeout requests that take too long.
         # Invalid MENTOS_TIMEOUT results in just using default.
         timeout_time = kwargs.delete(:timeout)
-        timeout_time = Integer(ENV["MENTOS_TIMEOUT"]) rescue 8 if timeout_time.nil?
+        timeout_time = Integer(ENV["MENTOS_TIMEOUT"]) rescue 10 if timeout_time.nil?
 
         Timeout::timeout(timeout_time) do
           # For sanity checking on both sides of the pipe when highlighting, we prepend and
