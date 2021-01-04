@@ -2,7 +2,6 @@
 
 require 'json'
 require 'open3'
-require 'timeout'
 require 'logger'
 require 'time'
 
@@ -14,9 +13,12 @@ end
 # Python process.
 module Pygments
   class Popen
-    def popen4(cmd)
-      stdin, stdout, stderr, wait_thr = Open3.popen3(cmd)
-      [wait_thr[:pid], stdin, stdout, stderr]
+    def popen4(argv)
+      stdin, stdout, stderr, wait_thr = Open3.popen3(*argv)
+      while (pid = wait_thr.pid).nil? && wait_thr.alive?
+        # For unknown reasons, wait_thr.pid is not immediately available on JRuby
+      end
+      [pid, stdin, stdout, stderr]
     end
 
     # Get things started by opening a pipe to mentos (the freshmaker), a
@@ -24,11 +26,9 @@ module Pygments
     # forth across this pipe.
     def start(pygments_path = File.expand_path('../../vendor/pygments-main', __dir__))
       begin
-        @log = Logger.new(ENV['MENTOS_LOG'] ||= File::NULL)
+        @log = Logger.new(ENV['MENTOS_LOG'] || File::NULL)
         @log.level = Logger::INFO
         @log.datetime_format = '%Y-%m-%d %H:%M '
-      rescue StandardError
-        @log = Logger.new(File::NULL)
       end
 
       ENV['PYGMENTS_PATH'] = pygments_path
@@ -38,13 +38,11 @@ module Pygments
 
       # A pipe to the mentos python process. #popen4 gives us
       # the pid and three IO objects to write and read.
-      script = "#{python_binary} #{File.expand_path('mentos.py', __dir__)}"
-      @pid, @in, @out, @err = popen4(script)
+      argv = [*python_binary, File.expand_path('mentos.py', __dir__)]
+      @pid, @in, @out, @err = popen4(argv)
+      @in.binmode
+      @out.binmode
       @log.info "Starting pid #{@pid} with fd #{@out.to_i} and python #{python_binary}."
-    end
-
-    def windows?
-      RUBY_PLATFORM =~ /mswin|mingw/
     end
 
     def python_binary
@@ -60,8 +58,8 @@ module Pygments
     def find_python_binary
       if ENV['PYGMENTS_RB_PYTHON']
         return which(ENV['PYGMENTS_RB_PYTHON'])
-      elsif windows? && which('py')
-        return 'py -3'
+      elsif Gem.win_platform? && which('py')
+        return %w[py -3]
       end
 
       which('python3') || which('python')
@@ -93,14 +91,14 @@ module Pygments
     # the signal isn't sent); but we have permissions, and
     # we're not doing anything invalid here.
     def stop(reason)
-      if @pid
+      unless @pid.nil?
+        @log.info "Killing pid: #{@pid}. Reason: #{reason}"
         begin
           Process.kill('KILL', @pid)
           Process.waitpid(@pid)
         rescue Errno::ESRCH, Errno::ECHILD
         end
       end
-      @log.info "Killing pid: #{@pid}. Reason: #{reason}"
       @pid = nil
     end
 
@@ -228,87 +226,118 @@ module Pygments
 
     private
 
+    def with_watchdog(timeout_time, error_message)
+      state_mutex = Mutex.new
+      state = :alive
+
+      watchdog = timeout_time > 0 ? Thread.new do
+        state_mutex.synchronize do
+          state_mutex.sleep(timeout_time) if state != :finished
+          if state != :finished
+            @log.error error_message
+            stop error_message
+            state = :timeout
+          end
+        end
+      end : nil
+      begin
+        yield
+      ensure
+        if watchdog
+          state_mutex.synchronize do
+            state = :finished if state == :alive
+            watchdog.wakeup if watchdog.alive?
+          end
+          watchdog.join
+        end
+
+        if state == :timeout
+          # raise MentosError, "Timeout on a mentos #{method} call"
+          return nil
+        end
+      end
+    end
+
     # Our 'rpc'-ish request to mentos. Requires a method name, and then optional
     # args, kwargs, code.
     def mentos(method, args = [], kwargs = {}, original_code = nil)
       # Open the pipe if necessary
       start unless alive?
 
+      # Timeout requests that take too long.
+      # Invalid MENTOS_TIMEOUT results in just using default.
+      timeout_time = kwargs.delete(:timeout)
+      if timeout_time.nil?
+        timeout_time = begin
+                         Integer(ENV['MENTOS_TIMEOUT'])
+                       rescue TypeError
+                         10
+                       end
+      end
+
+      # For sanity checking on both sides of the pipe when highlighting, we prepend and
+      # append an id.  mentos checks that these are 8 character ids and that they match.
+      # It then returns the id's back to Rubyland.
+      id = (0...8).map { rand(65..89).chr }.join
+      code = original_code ? add_ids(original_code, id) : nil
+
+      # Add metadata to the header and generate it.
+      bytesize = if code
+                   code.bytesize
+                 else
+                   0
+                 end
+
+      kwargs.freeze
+      kwargs = kwargs.merge('fd' => @out.to_i, 'id' => id, 'bytes' => bytesize)
+      out_header = JSON.generate(method: method, args: args, kwargs: kwargs)
+
       begin
-        # Timeout requests that take too long.
-        # Invalid MENTOS_TIMEOUT results in just using default.
-        timeout_time = kwargs.delete(:timeout)
-        if timeout_time.nil?
-          timeout_time = begin
-                           Integer(ENV['MENTOS_TIMEOUT'])
-                         rescue StandardError
-                           10
-                         end
-        end
-
-        Timeout.timeout(timeout_time) do
-          # For sanity checking on both sides of the pipe when highlighting, we prepend and
-          # append an id.  mentos checks that these are 8 character ids and that they match.
-          # It then returns the id's back to Rubyland.
-          id = (0...8).map { rand(65..89).chr }.join
-          code = add_ids(original_code, id) if original_code
-
-          # Add metadata to the header and generate it.
-          bytesize = if code
-                       code.bytesize
-                     else
-                       0
-                     end
-
-          kwargs.freeze
-          kwargs = kwargs.merge('fd' => @out.to_i, 'id' => id, 'bytes' => bytesize)
-          out_header = JSON.generate(method: method, args: args, kwargs: kwargs)
-
+        res = with_watchdog(timeout_time, "Timeout on a mentos #{method} call") do
           # Get the size of the header itself and write that.
-          bits = get_fixed_bits_from_header(out_header)
-          @in.write(bits)
+          @in.write([out_header.bytesize].pack('N'))
+          @log.info "Size out: #{out_header.bytesize}"
 
           # mentos is now waiting for the header, and, potentially, code.
-          write_data(out_header, code)
+          @in.write(out_header)
+          @log.info "Out header: #{out_header}"
+          @in.write(code) unless code.nil?
 
-          check_for_error
+          @in.flush
 
           # mentos will now return data to us. First it sends the header.
-          header = get_header
+
+          header_len_bytes = @out.read(4)
+          if header_len_bytes.nil?
+            raise Errno::EPIPE, %(Failed to read response from Python process on a mentos #{method} call)
+          end
+
+          header_len = header_len_bytes.unpack('N')[0]
+          @log.info "Size in: #{header_len}"
+          header = @out.read(header_len)
 
           # Now handle the header, any read any more data required.
-          res = handle_header_and_return(header, id)
-
-          # Finally, return what we got.
-          return_result(res, method)
+          handle_header_and_return(header, id)
         end
-      rescue Timeout::Error
-        # If we timeout, we need to clear out the pipe and start over.
-        @log.error "Timeout on a mentos #{method} call"
-        stop "Timeout on mentos #{method} call."
-      end
-    rescue Errno::EPIPE, EOFError
-      stop 'EPIPE'
-      raise MentosError, 'EPIPE'
-    end
 
-    def check_for_error
-      return if @err.closed?
-
-      timeout_time = 0.25 # set a very little timeout so that we do not hang the parser
-
-      Timeout.timeout(timeout_time) do
-        error_msg = @err.read
-
-        unless error_msg.empty?
-          @log.error "Error running python script: #{error_msg}"
-          stop "Error running python script: #{error_msg}"
-          raise MentosError, error_msg
+        # Finally, return what we got.
+        return_result(res, method)
+      rescue Errno::EPIPE => e
+        begin
+          error_msg = @err.read
+          @log.error "Error running Python script: #{error_msg}"
+          stop "Error running Python script: #{error_msg}"
+          raise MentosError, %(#{e}: #{error_msg})
+        rescue Errno::EPIPE
+          @log.error e.to_s
+          stop e.to_s
+          raise e
         end
+      rescue StandardError => e
+        @log.error e.to_s
+        stop e.to_s
+        raise e
       end
-    rescue Timeout::Error
-      # during the specified time no error were found
-      @err.close
     end
 
     # Based on the header we receive, determine if we need
@@ -316,9 +345,10 @@ module Pygments
     #
     # Then, do a sanity check with the ids.
     #
-    # Returns a result — either highlighted text or metadata.
+    # Returns a result - either highlighted text or metadata.
     def handle_header_and_return(header, id)
       if header
+        @log.info "In header: #{header}"
         header = header_to_json(header)
         bytes = header[:bytes]
 
@@ -327,14 +357,8 @@ module Pygments
 
         if header[:method] == 'highlight'
           # Make sure we have a result back; else consider this an error.
-          if res.nil?
-            @log.warn 'No highlight result back from mentos.'
-            stop 'No highlight result back from mentos.'
-            raise MentosError, 'No highlight result back from mentos.'
-          end
+          raise MentosError, 'No highlight result back from mentos.' if res.nil?
 
-          # Remove the newline from Python
-          res = res[0..-2]
           @log.info 'Highlight in process.'
 
           # Get the id's
@@ -343,8 +367,6 @@ module Pygments
 
           # Sanity check.
           if !((start_id == id) && (end_id == id))
-            @log.error "ID's did not match. Aborting."
-            stop "ID's did not match. Aborting."
             raise MentosError, "ID's did not match. Aborting."
           else
             # We're good. Remove the padding
@@ -355,8 +377,6 @@ module Pygments
         end
         res
       else
-        @log.error 'No header data back.'
-        stop 'No header data back.'
         raise MentosError, 'No header received back.'
       end
     end
@@ -367,50 +387,6 @@ module Pygments
     # code + 8 characters.
     def add_ids(code, id)
       (id + "  #{code}  #{id}").freeze
-    end
-
-    # Write data to mentos, the Python process.
-    #
-    # Returns nothing.
-    def write_data(out_header, code = nil)
-      @in.write(out_header)
-      @log.info "Out header: #{out_header}"
-      @in.write(code) if code
-    end
-
-    # Sanity check for size (32-arity of 0's and 1's)
-    def size_check(size)
-      size_regex = /[0-1]{32}/
-      if size_regex.match(size)
-        true
-      else
-        false
-      end
-    end
-
-    # Read the header via the pipe.
-    #
-    # Returns a header.
-    def get_header
-      size = @out.read(33)
-      size = size[0..-2]
-
-      # Sanity check the size
-      unless size_check(size)
-        @log.error 'Size returned from mentos.py invalid.'
-        stop 'Size returned from mentos.py invalid.'
-        raise MentosError, 'Size returned from mentos.py invalid.'
-      end
-
-      # Read the amount of bytes we should be expecting. We first
-      # convert the string of bits into an integer.
-      header_bytes = size.to_s.to_i(2) + 1
-      @log.info "Size in: #{size} (#{header_bytes})"
-      @out.read(header_bytes)
-    rescue StandardError
-      @log.error 'Failed to get header.'
-      stop 'Failed to get header.'
-      raise MentosError, 'Failed to get header.'
     end
 
     # Return the final result for the API. Return Ruby objects for the methods that
@@ -425,26 +401,13 @@ module Pygments
 
     # Convert a text header into JSON for easy access.
     def header_to_json(header)
-      @log.info "[In header: #{header} "
       header = JSON.parse(header, symbolize_names: true)
 
       if header[:error]
-        # Raise this as a Ruby exception of the MentosError class.
-        # Stop so we don't leave the pipe in an inconsistent state.
-        @log.error 'Failed to convert header to JSON.'
-        stop header[:error]
         raise MentosError, header[:error]
       else
         header
       end
-    end
-
-    def get_fixed_bits_from_header(out_header)
-      size = out_header.bytesize
-
-      # Fixed 32 bits to represent the int. We return a string
-      # representation: e.g, "00000000000000000000000000011110"
-      Array.new(32) { |i| size[i] }.reverse!.join
     end
   end
 end
