@@ -14,7 +14,7 @@ Gem::Specification.new do |s|
   s.license = 'MIT'
 
   s.add_dependency 'multi_json', '>= 1.0.0'
-  s.add_development_dependency 'rake-compiler', '~> 0.7.6'
+  s.add_development_dependency 'rake-compiler', '~> 1.1.0'
   s.add_development_dependency 'test-unit', '~> 3.3.0'
 
   # s.extensions = ['ext/extconf.rb']
