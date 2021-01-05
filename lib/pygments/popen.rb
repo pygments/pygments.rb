@@ -1,8 +1,8 @@
 # coding: utf-8
 # frozen_string_literal: true
 
+require 'json'
 require 'open3'
-require 'multi_json'
 require 'timeout'
 require 'logger'
 require 'time'
@@ -268,7 +268,7 @@ module Pygments
 
           kwargs.freeze
           kwargs = kwargs.merge("fd" => @out.to_i, "id" => id, "bytes" => bytesize)
-          out_header = MultiJson.dump(:method => method, :args => args, :kwargs => kwargs)
+          out_header = JSON.generate(:method => method, :args => args, :kwargs => kwargs)
 
           # Get the size of the header itself and write that.
           bits = get_fixed_bits_from_header(out_header)
@@ -427,7 +427,7 @@ module Pygments
     # want them, text otherwise.
     def return_result(res, method)
       unless method == :lexer_name_for || method == :highlight || method == :css
-        res = MultiJson.load(res, :symbolize_keys => true)
+        res = JSON.parse(res, symbolize_names: true)
       end
       res = res.rstrip if res.class == String
       res
@@ -436,7 +436,7 @@ module Pygments
     # Convert a text header into JSON for easy access.
     def header_to_json(header)
       @log.info "[In header: #{header} "
-      header = MultiJson.load(header, :symbolize_keys => true)
+      header = JSON.parse(header, symbolize_names: true)
 
       if header[:error]
         # Raise this as a Ruby exception of the MentosError class.
