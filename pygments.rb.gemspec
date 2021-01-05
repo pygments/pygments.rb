@@ -1,4 +1,6 @@
-require File.expand_path('../lib/pygments/version', __FILE__)
+# frozen_string_literal: true
+
+require File.expand_path('lib/pygments/version', __dir__)
 
 Gem::Specification.new do |s|
   s.name = 'pygments.rb'
@@ -14,10 +16,11 @@ Gem::Specification.new do |s|
   s.license = 'MIT'
 
   s.add_development_dependency 'rake-compiler', '~> 1.1.0'
+  s.add_development_dependency 'rubocop', '~> 0.81.0'
   s.add_development_dependency 'test-unit', '~> 3.3.0'
 
   # s.extensions = ['ext/extconf.rb']
   s.require_paths = ['lib']
 
-  s.files = `git ls-files`.split("\n").select { |f| !File.symlink?(f) } + ['lexers']
+  s.files = `git ls-files`.split("\n").reject { |f| File.symlink?(f) } + ['lexers']
 end

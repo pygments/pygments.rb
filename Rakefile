@@ -1,7 +1,9 @@
 #!/usr/bin/env rake
-require "bundler/gem_tasks"
+# frozen_string_literal: true
 
-task :default => :test
+require 'bundler/gem_tasks'
+
+task default: :test
 
 # ==========================================================
 # Packaging
@@ -25,7 +27,7 @@ end
 # ==========================================================
 
 task :bench do
-  sh "ruby bench.rb"
+  sh 'ruby bench.rb'
 end
 
 # ==========================================================
@@ -34,7 +36,7 @@ end
 
 # Write all the lexers to a file for easy lookup
 task :lexers do
-  sh "ruby cache-lexers.rb"
+  sh 'ruby cache-lexers.rb'
 end
 
 task(:test).enhance([:lexers])
@@ -62,9 +64,9 @@ namespace :vendor do
     LEXERS_DIR = 'vendor/pygments-main/pygments/lexers'
     lexers = FileList['vendor/custom_lexers/*.py']
     lexers.each { |l| FileUtils.copy l, LEXERS_DIR }
-    FileUtils.cd(LEXERS_DIR) { sh "python _mapping.py" }
+    FileUtils.cd(LEXERS_DIR) { sh 'python _mapping.py' }
   end
 
   desc 'update vendor/pygments-main'
-  task :update => [:clobber, 'vendor/pygments-main', :load_lexers]
+  task update: [:clobber, 'vendor/pygments-main', :load_lexers]
 end

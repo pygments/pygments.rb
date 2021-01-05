@@ -1,5 +1,5 @@
-# coding: utf-8
 # frozen_string_literal: true
+
 module Pygments
   class Lexer < Struct.new(:name, :aliases, :filenames, :mimetypes)
     @lexers          = []
@@ -34,13 +34,13 @@ module Pygments
           m[1].scan(/./).each do |s|
             extnames << extname.sub(m[0], s)
           end
-        elsif extname != ""
+        elsif extname != ''
           extnames << extname
         end
 
         extnames.each do |the_extname|
           @extname_index[the_extname] = lexer
-          @index[the_extname.downcase.sub(/^\./, "")] ||= lexer
+          @index[the_extname.downcase.sub(/^\./, '')] ||= lexer
         end
       end
 
@@ -142,8 +142,8 @@ module Pygments
       Pygments.highlight(text, options)
     end
 
-    alias_method :==, :equal?
-    alias_method :eql?, :equal?
+    alias == equal?
+    alias eql? equal?
   end
 
   lexers.values.each { |h| Lexer.create(h) }
