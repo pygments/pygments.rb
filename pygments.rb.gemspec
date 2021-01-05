@@ -13,7 +13,6 @@ Gem::Specification.new do |s|
   s.email = ['aman@tmm1.net']
   s.license = 'MIT'
 
-  s.add_dependency 'multi_json', '>= 1.0.0'
   s.add_development_dependency 'rake-compiler', '~> 1.1.0'
   s.add_development_dependency 'test-unit', '~> 3.3.0'
 
