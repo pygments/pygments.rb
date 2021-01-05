@@ -8,14 +8,16 @@
     :copyright: Copyright 2012 by GitHub, Inc
     :license: BSD, see LICENSE for details.
 """
-import re
 
 from pygments.lexer import RegexLexer, ExtendedRegexLexer, include, bygroups, \
-    using, DelegatingLexer
+    DelegatingLexer
 from pygments.token import Text, Name, Number, String, Comment, Punctuation, \
-     Other, Keyword, Operator, Literal, Whitespace
+    Other, Keyword, Operator, Literal, Whitespace
 
-__all__ = ['Dasm16Lexer', 'PuppetLexer', 'AugeasLexer', "TOMLLexer", "SlashLexer"]
+__all__ = [
+    'Dasm16Lexer', 'PuppetLexer', 'AugeasLexer', "TOMLLexer", "SlashLexer"
+]
+
 
 class Dasm16Lexer(RegexLexer):
     """
@@ -62,7 +64,8 @@ class Dasm16Lexer(RegexLexer):
 
     def guess_identifier(lexer, match):
         ident = match.group(0)
-        klass = Name.Variable if ident.upper() in lexer.REGISTERS else Name.Label
+        klass = Name.Variable if ident.upper() in lexer.REGISTERS \
+            else Name.Label
         yield match.start(), klass, ident
 
     tokens = {
@@ -75,25 +78,25 @@ class Dasm16Lexer(RegexLexer):
             (r'[\r\n]+', Text)
         ],
 
-        'numeric' : [
+        'numeric': [
             (binary_number, Number.Integer),
             (number, Number.Integer),
             (single_char, String),
         ],
 
-        'arg' : [
+        'arg': [
             (identifier, guess_identifier),
             include('numeric')
         ],
 
-        'deref' : [
+        'deref': [
             (r'\+', Punctuation),
             (r'\]', Punctuation, '#pop'),
             include('arg'),
             include('whitespace')
         ],
 
-        'instruction-line' : [
+        'instruction-line': [
             (r'[\r\n]+', Text, '#pop'),
             (r';.*?$', Comment, '#pop'),
             include('whitespace')
@@ -106,7 +109,7 @@ class Dasm16Lexer(RegexLexer):
             include('instruction-line')
         ],
 
-        'data-args' : [
+        'data-args': [
             (r',', Punctuation),
             include('numeric'),
             (string, String),
@@ -120,6 +123,7 @@ class Dasm16Lexer(RegexLexer):
         ],
     }
 
+
 class PuppetLexer(RegexLexer):
     name = 'Puppet'
     aliases = ['puppet']
@@ -131,18 +135,27 @@ class PuppetLexer(RegexLexer):
         ],
         'puppet': [
             include('comments'),
-            (r'(class)(\s*)(\{)', bygroups(Name.Class, Text, Punctuation), ('type', 'namevar')),
-            (r'(class|define)', Keyword.Declaration, ('block','class_name')),
+            (r'(class)(\s*)(\{)', bygroups(Name.Class, Text, Punctuation),
+             ('type', 'namevar')),
+            (r'(class|define)', Keyword.Declaration, ('block', 'class_name')),
             (r'node', Keyword.Declaration, ('block', 'node_name')),
             (r'elsif', Keyword.Reserved, ('block', 'conditional')),
             (r'if', Keyword.Reserved, ('block', 'conditional')),
             (r'unless', Keyword.Reserved, ('block', 'conditional')),
-            (r'(else)(\s*)(\{)', bygroups(Keyword.Reserved, Text, Punctuation), 'block'),
+            (r'(else)(\s*)(\{)', bygroups(Keyword.Reserved,
+                                          Text, Punctuation), 'block'),
             (r'case', Keyword.Reserved, ('case', 'conditional')),
-            (r'(::)?([A-Z][\w:]+)+(\s*)(<{1,2}\|)', bygroups(Name.Class, Name.Class, Text, Punctuation), 'spaceinvader'),
-            (r'(::)?([A-Z][\w:]+)+(\s*)(\{)', bygroups(Name.Class, Name.Class, Text, Punctuation), 'type'),
-            (r'(::)?([A-Z][\w:]+)+(\s*)(\[)', bygroups(Name.Class, Name.Class, Text, Punctuation), ('type', 'override_name')),
-            (r'(@{0,2}[\w:]+)(\s*)(\{)(\s*)', bygroups(Name.Class, Text, Punctuation, Text), ('type', 'namevar')),
+            (r'(::)?([A-Z][\w:]+)+(\s*)(<{1,2}\|)', bygroups(
+                Name.Class, Name.Class, Text, Punctuation), 'spaceinvader'),
+            (r'(::)?([A-Z][\w:]+)+(\s*)(\{)', bygroups(
+                Name.Class, Name.Class, Text, Punctuation
+            ), 'type'),
+            (r'(::)?([A-Z][\w:]+)+(\s*)(\[)', bygroups(
+                Name.Class, Name.Class, Text, Punctuation
+            ), ('type', 'override_name')),
+            (r'(@{0,2}[\w:]+)(\s*)(\{)(\s*)', bygroups(
+                Name.Class, Text, Punctuation, Text
+            ), ('type', 'namevar')),
             (r'\$(::)?(\w+::)*\w+', Name.Variable, 'var_assign'),
             (r'(include|require)', Keyword.Namespace, 'include'),
             (r'import', Keyword.Namespace, 'import'),
@@ -189,9 +202,12 @@ class PuppetLexer(RegexLexer):
             (r'\s', Text),
         ],
         'case': [
-            (r'(default)(:)(\s*)(\{)', bygroups(Keyword.Reserved, Punctuation, Text, Punctuation), 'block'),
+            (r'(default)(:)(\s*)(\{)', bygroups(
+                Keyword.Reserved, Punctuation, Text, Punctuation
+            ), 'block'),
             include('case_values'),
-            (r'(:)(\s*)(\{)', bygroups(Punctuation, Text, Punctuation), 'block'),
+            (r'(:)(\s*)(\{)', bygroups(Punctuation,
+                                       Text, Punctuation), 'block'),
             (r'\s', Text),
             (r'\}', Punctuation, '#pop'),
         ],
@@ -210,7 +226,8 @@ class PuppetLexer(RegexLexer):
         ],
         'dblstring': [
             (r'\$\{.+?\}', String.Interpol),
-            (r'(?:\\(?:[bdefnrstv\'"\$\\/]|[0-7][0-7]?[0-7]?|\^[a-zA-Z]))', String.Escape),
+            (r'(?:\\(?:[bdefnrstv\'"\$\\/]|[0-7][0-7]?[0-7]?|\^[a-zA-Z]))',
+             String.Escape),
             (r'[^"\\\$]+', String.Double),
             (r'\$', String.Double),
             (r'"', String.Double, '#pop'),
@@ -231,7 +248,8 @@ class PuppetLexer(RegexLexer):
             (r'(true|false)', Literal),
         ],
         'operators': [
-            (r'(\s*)(==|=~|\*|-|\+|<<|>>|!=|!~|!|>=|<=|<|>|and|or|in)(\s*)', bygroups(Text, Operator, Text)),
+            (r'(\s*)(==|=~|\*|-|\+|<<|>>|!=|!~|!|>=|<=|<|>|and|or|in)(\s*)',
+             bygroups(Text, Operator, Text)),
         ],
         'conditional': [
             include('operators'),
@@ -275,7 +293,9 @@ class PuppetLexer(RegexLexer):
             (r'\)', Punctuation, '#pop'),
         ],
         'type': [
-            (r'(\w+)(\s*)(=>)(\s*)', bygroups(Name.Tag, Text, Punctuation, Text), 'param_value'),
+            (r'(\w+)(\s*)(=>)(\s*)', bygroups(
+                Name.Tag, Text, Punctuation, Text
+            ), 'param_value'),
             (r'\}', Punctuation, '#pop'),
             (r'\s', Text),
             include('comments'),
@@ -283,13 +303,15 @@ class PuppetLexer(RegexLexer):
         ],
         'value': [
             (r'[\d\.]', Number),
-            (r'([A-Z][\w:]+)+(\[)', bygroups(Name.Class, Punctuation), 'array'),
+            (r'([A-Z][\w:]+)+(\[)',
+             bygroups(Name.Class, Punctuation), 'array'),
             (r'(\w+)(\()', bygroups(Name.Function, Punctuation), 'function'),
             include('strings'),
             include('variables'),
             include('comments'),
             include('booleans'),
-            (r'(\s*)(\?)(\s*)(\{)', bygroups(Text, Punctuation, Text, Punctuation), 'selector'),
+            (r'(\s*)(\?)(\s*)(\{)',
+             bygroups(Text, Punctuation, Text, Punctuation), 'selector'),
             (r'\{', Punctuation, 'hash'),
         ],
         'selector': [
@@ -324,6 +346,7 @@ class PuppetLexer(RegexLexer):
         ],
     }
 
+
 class AugeasLexer(RegexLexer):
     name = 'Augeas'
     aliases = ['augeas']
@@ -331,16 +354,25 @@ class AugeasLexer(RegexLexer):
 
     tokens = {
         'root': [
-            (r'(module)(\s*)([^\s=]+)', bygroups(Keyword.Namespace, Text, Name.Namespace)),
-            (r'(let)(\s*)([^\s=]+)', bygroups(Keyword.Declaration, Text, Name.Variable)),
-            (r'(del|store|value|counter|seq|key|label|autoload|incl|excl|transform|test|get|put)(\s+)', bygroups(Name.Builtin, Text)),
-            (r'(\()([^\:]+)(\:)(unit|string|regexp|lens|tree|filter)(\))', bygroups(Punctuation, Name.Variable, Punctuation, Keyword.Type, Punctuation)),
+            (r'(module)(\s*)([^\s=]+)',
+             bygroups(Keyword.Namespace, Text, Name.Namespace)),
+            (r'(let)(\s*)([^\s=]+)',
+             bygroups(Keyword.Declaration, Text, Name.Variable)),
+            (r'(del|store|value|counter|seq|key|label|autoload|incl|'
+             r'excl|transform|test|get|put)(\s+)',
+             bygroups(Name.Builtin, Text)),
+            (r'(\()([^\:]+)(\:)(unit|string|regexp|lens|tree|filter)(\))',
+             bygroups(
+                 Punctuation, Name.Variable, Punctuation, Keyword.Type,
+                 Punctuation
+             )),
             (r'\(\*', Comment.Multiline, 'comment'),
             (r'[\+=\|\.\*\;\?-]', Operator),
             (r'[\[\]\(\)\{\}]', Operator),
             (r'"', String.Double, 'string'),
             (r'\/', String.Regex, 'regex'),
-            (r'([A-Z]\w*)(\.)(\w+)', bygroups(Name.Namespace, Punctuation, Name.Variable)),
+            (r'([A-Z]\w*)(\.)(\w+)',
+             bygroups(Name.Namespace, Punctuation, Name.Variable)),
             (r'.', Name.Variable),
             (r'\s', Text),
         ],
@@ -361,6 +393,7 @@ class AugeasLexer(RegexLexer):
             (r'[\*\)]', Comment.Multiline)
         ],
     }
+
 
 class TOMLLexer(RegexLexer):
     """
@@ -398,6 +431,7 @@ class TOMLLexer(RegexLexer):
 
         ]
     }
+
 
 class SlashLanguageLexer(ExtendedRegexLexer):
     _nkw = r'(?=[^a-zA-Z_0-9])'
@@ -446,56 +480,61 @@ class SlashLanguageLexer(ExtendedRegexLexer):
             (r'{',                  String.Regex,       "regexp_r"),
         ],
         "slash": [
-            (r"%>",                     Comment.Preproc,    move_state("root")),
-            (r"\"",                     String,             move_state("string")),
+            (r"%>",                     Comment.Preproc, move_state("root")),
+            (r"\"",                     String,          move_state("string")),
             (r"'[a-zA-Z0-9_]+",         String),
-            (r'%r{',                    String.Regex,       move_state("regexp")),
+            (r'%r{',                    String.Regex,    move_state("regexp")),
             (r'/\*.*?\*/',              Comment.Multiline),
             (r"(#|//).*?\n",            Comment.Single),
             (r'-?[0-9]+e[+-]?[0-9]+',   Number.Float),
             (r'-?[0-9]+\.[0-9]+(e[+-]?[0-9]+)?', Number.Float),
             (r'-?[0-9]+',               Number.Integer),
-            (r'nil'+_nkw,               Name.Builtin),
-            (r'true'+_nkw,              Name.Builtin),
-            (r'false'+_nkw,             Name.Builtin),
-            (r'self'+_nkw,              Name.Builtin),
+            (r'nil' + _nkw,               Name.Builtin),
+            (r'true' + _nkw,              Name.Builtin),
+            (r'false' + _nkw,             Name.Builtin),
+            (r'self' + _nkw,              Name.Builtin),
             (r'(class)(\s+)([A-Z][a-zA-Z0-9_\']*)',
                 bygroups(Keyword, Whitespace, Name.Class)),
-            (r'class'+_nkw,             Keyword),
-            (r'extends'+_nkw,           Keyword),
-            (r'(def)(\s+)(self)(\s*)(\.)(\s*)([a-z_][a-zA-Z0-9_\']*=?|<<|>>|==|<=>|<=|<|>=|>|\+|-(self)?|~(self)?|\*|/|%|^|&&|&|\||\[\]=?)',
-                bygroups(Keyword, Whitespace, Name.Builtin, Whitespace, Punctuation, Whitespace, Name.Function)),
-            (r'(def)(\s+)([a-z_][a-zA-Z0-9_\']*=?|<<|>>|==|<=>|<=|<|>=|>|\+|-(self)?|~(self)?|\*|/|%|^|&&|&|\||\[\]=?)',
+            (r'class' + _nkw,             Keyword),
+            (r'extends' + _nkw,           Keyword),
+            (r'(def)(\s+)(self)(\s*)(\.)(\s*)([a-z_][a-zA-Z0-9_\']*=?|<<|>>|'
+             r'==|<=>|<=|<|>=|>|\+|-(self)?|~(self)?|\*|/|%|^|&&|&|\||\[\]=?)',
+                bygroups(
+                    Keyword, Whitespace, Name.Builtin, Whitespace, Punctuation,
+                    Whitespace, Name.Function
+                )),
+            (r'(def)(\s+)([a-z_][a-zA-Z0-9_\']*=?|<<|>>|==|<=>|<=|<|>=|>|\+|'
+             r'-(self)?|~(self)?|\*|/|%|^|&&|&|\||\[\]=?)',
                 bygroups(Keyword, Whitespace, Name.Function)),
-            (r'def'+_nkw,               Keyword),
-            (r'if'+_nkw,                Keyword),
-            (r'elsif'+_nkw,             Keyword),
-            (r'else'+_nkw,              Keyword),
-            (r'unless'+_nkw,            Keyword),
-            (r'for'+_nkw,               Keyword),
-            (r'in'+_nkw,                Keyword),
-            (r'while'+_nkw,             Keyword),
-            (r'until'+_nkw,             Keyword),
-            (r'and'+_nkw,               Keyword),
-            (r'or'+_nkw,                Keyword),
-            (r'not'+_nkw,               Keyword),
-            (r'lambda'+_nkw,            Keyword),
-            (r'try'+_nkw,               Keyword),
-            (r'catch'+_nkw,             Keyword),
-            (r'return'+_nkw,            Keyword),
-            (r'next'+_nkw,              Keyword),
-            (r'last'+_nkw,              Keyword),
-            (r'throw'+_nkw,             Keyword),
-            (r'use'+_nkw,               Keyword),
-            (r'switch'+_nkw,            Keyword),
+            (r'def' + _nkw,               Keyword),
+            (r'if' + _nkw,                Keyword),
+            (r'elsif' + _nkw,             Keyword),
+            (r'else' + _nkw,              Keyword),
+            (r'unless' + _nkw,            Keyword),
+            (r'for' + _nkw,               Keyword),
+            (r'in' + _nkw,                Keyword),
+            (r'while' + _nkw,             Keyword),
+            (r'until' + _nkw,             Keyword),
+            (r'and' + _nkw,               Keyword),
+            (r'or' + _nkw,                Keyword),
+            (r'not' + _nkw,               Keyword),
+            (r'lambda' + _nkw,            Keyword),
+            (r'try' + _nkw,               Keyword),
+            (r'catch' + _nkw,             Keyword),
+            (r'return' + _nkw,            Keyword),
+            (r'next' + _nkw,              Keyword),
+            (r'last' + _nkw,              Keyword),
+            (r'throw' + _nkw,             Keyword),
+            (r'use' + _nkw,               Keyword),
+            (r'switch' + _nkw,            Keyword),
             (r'\\',                     Keyword),
             (r'λ',                      Keyword),
-            (r'__FILE__'+_nkw,          Name.Builtin.Pseudo),
-            (r'__LINE__'+_nkw,          Name.Builtin.Pseudo),
-            (r'[A-Z][a-zA-Z0-9_\']*'+_nkw, Name.Constant),
-            (r'[a-z_][a-zA-Z0-9_\']*'+_nkw, Name),
-            (r'@[a-z_][a-zA-Z0-9_\']*'+_nkw, Name.Variable.Instance),
-            (r'@@[a-z_][a-zA-Z0-9_\']*'+_nkw, Name.Variable.Class),
+            (r'__FILE__' + _nkw,          Name.Builtin.Pseudo),
+            (r'__LINE__' + _nkw,          Name.Builtin.Pseudo),
+            (r'[A-Z][a-zA-Z0-9_\']*' + _nkw, Name.Constant),
+            (r'[a-z_][a-zA-Z0-9_\']*' + _nkw, Name),
+            (r'@[a-z_][a-zA-Z0-9_\']*' + _nkw, Name.Variable.Instance),
+            (r'@@[a-z_][a-zA-Z0-9_\']*' + _nkw, Name.Variable.Class),
             (r'\(',                     Punctuation),
             (r'\)',                     Punctuation),
             (r'\[',                     Punctuation),
@@ -550,6 +589,7 @@ class SlashLanguageLexer(ExtendedRegexLexer):
         ],
     }
 
+
 class SlashLexer(DelegatingLexer):
     """
     Lexer for the Slash programming language.
@@ -561,5 +601,5 @@ class SlashLexer(DelegatingLexer):
 
     def __init__(self, **options):
         from pygments.lexers.web import HtmlLexer
-        super(SlashLexer, self).__init__(HtmlLexer, SlashLanguageLexer, **options)
-
+        super(SlashLexer, self).__init__(
+            HtmlLexer, SlashLanguageLexer, **options)
