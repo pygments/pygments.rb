@@ -16,7 +16,7 @@ Gem::Specification.new do |s|
   s.license = 'MIT'
 
   s.add_development_dependency 'rake-compiler', '~> 1.1.0'
-  s.add_development_dependency 'rubocop', '~> 0.81.0'
+  s.add_development_dependency 'rubocop', '~> 1.7.0'
   s.add_development_dependency 'test-unit', '~> 3.3.0'
 
   # s.extensions = ['ext/extconf.rb']
