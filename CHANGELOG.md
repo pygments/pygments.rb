@@ -10,6 +10,7 @@ Unreleased
 * Add several Python 3.x versions to test matrix
 * Drop dependency on MultiJson
 * Update Pygments to 2.7.3
+* Drop GitHub custom lexers
 
 Version 1.2.1 (2017/12/07)
 -----------------------------
