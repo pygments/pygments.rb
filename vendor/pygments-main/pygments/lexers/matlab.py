@@ -5,13 +5,14 @@
 
     Lexers for Matlab and related languages.
 
-    :copyright: Copyright 2006-2017 by the Pygments team, see AUTHORS.
+    :copyright: Copyright 2006-2020 by the Pygments team, see AUTHORS.
     :license: BSD, see LICENSE for details.
 """
 
 import re
 
-from pygments.lexer import Lexer, RegexLexer, bygroups, words, do_insertions
+from pygments.lexer import Lexer, RegexLexer, bygroups, default, words, \
+    do_insertions
 from pygments.token import Text, Comment, Operator, Keyword, Name, String, \
     Number, Punctuation, Generic, Whitespace
 
@@ -45,32 +46,34 @@ class MatlabLexer(RegexLexer):
     # specfun: Special Math functions
     # elmat: Elementary matrices and matrix manipulation
     #
-    # taken from Matlab version 7.4.0.336 (R2007a)
+    # taken from Matlab version 9.4 (R2018a)
     #
     elfun = ("sin", "sind", "sinh", "asin", "asind", "asinh", "cos", "cosd", "cosh",
              "acos", "acosd", "acosh", "tan", "tand", "tanh", "atan", "atand", "atan2",
-             "atanh", "sec", "secd", "sech", "asec", "asecd", "asech", "csc", "cscd",
+             "atan2d", "atanh", "sec", "secd", "sech", "asec", "asecd", "asech", "csc", "cscd",
              "csch", "acsc", "acscd", "acsch", "cot", "cotd", "coth", "acot", "acotd",
-             "acoth", "hypot", "exp", "expm1", "log", "log1p", "log10", "log2", "pow2",
+             "acoth", "hypot", "deg2rad", "rad2deg", "exp", "expm1", "log", "log1p", "log10", "log2", "pow2",
              "realpow", "reallog", "realsqrt", "sqrt", "nthroot", "nextpow2", "abs",
              "angle", "complex", "conj", "imag", "real", "unwrap", "isreal", "cplxpair",
              "fix", "floor", "ceil", "round", "mod", "rem", "sign")
     specfun = ("airy", "besselj", "bessely", "besselh", "besseli", "besselk", "beta",
-               "betainc", "betaln", "ellipj", "ellipke", "erf", "erfc", "erfcx",
-               "erfinv", "expint", "gamma", "gammainc", "gammaln", "psi", "legendre",
+               "betainc", "betaincinv", "betaln", "ellipj", "ellipke", "erf", "erfc", "erfcx",
+               "erfinv", "erfcinv", "expint", "gamma", "gammainc", "gammaincinv", "gammaln", "psi", "legendre",
                "cross", "dot", "factor", "isprime", "primes", "gcd", "lcm", "rat",
                "rats", "perms", "nchoosek", "factorial", "cart2sph", "cart2pol",
                "pol2cart", "sph2cart", "hsv2rgb", "rgb2hsv")
-    elmat = ("zeros", "ones", "eye", "repmat", "rand", "randn", "linspace", "logspace",
+    elmat = ("zeros", "ones", "eye", "repmat", "repelem", "linspace", "logspace",
              "freqspace", "meshgrid", "accumarray", "size", "length", "ndims", "numel",
-             "disp", "isempty", "isequal", "isequalwithequalnans", "cat", "reshape",
-             "diag", "blkdiag", "tril", "triu", "fliplr", "flipud", "flipdim", "rot90",
+             "disp", "isempty", "isequal", "isequaln", "cat", "reshape",
+             "diag", "blkdiag", "tril", "triu", "fliplr", "flipud", "flip", "rot90",
              "find", "end", "sub2ind", "ind2sub", "bsxfun", "ndgrid", "permute",
              "ipermute", "shiftdim", "circshift", "squeeze", "isscalar", "isvector",
-             "ans", "eps", "realmax", "realmin", "pi", "i", "inf", "nan", "isnan",
-             "isinf", "isfinite", "j", "why", "compan", "gallery", "hadamard", "hankel",
+             "isrow", "iscolumn", "ismatrix", "eps", "realmax", "realmin", "intmax", "intmin", "flintmax", "pi", "i", "inf", "nan", "isnan",
+             "isinf", "isfinite", "j", "true", "false", "compan", "gallery", "hadamard", "hankel",
              "hilb", "invhilb", "magic", "pascal", "rosser", "toeplitz", "vander",
              "wilkinson")
+
+    _operators = r'-|==|~=|<=|>=|<|>|&&|&|~|\|\|?|\.\*|\*|\+|\.\^|\.\\|\./|/|\\'
 
     tokens = {
         'root': [
@@ -79,25 +82,40 @@ class MatlabLexer(RegexLexer):
             (r'^!.*', String.Other),
             (r'%\{\s*\n', Comment.Multiline, 'blockcomment'),
             (r'%.*$', Comment),
-            (r'^\s*function', Keyword, 'deffunc'),
+            (r'^\s*function\b', Keyword, 'deffunc'),
 
-            # from 'iskeyword' on version 7.11 (R2010):
-            (words((
-                'break', 'case', 'catch', 'classdef', 'continue', 'else', 'elseif',
-                'end', 'enumerated', 'events', 'for', 'function', 'global', 'if',
-                'methods', 'otherwise', 'parfor', 'persistent', 'properties',
-                'return', 'spmd', 'switch', 'try', 'while'), suffix=r'\b'),
+            # from 'iskeyword' on version 9.4 (R2018a):
+            # Check that there is no preceding dot, as keywords are valid field
+            # names.
+            (words(('break', 'case', 'catch', 'classdef', 'continue', 'else',
+                    'elseif', 'end', 'for', 'function',
+                    'global', 'if', 'otherwise', 'parfor',
+                    'persistent', 'return', 'spmd', 'switch',
+                    'try', 'while'),
+                   prefix=r'(?<!\.)', suffix=r'\b'),
              Keyword),
 
             ("(" + "|".join(elfun + specfun + elmat) + r')\b',  Name.Builtin),
 
             # line continuation with following comment:
-            (r'\.\.\..*$', Comment),
+            (r'(\.\.\.)(.*)$', bygroups(Keyword, Comment)),
+
+            # command form:
+            # "How MATLAB Recognizes Command Syntax" specifies that an operator
+            # is recognized if it is either surrounded by spaces or by no
+            # spaces on both sides; only the former case matters for us.  (This
+            # allows distinguishing `cd ./foo` from `cd ./ foo`.)
+            (r'(?:^|(?<=;))(\s*)(\w+)(\s+)(?!=|\(|(?:%s)\s+)' % _operators,
+             bygroups(Text, Name, Text), 'commandargs'),
 
             # operators:
-            (r'-|==|~=|<|>|<=|>=|&&|&|~|\|\|?', Operator),
-            # operators requiring escape for re:
-            (r'\.\*|\*|\+|\.\^|\.\\|\.\/|\/|\\', Operator),
+            (_operators, Operator),
+
+            # numbers (must come before punctuation to handle `.5`; cannot use
+            # `\b` due to e.g. `5. + .5`).
+            (r'(?<!\w)((\d+\.\d*)|(\d*\.\d+))([eEf][+-]?\d+)?(?!\w)', Number.Float),
+            (r'\b\d+[eEf][+-]?[0-9]+\b', Number.Float),
+            (r'\b\d+\b', Number.Integer),
 
             # punctuation:
             (r'\[|\]|\(|\)|\{|\}|:|@|\.|,', Punctuation),
@@ -107,16 +125,11 @@ class MatlabLexer(RegexLexer):
             # (not great, but handles common cases...)
             (r'(?<=[\w)\].])\'+', Operator),
 
-            (r'(\d+\.\d*|\d*\.\d+)([eEf][+-]?[0-9]+)?', Number.Float),
-            (r'\d+[eEf][+-]?[0-9]+', Number.Float),
-            (r'\d+', Number.Integer),
+            (r'"(""|[^"])*"', String),
 
             (r'(?<![\w)\].])\'', String, 'string'),
             (r'[a-zA-Z_]\w*', Name),
             (r'.', Text),
-        ],
-        'string': [
-            (r'[^\']*\'', String, '#pop')
         ],
         'blockcomment': [
             (r'^\s*%\}', Comment.Multiline, '#pop'),
@@ -131,12 +144,36 @@ class MatlabLexer(RegexLexer):
             # function with no args
             (r'(\s*)([a-zA-Z_]\w*)', bygroups(Text, Name.Function), '#pop'),
         ],
+        'string': [
+            (r"[^']*'", String, '#pop'),
+        ],
+        'commandargs': [
+            # If an equal sign or other operator is encountered, this
+            # isn't a command. It might be a variable assignment or
+            # comparison operation with multiple spaces before the
+            # equal sign or operator
+            (r"=", Punctuation, '#pop'),
+            (_operators, Operator, '#pop'),
+            (r"[ \t]+", Text),
+            ("'[^']*'", String),
+            (r"[^';\s]+", String),
+            (";", Punctuation, '#pop'),
+            default('#pop'),
+        ]
     }
 
     def analyse_text(text):
-        if re.match('^\s*%', text, re.M):  # comment
+        # function declaration.
+        first_non_comment = next((line for line in text.splitlines()
+                                  if not re.match(r'^\s*%', text)), '').strip()
+        if (first_non_comment.startswith('function')
+                and '{' not in first_non_comment):
+            return 1.
+        # comment
+        elif re.search(r'^\s*%', text, re.M):
             return 0.2
-        elif re.match('^!\w+', text, re.M):  # system cmd
+        # system cmd
+        elif re.search(r'^!\w+', text, re.M):
             return 0.2
 
 
@@ -158,6 +195,7 @@ class MatlabSessionLexer(Lexer):
 
         curcode = ''
         insertions = []
+        continuation = False
 
         for match in line_re.finditer(text):
             line = match.group()
@@ -180,21 +218,36 @@ class MatlabSessionLexer(Lexer):
                 # line = "\n" + line
                 token = (0, Generic.Traceback, line)
                 insertions.append((idx, [token]))
-
+            elif continuation:
+                # line_start is the length of the most recent prompt symbol
+                line_start = len(insertions[-1][-1][-1])
+                # Set leading spaces with the length of the prompt to be a generic prompt
+                # This keeps code aligned when prompts are removed, say with some Javascript
+                if line.startswith(' '*line_start):
+                    insertions.append((len(curcode),
+                                    [(0, Generic.Prompt, line[:line_start])]))
+                    curcode += line[line_start:]
+                else:
+                    curcode += line
             else:
                 if curcode:
-                    for item in do_insertions(
-                            insertions, mlexer.get_tokens_unprocessed(curcode)):
-                        yield item
+                    yield from do_insertions(
+                        insertions, mlexer.get_tokens_unprocessed(curcode))
                     curcode = ''
                     insertions = []
 
                 yield match.start(), Generic.Output, line
 
+            # Does not allow continuation if a comment is included after the ellipses.
+            # Continues any line that ends with ..., even comments (lines that start with %)
+            if line.strip().endswith('...'):
+                continuation = True
+            else:
+                continuation = False
+
         if curcode:  # or item:
-            for item in do_insertions(
-                    insertions, mlexer.get_tokens_unprocessed(curcode)):
-                yield item
+            yield from do_insertions(
+                insertions, mlexer.get_tokens_unprocessed(curcode))
 
 
 class OctaveLexer(RegexLexer):
@@ -536,7 +589,7 @@ class OctaveLexer(RegexLexer):
         'root': [
             # We should look into multiline comments
             (r'[%#].*$', Comment),
-            (r'^\s*function', Keyword, 'deffunc'),
+            (r'^\s*function\b', Keyword, 'deffunc'),
 
             # from 'iskeyword' on hg changeset 8cc154f45e37
             (words((
@@ -594,6 +647,10 @@ class OctaveLexer(RegexLexer):
         ],
     }
 
+    def analyse_text(text):
+        """Octave is quite hard to spot, and it looks like Matlab as well."""
+        return 0
+
 
 class ScilabLexer(RegexLexer):
     """
@@ -609,7 +666,7 @@ class ScilabLexer(RegexLexer):
     tokens = {
         'root': [
             (r'//.*?$', Comment.Single),
-            (r'^\s*function', Keyword, 'deffunc'),
+            (r'^\s*function\b', Keyword, 'deffunc'),
 
             (words((
                 '__FILE__', '__LINE__', 'break', 'case', 'catch', 'classdef', 'continue', 'do', 'else',

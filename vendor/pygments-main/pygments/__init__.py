@@ -17,19 +17,18 @@
     * it is usable as a command-line tool and as a library
     * ... and it highlights even Brainfuck!
 
-    The `Pygments tip`_ is installable with ``easy_install Pygments==dev``.
+    The `Pygments master branch`_ is installable with ``easy_install Pygments==dev``.
 
-    .. _Pygments tip:
-       http://bitbucket.org/birkenfeld/pygments-main/get/tip.zip#egg=Pygments-dev
+    .. _Pygments master branch:
+       https://github.com/pygments/pygments/archive/master.zip#egg=Pygments-dev
 
-    :copyright: Copyright 2006-2017 by the Pygments team, see AUTHORS.
+    :copyright: Copyright 2006-2020 by the Pygments team, see AUTHORS.
     :license: BSD, see LICENSE for details.
 """
 import sys
+from io import StringIO, BytesIO
 
-from pygments.util import StringIO, BytesIO
-
-__version__ = '2.2.0'
+__version__ = '2.7.3'
 __docformat__ = 'restructuredtext'
 
 __all__ = ['lex', 'format', 'highlight']
@@ -84,7 +83,3 @@ def highlight(code, lexer, formatter, outfile=None):
     """
     return format(lex(code, lexer), formatter, outfile)
 
-
-if __name__ == '__main__':  # pragma: no cover
-    from pygments.cmdline import main
-    sys.exit(main(sys.argv))

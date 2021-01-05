@@ -5,7 +5,7 @@
 
     Lexers for UrbiScript language.
 
-    :copyright: Copyright 2006-2017 by the Pygments team, see AUTHORS.
+    :copyright: Copyright 2006-2020 by the Pygments team, see AUTHORS.
     :license: BSD, see LICENSE for details.
 """
 
@@ -131,3 +131,16 @@ class UrbiscriptLexer(ExtendedRegexLexer):
             (r'[*/]', Comment.Multiline),
         ]
     }
+
+    def analyse_text(text):
+        """This is fairly similar to C and others, but freezeif and
+        waituntil are unique keywords."""
+        result = 0
+
+        if 'freezeif' in text:
+            result += 0.05
+
+        if 'waituntil' in text:
+            result += 0.05
+
+        return result

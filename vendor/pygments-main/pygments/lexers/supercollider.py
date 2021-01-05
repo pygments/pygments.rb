@@ -5,7 +5,7 @@
 
     Lexer for SuperCollider
 
-    :copyright: Copyright 2006-2017 by the Pygments team, see AUTHORS.
+    :copyright: Copyright 2006-2020 by the Pygments team, see AUTHORS.
     :license: BSD, see LICENSE for details.
 """
 
@@ -88,3 +88,8 @@ class SuperColliderLexer(RegexLexer):
             (r"'(\\\\|\\'|[^'])*'", String.Single),
         ]
     }
+
+    def analyse_text(text):
+        """We're searching for a common function and a unique keyword here."""
+        if 'SinOsc' in text or 'thisFunctionDef' in text:
+            return 0.1

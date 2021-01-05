@@ -5,7 +5,7 @@
 
     Lexer for the Chapel language.
 
-    :copyright: Copyright 2006-2017 by the Pygments team, see AUTHORS.
+    :copyright: Copyright 2006-2020 by the Pygments team, see AUTHORS.
     :license: BSD, see LICENSE for details.
 """
 
@@ -18,7 +18,7 @@ __all__ = ['ChapelLexer']
 
 class ChapelLexer(RegexLexer):
     """
-    For `Chapel <http://chapel.cray.com/>`_ source.
+    For `Chapel <https://chapel-lang.org/>`_ source.
 
     .. versionadded:: 2.0
     """
@@ -38,20 +38,30 @@ class ChapelLexer(RegexLexer):
 
             (r'(config|const|in|inout|out|param|ref|type|var)\b',
              Keyword.Declaration),
-            (r'(false|nil|true)\b', Keyword.Constant),
-            (r'(bool|complex|imag|int|opaque|range|real|string|uint)\b',
+            (r'(false|nil|none|true)\b', Keyword.Constant),
+            (r'(bool|bytes|complex|imag|int|nothing|opaque|range|real|string|uint|void)\b',
              Keyword.Type),
             (words((
-                'align', 'as', 'atomic', 'begin', 'break', 'by', 'cobegin',
-                'coforall', 'continue', 'delete', 'dmapped', 'do', 'domain',
-                'else', 'enum', 'except', 'export', 'extern', 'for', 'forall',
-                'if', 'index', 'inline', 'iter', 'label', 'lambda', 'let',
-                'local', 'new', 'noinit', 'on', 'only', 'otherwise', 'pragma',
-                'private', 'public', 'reduce', 'require', 'return', 'scan',
-                'select', 'serial', 'single', 'sparse', 'subdomain', 'sync',
-                'then', 'use', 'when', 'where', 'while', 'with', 'yield',
+                'align', 'as', 'atomic',
+                'begin', 'borrowed', 'break', 'by',
+                'catch', 'cobegin', 'coforall', 'continue',
+                'defer', 'delete', 'dmapped', 'do', 'domain',
+                'else', 'enum', 'except', 'export', 'extern',
+                'for', 'forall', 'forwarding',
+                'if', 'import', 'index', 'init', 'inline',
+                'label', 'lambda', 'let', 'lifetime', 'local', 'locale'
+                'new', 'noinit',
+                'on', 'only', 'otherwise', 'override', 'owned',
+                'pragma', 'private', 'prototype', 'public',
+                'reduce', 'require', 'return',
+                'scan', 'select', 'serial', 'shared', 'single', 'sparse', 'subdomain', 'sync',
+                'then', 'this', 'throw', 'throws', 'try',
+                'unmanaged', 'use',
+                'when', 'where', 'while', 'with',
+                'yield',
                 'zip'), suffix=r'\b'),
              Keyword),
+            (r'(iter)((?:\s)+)', bygroups(Keyword, Text), 'procname'),
             (r'(proc)((?:\s)+)', bygroups(Keyword, Text), 'procname'),
             (r'(class|module|record|union)(\s+)', bygroups(Keyword, Text),
              'classname'),
@@ -96,7 +106,7 @@ class ChapelLexer(RegexLexer):
             (r'[a-zA-Z_][\w$]*', Name.Class, '#pop'),
         ],
         'procname': [
-            (r'([a-zA-Z_][\w$]+|\~[a-zA-Z_][\w$]+|[+*/!~%<>=&^|\-]{1,2})',
+            (r'([a-zA-Z_][.\w$]*|\~[a-zA-Z_][.\w$]*|[+*/!~%<>=&^|\-]{1,2})',
              Name.Function, '#pop'),
         ],
     }

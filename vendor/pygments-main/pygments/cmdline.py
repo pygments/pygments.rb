@@ -5,11 +5,9 @@
 
     Command line interface.
 
-    :copyright: Copyright 2006-2017 by the Pygments team, see AUTHORS.
+    :copyright: Copyright 2006-2020 by the Pygments team, see AUTHORS.
     :license: BSD, see LICENSE for details.
 """
-
-from __future__ import print_function
 
 import os
 import sys
@@ -18,7 +16,8 @@ from textwrap import dedent
 
 from pygments import __version__, highlight
 from pygments.util import ClassNotFound, OptionError, docstring_headline, \
-    guess_decode, guess_decode_from_terminal, terminal_encoding
+    guess_decode, guess_decode_from_terminal, terminal_encoding, \
+    UnclosingTextIOWrapper
 from pygments.lexers import get_all_lexers, get_lexer_by_name, guess_lexer, \
     load_lexer_from_file, get_lexer_for_filename, find_lexer_class_for_filename
 from pygments.lexers.special import TextLexer
@@ -233,7 +232,7 @@ def main_inner(popts, args, usage):
         return 0
 
     if opts.pop('-V', None) is not None:
-        print('Pygments version %s, (c) 2006-2017 by Georg Brandl.' % __version__)
+        print('Pygments version %s, (c) 2006-2020 by Georg Brandl.' % __version__)
         return 0
 
     # handle ``pygmentize -L``
@@ -338,8 +337,17 @@ def main_inner(popts, args, usage):
         # custom lexer, located relative to user's cwd
         if allow_custom_lexer_formatter and '.py' in lexername:
             try:
+                filename = None
+                name = None
                 if ':' in lexername:
                     filename, name = lexername.rsplit(':', 1)
+
+                    if '.py' in name:
+                        # This can happen on Windows: If the lexername is
+                        # C:\lexer.py -- return to normal load path in that case
+                        name = None
+
+                if filename and name:
                     lexer = load_lexer_from_file(filename, name,
                                                  **parsed_opts)
                 else:
@@ -397,11 +405,7 @@ def main_inner(popts, args, usage):
     elif '-s' not in opts:  # treat stdin as full file (-s support is later)
         # read code from terminal, always in binary mode since we want to
         # decode ourselves and be tolerant with it
-        if sys.version_info > (3,):
-            # Python 3: we have to use .buffer to get a binary stream
-            code = sys.stdin.buffer.read()
-        else:
-            code = sys.stdin.read()
+        code = sys.stdin.buffer.read()  # use .buffer to get a binary stream
         if not inencoding:
             code, inencoding = guess_decode_from_terminal(code, sys.stdin)
             # else the lexer will do the decoding
@@ -432,10 +436,18 @@ def main_inner(popts, args, usage):
         # custom formatter, located relative to user's cwd
         if allow_custom_lexer_formatter and '.py' in fmter:
             try:
+                filename = None
+                name = None
                 if ':' in fmter:
-                    file, fmtername = fmter.rsplit(':', 1)
-                    fmter = load_formatter_from_file(file, fmtername,
-                                                     **parsed_opts)
+                    # Same logic as above for custom lexer
+                    filename, name = fmter.rsplit(':', 1)
+
+                    if '.py' in name:
+                        name = None
+
+                if filename and name:
+                    fmter = load_formatter_from_file(filename, name,
+                                    **parsed_opts)
                 else:
                     fmter = load_formatter_from_file(fmter, **parsed_opts)
             except ClassNotFound as err:
@@ -466,11 +478,7 @@ def main_inner(popts, args, usage):
                 fmter = Terminal256Formatter(**parsed_opts)
             else:
                 fmter = TerminalFormatter(**parsed_opts)
-        if sys.version_info > (3,):
-            # Python 3: we have to use .buffer to get a binary stream
-            outfile = sys.stdout.buffer
-        else:
-            outfile = sys.stdout
+        outfile = sys.stdout.buffer
 
     # determine output encoding if not explicitly selected
     if not outencoding:
@@ -485,10 +493,8 @@ def main_inner(popts, args, usage):
     if not outfn and sys.platform in ('win32', 'cygwin') and \
        fmter.name in ('Terminal', 'Terminal256'):  # pragma: no cover
         # unfortunately colorama doesn't support binary streams on Py3
-        if sys.version_info > (3,):
-            from pygments.util import UnclosingTextIOWrapper
-            outfile = UnclosingTextIOWrapper(outfile, encoding=fmter.encoding)
-            fmter.encoding = None
+        outfile = UnclosingTextIOWrapper(outfile, encoding=fmter.encoding)
+        fmter.encoding = None
         try:
             import colorama.initialise
         except ImportError:
@@ -509,17 +515,17 @@ def main_inner(popts, args, usage):
     # ... and do it!
     if '-s' not in opts:
         # process whole input as per normal...
-        highlight(code, lexer, fmter, outfile)
+        try:
+            highlight(code, lexer, fmter, outfile)
+        finally:
+            if outfn:
+                outfile.close()
         return 0
     else:
         # line by line processing of stdin (eg: for 'tail -f')...
         try:
             while 1:
-                if sys.version_info > (3,):
-                    # Python 3: we have to use .buffer to get a binary stream
-                    line = sys.stdin.buffer.readline()
-                else:
-                    line = sys.stdin.readline()
+                line = sys.stdin.buffer.readline()
                 if not line:
                     break
                 if not inencoding:
@@ -530,6 +536,9 @@ def main_inner(popts, args, usage):
             return 0
         except KeyboardInterrupt:  # pragma: no cover
             return 0
+        finally:
+            if outfn:
+                outfile.close()
 
 
 def main(args=sys.argv):
@@ -554,7 +563,7 @@ def main(args=sys.argv):
                   file=sys.stderr)
             print('Please report the whole traceback to the issue tracker at',
                   file=sys.stderr)
-            print('<https://bitbucket.org/birkenfeld/pygments-main/issues>.',
+            print('<https://github.com/pygments/pygments/issues>.',
                   file=sys.stderr)
             print('*' * 65, file=sys.stderr)
             print(file=sys.stderr)

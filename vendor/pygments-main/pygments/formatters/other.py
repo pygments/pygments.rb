@@ -5,12 +5,12 @@
 
     Other formatters: NullFormatter, RawTokenFormatter.
 
-    :copyright: Copyright 2006-2017 by the Pygments team, see AUTHORS.
+    :copyright: Copyright 2006-2020 by the Pygments team, see AUTHORS.
     :license: BSD, see LICENSE for details.
 """
 
 from pygments.formatter import Formatter
-from pygments.util import OptionError, get_choice_opt
+from pygments.util import get_choice_opt
 from pygments.token import Token
 from pygments.console import colorize
 
@@ -87,14 +87,17 @@ class RawTokenFormatter(Formatter):
         if self.compress == 'gz':
             import gzip
             outfile = gzip.GzipFile('', 'wb', 9, outfile)
+
             def write(text):
                 outfile.write(text.encode())
             flush = outfile.flush
         elif self.compress == 'bz2':
             import bz2
             compressor = bz2.BZ2Compressor(9)
+
             def write(text):
                 outfile.write(compressor.compress(text.encode()))
+
             def flush():
                 outfile.write(compressor.flush())
                 outfile.flush()
@@ -115,14 +118,15 @@ class RawTokenFormatter(Formatter):
                 write("%s\t%r\n" % (ttype, value))
         flush()
 
-TESTCASE_BEFORE = u'''\
-    def testNeedsName(self):
+
+TESTCASE_BEFORE = '''\
+    def testNeedsName(lexer):
         fragment = %r
         tokens = [
 '''
-TESTCASE_AFTER = u'''\
+TESTCASE_AFTER = '''\
         ]
-        self.assertEqual(tokens, list(self.lexer.get_tokens(fragment)))
+        assert list(lexer.get_tokens(fragment)) == tokens
 '''
 
 
@@ -148,8 +152,8 @@ class TestcaseFormatter(Formatter):
             rawbuf.append(value)
             outbuf.append('%s(%s, %r),\n' % (indentation, ttype, value))
 
-        before = TESTCASE_BEFORE % (u''.join(rawbuf),)
-        during = u''.join(outbuf)
+        before = TESTCASE_BEFORE % (''.join(rawbuf),)
+        during = ''.join(outbuf)
         after = TESTCASE_AFTER
         if self.encoding is None:
             outfile.write(before + during + after)

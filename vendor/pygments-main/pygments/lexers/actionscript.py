@@ -5,7 +5,7 @@
 
     Lexers for ActionScript and MXML.
 
-    :copyright: Copyright 2006-2017 by the Pygments team, see AUTHORS.
+    :copyright: Copyright 2006-2020 by the Pygments team, see AUTHORS.
     :license: BSD, see LICENSE for details.
 """
 
@@ -110,6 +110,11 @@ class ActionScriptLexer(RegexLexer):
         ]
     }
 
+    def analyse_text(text):
+        """This is only used to disambiguate between ActionScript and
+        ActionScript3. We return 0 here; the ActionScript3 lexer will match
+        AS3 variable definitions and that will hopefully suffice."""
+        return 0
 
 class ActionScript3Lexer(RegexLexer):
     """
@@ -125,7 +130,7 @@ class ActionScript3Lexer(RegexLexer):
                  'text/actionscript3']
 
     identifier = r'[$a-zA-Z_]\w*'
-    typeidentifier = identifier + '(?:\.<\w+>)?'
+    typeidentifier = identifier + r'(?:\.<\w+>)?'
 
     flags = re.DOTALL | re.MULTILINE
     tokens = {
@@ -232,7 +237,7 @@ class MxmlLexer(RegexLexer):
             (r'/?\s*>', Name.Tag, '#pop'),
         ],
         'attr': [
-            ('\s+', Text),
+            (r'\s+', Text),
             ('".*?"', String, '#pop'),
             ("'.*?'", String, '#pop'),
             (r'[^\s>]+', String, '#pop'),

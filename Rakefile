@@ -48,10 +48,7 @@ task(:build).enhance([:lexers])
 
 namespace :vendor do
   file 'vendor/pygments-main' do |f|
-    sh "hg clone https://bitbucket.org/birkenfeld/pygments-main #{f.name}"
-    sh "hg --repository #{f.name} identify --id > #{f.name}/REVISION"
-    rm_rf Dir["#{f.name}/.hg*"]
-    rm_rf Dir["#{f.name}/tests"]
+    sh "pip install --target=#{f.name} pygments"
   end
 
   task :clobber do

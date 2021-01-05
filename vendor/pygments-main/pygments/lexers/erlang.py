@@ -5,7 +5,7 @@
 
     Lexers for Erlang.
 
-    :copyright: Copyright 2006-2017 by the Pygments team, see AUTHORS.
+    :copyright: Copyright 2006-2020 by the Pygments team, see AUTHORS.
     :license: BSD, see LICENSE for details.
 """
 
@@ -163,7 +163,7 @@ class ErlangShellLexer(Lexer):
     filenames = ['*.erl-sh']
     mimetypes = ['text/x-erl-shellsession']
 
-    _prompt_re = re.compile(r'\d+>(?=\s|\Z)')
+    _prompt_re = re.compile(r'(?:\([\w@_.]+\))?\d+>(?=\s|\Z)')
 
     def get_tokens_unprocessed(self, text):
         erlexer = ErlangLexer(**self.options)
@@ -180,9 +180,8 @@ class ErlangShellLexer(Lexer):
                 curcode += line[end:]
             else:
                 if curcode:
-                    for item in do_insertions(insertions,
-                                              erlexer.get_tokens_unprocessed(curcode)):
-                        yield item
+                    yield from do_insertions(insertions,
+                                             erlexer.get_tokens_unprocessed(curcode))
                     curcode = ''
                     insertions = []
                 if line.startswith('*'):
@@ -190,9 +189,8 @@ class ErlangShellLexer(Lexer):
                 else:
                     yield match.start(), Generic.Output, line
         if curcode:
-            for item in do_insertions(insertions,
-                                      erlexer.get_tokens_unprocessed(curcode)):
-                yield item
+            yield from do_insertions(insertions,
+                                     erlexer.get_tokens_unprocessed(curcode))
 
 
 def gen_elixir_string_rules(name, symbol, token):
@@ -207,10 +205,10 @@ def gen_elixir_string_rules(name, symbol, token):
     return states
 
 
-def gen_elixir_sigstr_rules(term, token, interpol=True):
+def gen_elixir_sigstr_rules(term, term_class, token, interpol=True):
     if interpol:
         return [
-            (r'[^#%s\\]+' % (term,), token),
+            (r'[^#%s\\]+' % (term_class,), token),
             include('escapes'),
             (r'\\.', token),
             (r'%s[a-zA-Z]*' % (term,), token, '#pop'),
@@ -218,7 +216,7 @@ def gen_elixir_sigstr_rules(term, token, interpol=True):
         ]
     else:
         return [
-            (r'[^%s\\]+' % (term,), token),
+            (r'[^%s\\]+' % (term_class,), token),
             (r'\\.', token),
             (r'%s[a-zA-Z]*' % (term,), token, '#pop'),
         ]
@@ -233,7 +231,7 @@ class ElixirLexer(RegexLexer):
 
     name = 'Elixir'
     aliases = ['elixir', 'ex', 'exs']
-    filenames = ['*.ex', '*.exs']
+    filenames = ['*.ex', '*.eex', '*.exs']
     mimetypes = ['text/x-elixir']
 
     KEYWORD = ('fn', 'do', 'end', 'after', 'else', 'rescue', 'catch')
@@ -291,14 +289,14 @@ class ElixirLexer(RegexLexer):
     def gen_elixir_sigil_rules():
         # all valid sigil terminators (excluding heredocs)
         terminators = [
-            (r'\{', r'\}', 'cb'),
-            (r'\[', r'\]', 'sb'),
-            (r'\(', r'\)', 'pa'),
-            (r'<', r'>', 'ab'),
-            (r'/', r'/', 'slas'),
-            (r'\|', r'\|', 'pipe'),
-            ('"', '"', 'quot'),
-            ("'", "'", 'apos'),
+            (r'\{', r'\}', '}',   'cb'),
+            (r'\[', r'\]', r'\]', 'sb'),
+            (r'\(', r'\)', ')',   'pa'),
+            ('<',   '>',   '>',   'ab'),
+            ('/',   '/',   '/',   'slas'),
+            (r'\|', r'\|', '|',   'pipe'),
+            ('"',   '"',   '"',   'quot'),
+            ("'",   "'",   "'",   'apos'),
         ]
 
         # heredocs have slightly different rules
@@ -328,14 +326,15 @@ class ElixirLexer(RegexLexer):
                 include('heredoc_no_interpol'),
             ]
 
-        for lterm, rterm, name in terminators:
+        for lterm, rterm, rterm_class, name in terminators:
             states['sigils'] += [
                 (r'~[a-z]' + lterm, token, name + '-intp'),
                 (r'~[A-Z]' + lterm, token, name + '-no-intp'),
             ]
-            states[name + '-intp'] = gen_elixir_sigstr_rules(rterm, token)
+            states[name + '-intp'] = \
+                gen_elixir_sigstr_rules(rterm, rterm_class, token)
             states[name + '-no-intp'] = \
-                gen_elixir_sigstr_rules(rterm, token, interpol=False)
+                gen_elixir_sigstr_rules(rterm, rterm_class, token, interpol=False)
 
         return states
 
@@ -344,7 +343,7 @@ class ElixirLexer(RegexLexer):
     op1_re = "|".join(re.escape(s) for s in OPERATORS1)
     ops_re = r'(?:%s|%s|%s)' % (op3_re, op2_re, op1_re)
     punctuation_re = "|".join(re.escape(s) for s in PUNCTUATION)
-    alnum = '\w'
+    alnum = r'\w'
     name_re = r'(?:\.\.\.|[a-z_]%s*[!?]?)' % alnum
     modname_re = r'[A-Z]%(alnum)s*(?:\.[A-Z]%(alnum)s*)*' % {'alnum': alnum}
     complex_name_re = r'(?:%s|%s|%s)' % (name_re, modname_re, ops_re)
@@ -495,7 +494,7 @@ class ElixirConsoleLexer(Lexer):
     aliases = ['iex']
     mimetypes = ['text/x-elixir-shellsession']
 
-    _prompt_re = re.compile('(iex|\.{3})(\(\d+\))?> ')
+    _prompt_re = re.compile(r'(iex|\.{3})((?:\([\w@_.]+\))?\d+|\(\d+\))?> ')
 
     def get_tokens_unprocessed(self, text):
         exlexer = ElixirLexer(**self.options)
@@ -505,7 +504,7 @@ class ElixirConsoleLexer(Lexer):
         insertions = []
         for match in line_re.finditer(text):
             line = match.group()
-            if line.startswith(u'** '):
+            if line.startswith('** '):
                 in_error = True
                 insertions.append((len(curcode),
                                    [(0, Generic.Error, line[:-1])]))
@@ -520,14 +519,12 @@ class ElixirConsoleLexer(Lexer):
                     curcode += line[end:]
                 else:
                     if curcode:
-                        for item in do_insertions(
-                                insertions, exlexer.get_tokens_unprocessed(curcode)):
-                            yield item
+                        yield from do_insertions(
+                            insertions, exlexer.get_tokens_unprocessed(curcode))
                         curcode = ''
                         insertions = []
                     token = Generic.Error if in_error else Generic.Output
                     yield match.start(), token, line
         if curcode:
-            for item in do_insertions(
-                    insertions, exlexer.get_tokens_unprocessed(curcode)):
-                yield item
+            yield from do_insertions(
+                insertions, exlexer.get_tokens_unprocessed(curcode))

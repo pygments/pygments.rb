@@ -5,7 +5,7 @@
 
     Formatter for terminal output with ANSI sequences.
 
-    :copyright: Copyright 2006-2017 by the Pygments team, see AUTHORS.
+    :copyright: Copyright 2006-2020 by the Pygments team, see AUTHORS.
     :license: BSD, see LICENSE for details.
 """
 
@@ -26,33 +26,33 @@ __all__ = ['TerminalFormatter']
 TERMINAL_COLORS = {
     Token:              ('',            ''),
 
-    Whitespace:         ('lightgray',   'darkgray'),
-    Comment:            ('lightgray',   'darkgray'),
-    Comment.Preproc:    ('teal',        'turquoise'),
-    Keyword:            ('darkblue',    'blue'),
-    Keyword.Type:       ('teal',        'turquoise'),
-    Operator.Word:      ('purple',      'fuchsia'),
-    Name.Builtin:       ('teal',        'turquoise'),
-    Name.Function:      ('darkgreen',   'green'),
-    Name.Namespace:     ('_teal_',      '_turquoise_'),
-    Name.Class:         ('_darkgreen_', '_green_'),
-    Name.Exception:     ('teal',        'turquoise'),
-    Name.Decorator:     ('darkgray',    'lightgray'),
-    Name.Variable:      ('darkred',     'red'),
-    Name.Constant:      ('darkred',     'red'),
-    Name.Attribute:     ('teal',        'turquoise'),
-    Name.Tag:           ('blue',        'blue'),
-    String:             ('brown',       'brown'),
-    Number:             ('darkblue',    'blue'),
+    Whitespace:         ('gray',   'brightblack'),
+    Comment:            ('gray',   'brightblack'),
+    Comment.Preproc:    ('cyan',        'brightcyan'),
+    Keyword:            ('blue',    'brightblue'),
+    Keyword.Type:       ('cyan',        'brightcyan'),
+    Operator.Word:      ('magenta',      'brightmagenta'),
+    Name.Builtin:       ('cyan',        'brightcyan'),
+    Name.Function:      ('green',   'brightgreen'),
+    Name.Namespace:     ('_cyan_',      '_brightcyan_'),
+    Name.Class:         ('_green_', '_brightgreen_'),
+    Name.Exception:     ('cyan',        'brightcyan'),
+    Name.Decorator:     ('brightblack',    'gray'),
+    Name.Variable:      ('red',     'brightred'),
+    Name.Constant:      ('red',     'brightred'),
+    Name.Attribute:     ('cyan',        'brightcyan'),
+    Name.Tag:           ('brightblue',        'brightblue'),
+    String:             ('yellow',       'yellow'),
+    Number:             ('blue',    'brightblue'),
 
-    Generic.Deleted:    ('red',        'red'),
-    Generic.Inserted:   ('darkgreen',  'green'),
+    Generic.Deleted:    ('brightred',        'brightred'),
+    Generic.Inserted:   ('green',  'brightgreen'),
     Generic.Heading:    ('**',         '**'),
-    Generic.Subheading: ('*purple*',   '*fuchsia*'),
+    Generic.Subheading: ('*magenta*',   '*brightmagenta*'),
     Generic.Prompt:     ('**',         '**'),
-    Generic.Error:      ('red',        'red'),
+    Generic.Error:      ('brightred',        'brightred'),
 
-    Error:              ('_red_',      '_red_'),
+    Error:              ('_brightred_',      '_brightred_'),
 }
 
 
@@ -92,12 +92,6 @@ class TerminalFormatter(Formatter):
         self._lineno = 0
 
     def format(self, tokensource, outfile):
-        # hack: if the output is a terminal and has an encoding set,
-        # use that to avoid unicode encode problems
-        if not self.encoding and hasattr(outfile, "encoding") and \
-           hasattr(outfile, "isatty") and outfile.isatty() and \
-           sys.version_info < (3,):
-            self.encoding = outfile.encoding
         return Formatter.format(self, tokensource, outfile)
 
     def _write_lineno(self, outfile):

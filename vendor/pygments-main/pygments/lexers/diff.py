@@ -5,7 +5,7 @@
 
     Lexers for diff/patch formats.
 
-    :copyright: Copyright 2006-2017 by the Pygments team, see AUTHORS.
+    :copyright: Copyright 2006-2020 by the Pygments team, see AUTHORS.
     :license: BSD, see LICENSE for details.
 """
 
@@ -114,9 +114,9 @@ class WDiffLexer(RegexLexer):
 
     Note that:
 
-    * only to normal output (without option like -l).
-    * if target files of wdiff contain "[-", "-]", "{+", "+}",
-      especially they are unbalanced, this lexer will get confusing.
+    * It only works with normal output (without options like ``-l``).
+    * If the target files contain "[-", "-]", "{+", or "+}",
+      especially they are unbalanced, the lexer will get confused.
 
     .. versionadded:: 2.2
     """

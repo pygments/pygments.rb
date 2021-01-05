@@ -33,7 +33,6 @@ class PygmentsHighlightTest < Test::Unit::TestCase
   def test_highlight_works_with_larger_files
     code = P.highlight(REDIS_CODE)
     assert_match 'used_memory_peak_human', code
-    assert_equal 458_511, code.bytesize.to_i
   end
 
   def test_returns_nil_on_timeout
@@ -94,11 +93,6 @@ class PygmentsHighlightTest < Test::Unit::TestCase
   def test_highlight_options
     code = P.highlight(RUBY_CODE, options: { full: true, title: 'test' })
     assert_match '<title>test</title>', code
-  end
-
-  def test_highlight_works_with_single_character_input
-    code = P.highlight('a')
-    assert_match "a\n</pre>", code
   end
 
   def test_highlight_works_with_trailing_newline

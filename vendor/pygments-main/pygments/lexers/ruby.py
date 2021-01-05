@@ -5,7 +5,7 @@
 
     Lexers for Ruby and related languages.
 
-    :copyright: Copyright 2006-2017 by the Pygments team, see AUTHORS.
+    :copyright: Copyright 2006-2020 by the Pygments team, see AUTHORS.
     :license: BSD, see LICENSE for details.
 """
 
@@ -43,23 +43,22 @@ class RubyLexer(ExtendedRegexLexer):
 
     def heredoc_callback(self, match, ctx):
         # okay, this is the hardest part of parsing Ruby...
-        # match: 1 = <<-?, 2 = quote? 3 = name 4 = quote? 5 = rest of line
+        # match: 1 = <<[-~]?, 2 = quote? 3 = name 4 = quote? 5 = rest of line
 
         start = match.start(1)
-        yield start, Operator, match.group(1)        # <<-?
+        yield start, Operator, match.group(1)        # <<[-~]?
         yield match.start(2), String.Heredoc, match.group(2)   # quote ", ', `
         yield match.start(3), String.Delimiter, match.group(3) # heredoc name
         yield match.start(4), String.Heredoc, match.group(4)   # quote again
 
         heredocstack = ctx.__dict__.setdefault('heredocstack', [])
         outermost = not bool(heredocstack)
-        heredocstack.append((match.group(1) == '<<-', match.group(3)))
+        heredocstack.append((match.group(1) in ('<<-', '<<~'), match.group(3)))
 
         ctx.pos = match.start(5)
         ctx.end = match.end(5)
         # this may find other heredocs
-        for i, t, v in self.get_tokens_unprocessed(context=ctx):
-            yield i, t, v
+        yield from self.get_tokens_unprocessed(context=ctx)
         ctx.pos = match.end()
 
         if outermost:
@@ -109,16 +108,17 @@ class RubyLexer(ExtendedRegexLexer):
             (r'\:@{0,2}[a-zA-Z_]\w*[!?]?', String.Symbol),
             (words(RUBY_OPERATORS, prefix=r'\:@{0,2}'), String.Symbol),
             (r":'(\\\\|\\'|[^'])*'", String.Symbol),
-            (r"'(\\\\|\\'|[^'])*'", String.Single),
             (r':"', String.Symbol, 'simple-sym'),
             (r'([a-zA-Z_]\w*)(:)(?!:)',
              bygroups(String.Symbol, Punctuation)),  # Since Ruby 1.9
-            (r'"', String.Double, 'simple-string'),
+            (r'"', String.Double, 'simple-string-double'),
+            (r"'", String.Single, 'simple-string-single'),
             (r'(?<!\.)`', String.Backtick, 'simple-backtick'),
         ]
 
-        # double-quoted string and symbol
-        for name, ttype, end in ('string', String.Double, '"'), \
+        # quoted string and symbol
+        for name, ttype, end in ('string-double', String.Double, '"'), \
+                                ('string-single', String.Single, "'"),\
                                 ('sym', String.Symbol, '"'), \
                                 ('backtick', String.Backtick, '`'):
             states['simple-'+name] = [
@@ -247,10 +247,10 @@ class RubyLexer(ExtendedRegexLexer):
              Name.Builtin),
             (r'__(FILE|LINE)__\b', Name.Builtin.Pseudo),
             # normal heredocs
-            (r'(?<!\w)(<<-?)(["`\']?)([a-zA-Z_]\w*)(\2)(.*?\n)',
+            (r'(?<!\w)(<<[-~]?)(["`\']?)([a-zA-Z_]\w*)(\2)(.*?\n)',
              heredoc_callback),
             # empty string heredocs
-            (r'(<<-?)("|\')()(\2)(.*?\n)', heredoc_callback),
+            (r'(<<[-~]?)("|\')()(\2)(.*?\n)', heredoc_callback),
             (r'__END__', Comment.Preproc, 'end-part'),
             # multiline regex (after keywords or assignments)
             (r'(?:^|(?<=[=<>~!:])|'
@@ -403,8 +403,8 @@ class RubyConsoleLexer(Lexer):
     aliases = ['rbcon', 'irb']
     mimetypes = ['text/x-ruby-shellsession']
 
-    _prompt_re = re.compile('irb\([a-zA-Z_]\w*\):\d{3}:\d+[>*"\'] '
-                            '|>> |\?> ')
+    _prompt_re = re.compile(r'irb\([a-zA-Z_]\w*\):\d{3}:\d+[>*"\'] '
+                            r'|>> |\?> ')
 
     def get_tokens_unprocessed(self, text):
         rblexer = RubyLexer(**self.options)
@@ -421,16 +421,14 @@ class RubyConsoleLexer(Lexer):
                 curcode += line[end:]
             else:
                 if curcode:
-                    for item in do_insertions(
-                            insertions, rblexer.get_tokens_unprocessed(curcode)):
-                        yield item
+                    yield from do_insertions(
+                        insertions, rblexer.get_tokens_unprocessed(curcode))
                     curcode = ''
                     insertions = []
                 yield match.start(), Generic.Output, line
         if curcode:
-            for item in do_insertions(
-                    insertions, rblexer.get_tokens_unprocessed(curcode)):
-                yield item
+            yield from do_insertions(
+                insertions, rblexer.get_tokens_unprocessed(curcode))
 
 
 class FancyLexer(RegexLexer):
@@ -498,11 +496,11 @@ class FancyLexer(RegexLexer):
             (r'[a-zA-Z](\w|[-+?!=*/^><%])*:', Name.Function),
             # operators, must be below functions
             (r'[-+*/~,<>=&!?%^\[\].$]+', Operator),
-            ('[A-Z]\w*', Name.Constant),
-            ('@[a-zA-Z_]\w*', Name.Variable.Instance),
-            ('@@[a-zA-Z_]\w*', Name.Variable.Class),
+            (r'[A-Z]\w*', Name.Constant),
+            (r'@[a-zA-Z_]\w*', Name.Variable.Instance),
+            (r'@@[a-zA-Z_]\w*', Name.Variable.Class),
             ('@@?', Operator),
-            ('[a-zA-Z_]\w*', Name),
+            (r'[a-zA-Z_]\w*', Name),
             # numbers - / checks are necessary to avoid mismarking regexes,
             # see comment in RubyLexer
             (r'(0[oO]?[0-7]+(?:_[0-7]+)*)(\s*)([/?])?',
