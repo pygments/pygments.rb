@@ -29,14 +29,14 @@ require 'pygments'
 ```
 
 ```ruby
-Pygments.highlight(File.read(__FILE__), :lexer => 'ruby')
+Pygments.highlight(File.read(__FILE__), lexer: 'ruby')
 ```
 
 Encoding and other lexer/formatter options can be passed in via an
 options hash:
 
 ```ruby
-Pygments.highlight('code', :options => {:encoding => 'utf-8'})
+Pygments.highlight('code', options: {encoding: 'utf-8'})
 ```
 
 pygments.rb defaults to using an HTML formatter.
@@ -44,8 +44,8 @@ To use a formatter other than `html`, specify it explicitly
 like so:
 
 ```ruby
-Pygments.highlight('code', :formatter => 'bbcode')
-Pygments.highlight('code', :formatter => 'terminal')
+Pygments.highlight('code', formatter: 'bbcode')
+Pygments.highlight('code', formatter: 'terminal')
 ```
 
 To generate CSS for HTML formatted code, use the `#css` method:
@@ -58,7 +58,7 @@ Pygments.css('.highlight')
 To use a specific pygments style, pass the `:style` option to the `#css` method:
 
 ```ruby
-Pygments.css(:style => "monokai")
+Pygments.css(style: "monokai")
 ```
 
 Other Pygments high-level API methods are also available.
@@ -85,7 +85,7 @@ You can change this by setting the environmental variable `MENTOS_TIMEOUT` to a
 different value or by passing the `:timeout` option (taking precedence over `MENTOS_TIMEOUT`):
 
 ```ruby
-Pygments.highlight('code', :timeout => 4)
+Pygments.highlight('code', timeout: 4)
 ```
 
 ## benchmarks
