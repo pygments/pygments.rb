@@ -1,0 +1,17 @@
+name: Publish to RubyGems.org
+on:
+  push:
+    tags: [ '*' ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.0'
+      - name: Publish to RubyGems.org
+        uses: dawidd6/action-publish-gem@v1
+        with:
+          api_key: ${{ secrets.RUBYGEMS_API_KEY }}
