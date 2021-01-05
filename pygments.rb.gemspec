@@ -10,6 +10,7 @@ Gem::Specification.new do |s|
   s.description = 'pygments.rb exposes the pygments syntax highlighter to Ruby'
 
   s.homepage = 'https://github.com/tmm1/pygments.rb'
+  s.required_ruby_version = '>= 2.3.0'
 
   s.authors = ['Aman Gupta', 'Ted Nyman']
   s.email = ['aman@tmm1.net']
