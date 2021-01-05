@@ -5,7 +5,7 @@
 
     Lexers for Xorg configs.
 
-    :copyright: Copyright 2006-2017 by the Pygments team, see AUTHORS.
+    :copyright: Copyright 2006-2020 by the Pygments team, see AUTHORS.
     :license: BSD, see LICENSE for details.
 """
 
@@ -16,6 +16,7 @@ __all__ = ['XorgLexer']
 
 
 class XorgLexer(RegexLexer):
+    """Lexer for xorg.conf file."""
     name = 'Xorg'
     aliases = ['xorg.conf']
     filenames = ['xorg.conf']
@@ -26,9 +27,9 @@ class XorgLexer(RegexLexer):
             (r'\s+', Text),
             (r'#.*$', Comment),
 
-            (r'((|Sub)Section)(\s+)("\w+")',
-             bygroups(String.Escape, String.Escape, Text, String.Escape)),
-            (r'(End(|Sub)Section)', String.Escape),
+            (r'((?:Sub)?Section)(\s+)("\w+")',
+             bygroups(String.Escape, Text, String.Escape)),
+            (r'(End(?:Sub)?Section)', String.Escape),
 
             (r'(\w+)(\s+)([^\n#]+)',
              bygroups(Name.Builtin, Text, Name.Constant)),

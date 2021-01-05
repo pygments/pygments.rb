@@ -11,7 +11,6 @@ dirname = os.path.dirname
 base_dir = dirname(dirname(dirname(os.path.abspath(__file__))))
 sys.path.append(base_dir + "/vendor")
 sys.path.append(base_dir + "/vendor/pygments-main")
-sys.path.append(base_dir + "/vendor/simplejson")
 
 import pygments
 from pygments import lexers, formatters, styles, filters

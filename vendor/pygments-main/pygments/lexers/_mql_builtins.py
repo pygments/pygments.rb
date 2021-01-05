@@ -5,7 +5,7 @@
 
     Builtins for the MqlLexer.
 
-    :copyright: Copyright 2006-2017 by the Pygments team, see AUTHORS.
+    :copyright: Copyright 2006-2020 by the Pygments team, see AUTHORS.
     :license: BSD, see LICENSE for details.
 """
 types = (
@@ -884,7 +884,7 @@ constants = (
     'PERIOD_W1',
     'POINTER_AUTOMATIC',
     'POINTER_DYNAMIC',
-    'POINTER_INVALID'
+    'POINTER_INVALID',
     'PRICE_CLOSE',
     'PRICE_HIGH',
     'PRICE_LOW',

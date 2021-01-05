@@ -5,7 +5,7 @@
 
     Lexers for languages related to text processing.
 
-    :copyright: Copyright 2006-2017 by the Pygments team, see AUTHORS.
+    :copyright: Copyright 2006-2020 by the Pygments team, see AUTHORS.
     :license: BSD, see LICENSE for details.
 """
 
@@ -102,9 +102,9 @@ class VimLexer(RegexLexer):
 
             (r'[ \t]+', Text),
             # TODO: regexes can have other delims
-            (r'/(\\\\|\\/|[^\n/])*/', String.Regex),
-            (r'"(\\\\|\\"|[^\n"])*"', String.Double),
-            (r"'(''|[^\n'])*'", String.Single),
+            (r'/[^/\\\n]*(?:\\[\s\S][^/\\\n]*)*/', String.Regex),
+            (r'"[^"\\\n]*(?:\\[\s\S][^"\\\n]*)*"', String.Double),
+            (r"'[^\n']*(?:''[^\n']*)*'", String.Single),
 
             # Who decided that doublequote was a good comment character??
             (r'(?<=\s)"[^\-:.%#=*].*', Comment),

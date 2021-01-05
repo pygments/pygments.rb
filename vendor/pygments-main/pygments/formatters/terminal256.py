@@ -11,7 +11,7 @@
 
     Formatter version 1.
 
-    :copyright: Copyright 2006-2017 by the Pygments team, see AUTHORS.
+    :copyright: Copyright 2006-2020 by the Pygments team, see AUTHORS.
     :license: BSD, see LICENSE for details.
 """
 
@@ -35,11 +35,12 @@ __all__ = ['Terminal256Formatter', 'TerminalTrueColorFormatter']
 
 
 class EscapeSequence:
-    def __init__(self, fg=None, bg=None, bold=False, underline=False):
+    def __init__(self, fg=None, bg=None, bold=False, underline=False, italic=False):
         self.fg = fg
         self.bg = bg
         self.bold = bold
         self.underline = underline
+        self.italic = italic
 
     def escape(self, attrs):
         if len(attrs):
@@ -50,7 +51,7 @@ class EscapeSequence:
         attrs = []
         if self.fg is not None:
             if self.fg in ansicolors:
-                esc = codes[self.fg[5:]]
+                esc = codes[self.fg.replace('ansi','')]
                 if ';01m' in esc:
                     self.bold = True
                 # extract fg color code.
@@ -59,7 +60,7 @@ class EscapeSequence:
                 attrs.extend(("38", "5", "%i" % self.fg))
         if self.bg is not None:
             if self.bg in ansicolors:
-                esc = codes[self.bg[5:]]
+                esc = codes[self.bg.replace('ansi','')]
                 # extract fg color code, add 10 for bg.
                 attrs.append(str(int(esc[2:4])+10))
             else:
@@ -68,6 +69,8 @@ class EscapeSequence:
             attrs.append("01")
         if self.underline:
             attrs.append("04")
+        if self.italic:
+            attrs.append("03")
         return self.escape(attrs)
 
     def true_color_string(self):
@@ -80,6 +83,8 @@ class EscapeSequence:
             attrs.append("01")
         if self.underline:
             attrs.append("04")
+        if self.italic:
+            attrs.append("03")
         return self.escape(attrs)
 
     def reset_string(self):
@@ -88,7 +93,7 @@ class EscapeSequence:
             attrs.append("39")
         if self.bg is not None:
             attrs.append("49")
-        if self.bold or self.underline:
+        if self.bold or self.underline or self.italic:
             attrs.append("00")
         return self.escape(attrs)
 
@@ -110,6 +115,12 @@ class Terminal256Formatter(Formatter):
        `Terminal256Formatter` will map these to non extended foreground color.
        See :ref:`AnsiTerminalStyle` for more information.
 
+    .. versionchanged:: 2.4
+       The ANSI color names have been updated with names that are easier to
+       understand and align with colornames of other projects and terminals.
+       See :ref:`this table <new-ansi-color-names>` for more information.
+
+
     Options accepted:
 
     `style`
@@ -129,6 +140,7 @@ class Terminal256Formatter(Formatter):
 
         self.usebold = 'nobold' not in options
         self.useunderline = 'nounderline' not in options
+        self.useitalic = 'noitalic' not in options
 
         self._build_color_table()  # build an RGB-to-256 color conversion table
         self._setup_styles()  # convert selected style's colors to term. colors
@@ -189,7 +201,7 @@ class Terminal256Formatter(Formatter):
     def _color_index(self, color):
         index = self.best_match.get(color, None)
         if color in ansicolors:
-            # strip the `#ansi` part and look up code
+            # strip the `ansi/#ansi` part and look up code
             index = color
             self.best_match[color] = index
         if index is None:
@@ -221,16 +233,12 @@ class Terminal256Formatter(Formatter):
                 escape.bold = True
             if self.useunderline and ndef['underline']:
                 escape.underline = True
+            if self.useitalic and ndef['italic']:
+                escape.italic = True
             self.style_string[str(ttype)] = (escape.color_string(),
                                              escape.reset_string())
 
     def format(self, tokensource, outfile):
-        # hack: if the output is a terminal and has an encoding set,
-        # use that to avoid unicode encode problems
-        if not self.encoding and hasattr(outfile, "encoding") and \
-           hasattr(outfile, "isatty") and outfile.isatty() and \
-           sys.version_info < (3,):
-            self.encoding = outfile.encoding
         return Formatter.format(self, tokensource, outfile)
 
     def format_unencoded(self, tokensource, outfile):
@@ -305,5 +313,7 @@ class TerminalTrueColorFormatter(Terminal256Formatter):
                 escape.bold = True
             if self.useunderline and ndef['underline']:
                 escape.underline = True
+            if self.useitalic and ndef['italic']:
+                escape.italic = True
             self.style_string[str(ttype)] = (escape.true_color_string(),
                                              escape.reset_string())

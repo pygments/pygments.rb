@@ -5,7 +5,7 @@
 
     Lexers for "business-oriented" languages.
 
-    :copyright: Copyright 2006-2017 by the Pygments team, see AUTHORS.
+    :copyright: Copyright 2006-2020 by the Pygments team, see AUTHORS.
     :license: BSD, see LICENSE for details.
 """
 
@@ -500,11 +500,26 @@ class OpenEdgeLexer(RegexLexer):
         ],
     }
 
+    def analyse_text(text):
+        """Try to identify OpenEdge ABL based on a few common constructs."""
+        result = 0
+
+        if 'END.' in text:
+            result += 0.05
+
+        if 'END PROCEDURE.' in text:
+            result += 0.05
+
+        if 'ELSE DO:' in text:
+            result += 0.05
+
+        return result
+
 
 class GoodDataCLLexer(RegexLexer):
     """
     Lexer for `GoodData-CL
-    <http://github.com/gooddata/GoodData-CL/raw/master/cli/src/main/resources/\
+    <https://github.com/gooddata/GoodData-CL/raw/master/cli/src/main/resources/\
 com/gooddata/processor/COMMANDS.txt>`_
     script files.
 

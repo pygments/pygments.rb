@@ -5,15 +5,16 @@
 
     Special lexers.
 
-    :copyright: Copyright 2006-2017 by the Pygments team, see AUTHORS.
+    :copyright: Copyright 2006-2020 by the Pygments team, see AUTHORS.
     :license: BSD, see LICENSE for details.
 """
 
 import re
+from io import BytesIO
 
 from pygments.lexer import Lexer
 from pygments.token import Token, Error, Text
-from pygments.util import get_choice_opt, text_type, BytesIO
+from pygments.util import get_choice_opt
 
 
 __all__ = ['TextLexer', 'RawTokenLexer']
@@ -34,6 +35,7 @@ class TextLexer(Lexer):
 
     def analyse_text(text):
         return TextLexer.priority
+
 
 _ttype_cache = {}
 
@@ -63,7 +65,7 @@ class RawTokenLexer(Lexer):
         Lexer.__init__(self, **options)
 
     def get_tokens(self, text):
-        if isinstance(text, text_type):
+        if isinstance(text, str):
             # raw token stream never has any non-ASCII characters
             text = text.encode('ascii')
         if self.compress == 'gz':
