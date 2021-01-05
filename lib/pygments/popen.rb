@@ -164,11 +164,6 @@ module Pygments
           filenames: lxr[2],
           mimetypes: lxr[3]
         }
-        hash['dasm16'] = { name: 'dasm16', aliases: ['DASM16'], filenames: ['*.dasm16', '*.dasm'], mimetypes: ['text/x-dasm16'] }
-        hash['Puppet'] = { name: 'Puppet', aliases: ['puppet'], filenames: ['*.pp'], mimetypes: [] }
-        hash['Augeas'] = { name: 'Augeas', aliases: ['augeas'], filenames: ['*.aug'], mimetypes: [] }
-        hash['TOML']   = { name: 'TOML',   aliases: ['toml'],   filenames: ['*.toml'], mimetypes: [] }
-        hash['Slash']  = { name: 'Slash',  aliases: ['slash'],  filenames: ['*.sl'], mimetypes: [] }
       end
     end
 
