@@ -1,9 +1,9 @@
 # pygments.rb [![GitHub Actions][gh-actions_badge]][gh-actions_url] [![Gem Version][gem_badge]][gem_url]
 
-[gh-actions_badge]: https://github.com/tmm1/pygments.rb/workflows/CI/badge.svg
-[gh-actions_url]: https://github.com/tmm1/pygments.rb/actions?query=workflow%3ACI
-[gem_badge]: https://badge.fury.io/rb/pygments.rb.svg
-[gem_url]: https://badge.fury.io/rb/pygments.rb
+[gh-actions_badge]: https://github.com/tmm1/pygments.rb/workflows/CI/badge.svg?branch=master
+[gh-actions_url]: https://github.com/tmm1/pygments.rb/actions?query=branch%3Amaster
+[gem_badge]: https://img.shields.io/gem/v/pygments.rb.svg
+[gem_url]: https://rubygems.org/gems/pygments.rb
 
 A Ruby wrapper for the Python [pygments syntax highlighter](http://pygments.org/).
 
