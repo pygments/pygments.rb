@@ -147,28 +147,6 @@ class PygmentsValidityTest < Test::Unit::TestCase
     res = PE.send(:add_ids, '\\# ø ø ø..//', 'ABCDEFGH')
     assert_equal 'ABCDEFGH  \\# ø ø ø..//  ABCDEFGH', res
   end
-
-  def test_get_fixed_bits_from_header
-    bits = PE.send(:get_fixed_bits_from_header, '{"herp": "derp"}')
-    assert_equal '00000000000000000000000000010000', bits
-  end
-
-  def test_get_fixed_bits_from_header_works_with_large_headers
-    bits = PE.send(:get_fixed_bits_from_header, '{"herp": "derp"}' * 10_000)
-    assert_equal '00000000000000100111000100000000', bits
-  end
-
-  def test_size_check
-    size = '00000000000000000000000000100110'
-    res = PE.send(:size_check, size)
-    assert_equal res, true
-  end
-
-  def test_size_check_bad
-    size = 'some random thing'
-    res = PE.send(:size_check, size)
-    assert_equal res, false
-  end
 end
 
 class PygmentsLexerTest < Test::Unit::TestCase

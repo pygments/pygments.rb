@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import struct
 import sys, re, os, signal
 import traceback
 if 'PYGMENTS_PATH' in os.environ:
@@ -9,13 +10,10 @@ if 'PYGMENTS_PATH' in os.environ:
 dirname = os.path.dirname
 
 base_dir = dirname(dirname(dirname(os.path.abspath(__file__))))
-sys.path.append(base_dir + "/vendor")
 sys.path.append(base_dir + "/vendor/pygments-main")
 
 import pygments
 from pygments import lexers, formatters, styles, filters
-
-from threading import Lock
 
 try:
     import json
@@ -31,20 +29,10 @@ def _convert_keys(dictionary):
 def _write_error(error):
     res = {"error": error}
     out_header_bytes = json.dumps(res).encode('utf-8')
-    bits = _get_fixed_bits_from_header(out_header_bytes)
-    sys.stdout.buffer.write(bits + b"\n")
-    sys.stdout.flush()
-    sys.stdout.buffer.write(out_header_bytes + b"\n")
+    sys.stdout.buffer.write(struct.pack('!i', len(out_header_bytes)))
+    sys.stdout.buffer.write(out_header_bytes)
     sys.stdout.flush()
     return
-
-def _get_fixed_bits_from_header(out_header_bytes):
-    """
-    Encode the length of the bytes-string `out_header` as a 32-long binary:
-    _get_fixed_bits_from_header(b'abcd') == b'00000000000000000000000000000100'
-    """
-    size = len(out_header_bytes)
-    return "".join([str((size>>y)&1) for y in range(32-1, -1, -1)]).encode('utf-8')
 
 def _signal_handler(signal, frame):
     """
@@ -193,30 +181,19 @@ class Mentos(object):
 
 
     def _send_data(self, res, method):
-
         # Base header. We'll build on this, adding keys as necessary.
         base_header = {"method": method}
 
         res_bytes = res.encode("utf-8")
-        bytes = len(res_bytes) + 1
+        bytes = len(res_bytes)
         base_header["bytes"] = bytes
 
         out_header_bytes = json.dumps(base_header).encode('utf-8')
 
-        # Following the protocol, send over a fixed size represenation of the
-        # size of the JSON header
-        bits = _get_fixed_bits_from_header(out_header_bytes)
-
         # Send it to Rubyland
-        sys.stdout.buffer.write(bits + b"\n")
-        sys.stdout.flush()
-
-        # Send the header.
-        sys.stdout.buffer.write(out_header_bytes + b"\n")
-        sys.stdout.flush()
-
-        # Finally, send the result
-        sys.stdout.buffer.write(res_bytes + b"\n")
+        sys.stdout.buffer.write(struct.pack('!i', len(out_header_bytes)))
+        sys.stdout.buffer.write(out_header_bytes)
+        sys.stdout.buffer.write(res_bytes)
         sys.stdout.flush()
 
 
@@ -259,30 +236,16 @@ class Mentos(object):
         The header is of form:
         { "method": "highlight", "args": [], "kwargs": {"arg1": "v"}, "bytes": 128, "fd": "8"}
         """
-        lock = Lock()
 
         while True:
-            # The loop begins by reading off a simple 32-arity string
-            # representing an integer of 32 bits. This is the length of
-            # our JSON header.
-            size = sys.stdin.buffer.read(32).decode('utf-8')
-
-            if not size:
+            header_size_bytes = sys.stdin.buffer.read(4)
+            if not header_size_bytes:
                 break
 
-            lock.acquire()
+            header_size = struct.unpack('!i', header_size_bytes)[0]
 
             try:
-                # Read from stdin the amount of bytes we were told to expect.
-                header_bytes = int(size, 2)
-
-                # Sanity check the size
-                size_regex = re.compile('[0-1]{32}')
-                if not size_regex.match(size):
-                    _write_error("Size received is not valid.")
-
-                line = sys.stdin.buffer.read(header_bytes).decode('utf-8')
-
+                line = sys.stdin.buffer.read(header_size).decode('utf-8')
                 header = json.loads(line)
 
                 method, args, kwargs, lexer = self._parse_header(header)
@@ -316,9 +279,6 @@ class Mentos(object):
                 tb = traceback.format_exc()
                 _write_error(tb)
 
-            finally:
-                lock.release()
-
 def main():
 
     # Signal handlers to trap signals.
@@ -329,11 +289,7 @@ def main():
 
     mentos = Mentos()
 
-    if sys.platform == "win32":
-        # disable CRLF
-        import msvcrt
-        msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
-    else:
+    if sys.platform != "win32":
         # close fd's inherited from the ruby parent
         import resource
         maxfd = resource.getrlimit(resource.RLIMIT_NOFILE)[1]
@@ -350,6 +306,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
