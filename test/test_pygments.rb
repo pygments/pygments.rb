@@ -116,6 +116,8 @@ class PygmentsHighlightTest < Test::Unit::TestCase
   end
 
   def test_highlight_on_multi_threads
+    omit "We do not actually support multithreading"
+
     10.times.map do
       Thread.new do
         test_full_html_highlight
