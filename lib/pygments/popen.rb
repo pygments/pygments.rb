@@ -54,15 +54,13 @@ module Pygments
     end
 
     # Detect a suitable Python binary to use.
-    # Or return $PYGMENTS_RB_PYTHON if it's exists.
     def find_python_binary
-      if ENV['PYGMENTS_RB_PYTHON']
-        return which(ENV['PYGMENTS_RB_PYTHON'])
-      elsif Gem.win_platform? && which('py')
-        return %w[py -3]
+      if Gem.win_platform?
+        return %w[py python3 python].first { |py| !which(py).nil? }
       end
 
-      which('python3') || which('python')
+      # On non-Windows platforms, we simply rely on shebang
+      []
     end
 
     # Cross platform which command
