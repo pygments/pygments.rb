@@ -5,7 +5,6 @@ Unreleased
 -----------------------------
 
 * Modify `mentos.py` to run on Python 3.x instead of Python 2.7
-* Add `:timeout` keyword option to allow for configurable timeouts
 * Add several Python 3.x versions to test matrix
 * Drop dependency on MultiJson
 * Fix hanging on JRuby + Windows
@@ -13,6 +12,8 @@ Unreleased
 * Drop GitHub custom lexers
 * Rework timeout handling
 * Improve error message when Python is not found
+* **Breaking change** pygments.rb no longer sets default timeout for its operations
+* **Breaking change** now pygments.rb raises `MentosError` instead of returning `nil` on timeout
 
 Version 1.2.1 (2017/12/07)
 -----------------------------

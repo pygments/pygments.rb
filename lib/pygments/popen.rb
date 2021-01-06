@@ -152,7 +152,7 @@ module Pygments
     #
     # Returns an array of lexers.
     def lexers!
-      mentos(:get_all_lexers, nil, { timeout: 30 }).each_with_object({}) do |lxr, hash|
+      mentos(:get_all_lexers).each_with_object({}) do |lxr, hash|
         name = lxr[0]
         hash[name] = {
           name: name,
@@ -249,10 +249,7 @@ module Pygments
           watchdog.join
         end
 
-        if state == :timeout
-          # raise MentosError, "Timeout on a mentos #{method} call"
-          return nil
-        end
+        raise MentosError, error_message if state == :timeout
       end
     end
 
@@ -269,7 +266,7 @@ module Pygments
         timeout_time = begin
                          Integer(ENV['MENTOS_TIMEOUT'])
                        rescue TypeError
-                         10
+                         0
                        end
       end
 

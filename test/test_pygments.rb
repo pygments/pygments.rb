@@ -35,18 +35,11 @@ class PygmentsHighlightTest < Test::Unit::TestCase
     assert_match 'used_memory_peak_human', code
   end
 
-  def test_returns_nil_on_timeout
-    large_code = REDIS_CODE * 300
-    code = P.highlight(large_code) # a 30 mb highlight request will timeout
-    assert_equal nil, code
-  end
-
-  def test_supports_configurable_timeout
-    code = P.highlight(REDIS_CODE)
-    assert_match 'used_memory_peak_human', code
-    # Assume highlighting a large file will take more than 1 millisecond
-    code = P.highlight(REDIS_CODE, timeout: 0.001)
-    assert_equal nil, code
+  def test_raises_exception_on_timeout
+    assert_raise MentosError.new('Timeout on a mentos highlight call') do
+      # Assume highlighting a large file will take more than 1 millisecond
+      P.highlight(REDIS_CODE, timeout: 0.001)
+    end
   end
 
   def test_highlight_works_with_null_bytes
