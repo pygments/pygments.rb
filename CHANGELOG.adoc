@@ -8,6 +8,7 @@ For a detailed view of what has changed, refer to the {uri-repo}/commits/master[
 == Unreleased
 
 * stop sending/receiving `ids` between Ruby and Python
+* use `close_others` Ruby mechanism to prevent file descriptor leaking to Python
 
 == 2.0.0.rc3 (2021-01-08) - @slonopotamus
 

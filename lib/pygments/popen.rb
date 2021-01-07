@@ -14,7 +14,7 @@ end
 module Pygments
   class Popen
     def popen4(argv)
-      stdin, stdout, stderr, wait_thr = Open3.popen3(*argv)
+      stdin, stdout, stderr, wait_thr = Open3.popen3(*argv, { close_others: true })
       while (pid = wait_thr.pid).nil? && wait_thr.alive?
         # For unknown reasons, wait_thr.pid is not immediately available on JRuby
       end
@@ -42,7 +42,7 @@ module Pygments
       @pid, @in, @out, @err = popen4(argv)
       @in.binmode
       @out.binmode
-      @log.info "Starting pid #{@pid} with fd #{@out.to_i} and python #{python_binary}."
+      @log.info "Starting pid #{@pid} with python #{python_binary}."
     end
 
     def python_binary
@@ -280,7 +280,7 @@ module Pygments
                  end
 
       kwargs.freeze
-      kwargs = kwargs.merge('fd' => @out.to_i, 'bytes' => bytesize)
+      kwargs = kwargs.merge('bytes' => bytesize)
       out_header = JSON.generate(method: method, args: args, kwargs: kwargs)
 
       begin
