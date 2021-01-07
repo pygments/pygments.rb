@@ -5,7 +5,7 @@
 This document provides a high-level view of the changes to the {project-name} by release.
 For a detailed view of what has changed, refer to the {uri-repo}/commits/master[commit history] on GitHub.
 
-== Unreleased
+== 2.0.0.rc1 (2021-01-07) - @slonopotamus
 
 * Modify `mentos.py` to run on Python 3.x instead of Python 2.7
 * Add `:timeout` parameter to allow for configurable timeouts
