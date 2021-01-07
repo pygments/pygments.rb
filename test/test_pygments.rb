@@ -10,7 +10,7 @@ PE = Pygments.engine
 class PygmentsHighlightTest < Test::Unit::TestCase
   RUBY_CODE = "#!/usr/bin/ruby\nputs 'foo'"
   RUBY_CODE_TRAILING_NEWLINE = "#!/usr/bin/ruby\nputs 'foo'\n"
-  REDIS_CODE = File.read(File.join(File.dirname(__FILE__), '..', '/test/test_data.c'))
+  TEST_CODE = File.read(File.join(File.dirname(__FILE__), '..', 'lib', 'pygments', 'mentos.py'))
 
   def test_highlight_defaults_to_html
     code = P.highlight(RUBY_CODE)
@@ -31,14 +31,14 @@ class PygmentsHighlightTest < Test::Unit::TestCase
   end
 
   def test_highlight_works_with_larger_files
-    code = P.highlight(REDIS_CODE)
-    assert_match 'used_memory_peak_human', code
+    code = P.highlight(TEST_CODE)
+    assert_match 'Main loop, waiting for inputs on stdin', code
   end
 
   def test_raises_exception_on_timeout
     assert_raise MentosError.new('Timeout on a mentos highlight call') do
       # Assume highlighting a large file will take more than 1 millisecond
-      P.highlight(REDIS_CODE, timeout: 0.001)
+      P.highlight(TEST_CODE * 10, timeout: 0.001)
     end
   end
 
