@@ -11,6 +11,12 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.0'
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+      - name: Build
+        run: bundle exec rake build
       - name: Publish to RubyGems.org
         uses: dawidd6/action-publish-gem@v1
         with:
