@@ -213,7 +213,7 @@ class Mentos(object):
         pygmentized, this header will be followed by the text to be pygmentized.
 
         The header is of form:
-        { "method": "highlight", "args": [], "kwargs": {"arg1": "v"}, "bytes": 128, "fd": "8"}
+        { "method": "highlight", "args": [], "kwargs": {"arg1": "v"}, "bytes": 128}
         """
 
         while True:
@@ -258,20 +258,6 @@ def main():
         signal.signal(signal.SIGHUP, _signal_handler)
 
     mentos = Mentos()
-
-    if sys.platform != "win32":
-        # close fd's inherited from the ruby parent
-        import resource
-        maxfd = resource.getrlimit(resource.RLIMIT_NOFILE)[1]
-        if maxfd == resource.RLIM_INFINITY:
-            maxfd = 65536
-
-        for fd in range(3, maxfd):
-            try:
-                os.close(fd)
-            except:
-                pass
-
     mentos.start()
 
 if __name__ == "__main__":
