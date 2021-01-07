@@ -119,31 +119,6 @@ class PygmentsHighlightTest < Test::Unit::TestCase
   end
 end
 
-# Philosophically, I'm not the biggest fan of testing private
-# methods, but given the relative delicacy of validity checking
-# over the pipe I think it's necessary and informative.
-class PygmentsValidityTest < Test::Unit::TestCase
-  def test_add_ids_with_padding
-    res = PE.send(:add_ids, 'herp derp baz boo foo', 'ABCDEFGH')
-    assert_equal 'ABCDEFGH  herp derp baz boo foo  ABCDEFGH', res
-  end
-
-  def test_add_ids_on_empty_string
-    res = PE.send(:add_ids, '', 'ABCDEFGH')
-    assert_equal 'ABCDEFGH    ABCDEFGH', res
-  end
-
-  def test_add_ids_with_unicode_data
-    res = PE.send(:add_ids, '# ø ø ø', 'ABCDEFGH')
-    assert_equal 'ABCDEFGH  # ø ø ø  ABCDEFGH', res
-  end
-
-  def test_add_ids_with_starting_slashes
-    res = PE.send(:add_ids, '\\# ø ø ø..//', 'ABCDEFGH')
-    assert_equal 'ABCDEFGH  \\# ø ø ø..//  ABCDEFGH', res
-  end
-end
-
 class PygmentsLexerTest < Test::Unit::TestCase
   RUBY_CODE = "#!/usr/bin/ruby\nputs 'foo'"
 

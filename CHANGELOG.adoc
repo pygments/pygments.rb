@@ -5,6 +5,10 @@
 This document provides a high-level view of the changes to the {project-name} by release.
 For a detailed view of what has changed, refer to the {uri-repo}/commits/master[commit history] on GitHub.
 
+== Unreleased
+
+* stop sending/receiving `ids` between Ruby and Python
+
 == 2.0.0.rc3 (2021-01-08) - @slonopotamus
 
 * fix watchdog race condition leading to `ThreadError(<killed thread>)` on JRuby ({uri-repo}/pull/215[#215])
