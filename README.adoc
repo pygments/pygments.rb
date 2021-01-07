@@ -17,7 +17,7 @@ image:{uri-project}/workflows/CI/badge.svg?branch=master[Build Status,link={uri-
 {project-name} is a Ruby wrapper for the Python {uri-pygments}[Pygments] syntax highlighter.
 
 {project-name} works by talking over a simple pipe to a long-lived Python child process.
-This library replaces [github/albino](https://github.com/github/albino), as well as an older version of {project-name} that used an embedded Python interpreter.
+This library replaces https://github.com/github/albino[github/albino], as well as an older version of {project-name} that used an embedded Python interpreter.
 
 Each Ruby process that runs has its own 'personal Python'; for example, 4 Unicorn workers will have one Python process each.
 If a Python process dies, a new one will be spawned on the next pygments.rb request.
