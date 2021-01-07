@@ -7,7 +7,7 @@ Gem::Specification.new do |s|
   s.version = Pygments::VERSION
 
   s.summary = 'pygments wrapper for ruby'
-  s.description = 'pygments.rb exposes the pygments syntax highlighter to Ruby'
+  s.description = 'pygments.rb is a Ruby wrapper for Pygments syntax highlighter'
 
   s.homepage = 'https://github.com/pygments/pygments.rb'
   s.required_ruby_version = '>= 2.3.0'

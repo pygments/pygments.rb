@@ -1,7 +1,6 @@
 = {project-name}
 Ted Nyman <ted@ted.io>; Aman Gupta <aman@tmm1.net>; Marat Radchenko <marat@slonopotamus.org>
 :project-name: pygments.rb
-:project-handle: pygments.rb
 :slug: pygments/{project-name}
 :toc: preamble
 :uri-project: https://github.com/{slug}
@@ -14,7 +13,7 @@ image:{uri-project}/workflows/CI/badge.svg?branch=master[Build Status,link={uri-
 
 == Introduction
 
-{project-name} is a Ruby wrapper for the Python {uri-pygments}[Pygments] syntax highlighter.
+{project-name} is a Ruby wrapper for {uri-pygments}[Pygments] syntax highlighter.
 
 {project-name} works by talking over a simple pipe to a long-lived Python child process.
 This library replaces https://github.com/github/albino[github/albino], as well as an older version of {project-name} that used an embedded Python interpreter.
