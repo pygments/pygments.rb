@@ -227,15 +227,17 @@ module Pygments
     def with_watchdog(timeout_time, error_message)
       state_mutex = Mutex.new
       state = :alive
+      wd_cleanup = ConditionVariable.new
 
       watchdog = timeout_time > 0 ? Thread.new do
         state_mutex.synchronize do
-          state_mutex.sleep(timeout_time) if state != :finished
+          wd_cleanup.wait(state_mutex, timeout_time) if state != :finished
           if state != :finished
             @log.error error_message
             stop error_message
             state = :timeout
           end
+
         end
       end : nil
       begin
@@ -244,7 +246,8 @@ module Pygments
         if watchdog
           state_mutex.synchronize do
             state = :finished if state == :alive
-            watchdog.wakeup if watchdog.alive?
+            # wake up watchdog thread
+            wd_cleanup.signal
           end
           watchdog.join
         end
