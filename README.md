@@ -80,9 +80,7 @@ Pygments.start("/path/to/pygments")
 
 If you'd like logging, set the environmental variable `MENTOS_LOG` to a file path for your logfile.
 
-By default pygments.rb will timeout calls to pygments that take over 10 seconds.
-You can change this by setting the environmental variable `MENTOS_TIMEOUT` to a
-different value or by passing the `:timeout` option (taking precedence over `MENTOS_TIMEOUT`):
+You can apply a timeout to pygments.rb calls by specifying number of seconds in `MENTOS_TIMEOUT` environmental variable or by passing the `:timeout` argument (takes precedence over `MENTOS_TIMEOUT`):
 
 ```ruby
 Pygments.highlight('code', timeout: 4)
