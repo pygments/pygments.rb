@@ -1,0 +1,161 @@
+= {project-name}
+Ted Nyman <ted@ted.io>; Aman Gupta <aman@tmm1.net>; Marat Radchenko <marat@slonopotamus.org>
+:project-name: pygments.rb
+:project-handle: pygments.rb
+:slug: tmm1/{project-name}
+:toc:
+:uri-project: https://github.com/{slug}
+:uri-ci: {uri-project}/actions?query=branch%3Amaster
+:uri-gem: https://rubygems.org/gems/{project-name}
+:uri-pygments: https://pygments.org/
+
+image:https://img.shields.io/gem/v/{project-name}.svg[Latest Release,link={uri-gem}]
+image:{uri-project}/workflows/CI/badge.svg?branch=master[Build Status,link={uri-ci}]
+
+== Introduction
+
+{project-name} is a Ruby wrapper for the Python {uri-pygments}[Pygments] syntax highlighter.
+
+{project-name} works by talking over a simple pipe to a long-lived Python child process.
+This library replaces [github/albino](https://github.com/github/albino), as well as an older version of {project-name} that used an embedded Python interpreter.
+
+Each Ruby process that runs has its own 'personal Python'; for example, 4 Unicorn workers will have one Python process each.
+If a Python process dies, a new one will be spawned on the next pygments.rb request.
+
+== System Requirements
+
+- Python >= 3.5
+- Ruby >= 2.3
+
+== Installation
+
+Add this line to your application's Gemfile:
+
+[source,ruby]
+----
+gem 'pygments.rb'
+----
+
+And then execute:
+
+[source,shell script]
+----
+$ bundle install
+----
+
+Or install pygments.rb gem yourself as:
+
+[source,shell script]
+----
+$ gem install pygments.rb
+----
+
+== Usage
+
+Require pygments.rb module:
+
+[source,ruby]
+----
+require 'pygments'
+----
+
+Highlight a file:
+
+[source,ruby]
+----
+Pygments.highlight(File.read(__FILE__), lexer: 'ruby')
+----
+
+Optionally, pass encoding and other lexer/formatter options via an `:options` hash:
+
+[source,ruby]
+----
+Pygments.highlight('code', options: {encoding: 'utf-8'})
+----
+
+pygments.rb uses HTML formatter by default.
+To use a different formatter, specify it via `:formatter` parameter:
+
+[source,ruby]
+----
+Pygments.highlight('code', formatter: 'bbcode')
+Pygments.highlight('code', formatter: 'terminal')
+----
+
+To generate CSS for HTML formatted code, use the `Pygments.css` method:
+
+[source,ruby]
+----
+Pygments.css
+Pygments.css('.highlight')
+----
+
+To use a specific pygments style, pass the `:style` option to the `Pygments.css` method:
+
+[source,ruby]
+----
+Pygments.css(style: 'monokai')
+----
+
+Other Pygments high-level API methods are also available.
+These methods return arrays detailing all the available lexers, formatters, and styles:
+
+[source,ruby]
+----
+Pygments.lexers
+Pygments.formatters
+Pygments.styles
+----
+
+To use a custom pygments installation, specify the path to
+`Pygments.start`:
+
+[source,ruby]
+----
+Pygments.start("/path/to/pygments")
+----
+
+If you'd like logging, set the environmental variable `MENTOS_LOG` to a file path for your logfile.
+
+You can apply a timeout to pygments.rb calls by specifying number of seconds in `MENTOS_TIMEOUT` environmental variable or by passing the `:timeout` argument (takes precedence over `MENTOS_TIMEOUT`):
+
+[source,ruby]
+----
+Pygments.highlight('code', timeout: 4)
+----
+
+== Benchmarks
+
+----
+$ ruby bench.rb 50
+   Benchmarking....
+   Size: 698 bytes
+   Iterations: 50
+                                                  user     system      total        real
+   pygments popen                                0.010000   0.010000   0.020000 (  0.460370)
+   pygments popen (process already started)      0.010000   0.000000   0.010000 (  0.272975)
+   pygments popen (process already started 2)    0.000000   0.000000   0.000000 (  0.273589)
+----
+
+----
+$ ruby bench.rb 10
+   Benchmarking....
+   Size: 15523 bytes
+   Iterations: 10
+                                                  user     system      total        real
+   pygments popen                               0.000000   0.000000   0.000000 (  0.819419)
+   pygments popen (process already started)     0.010000   0.000000   0.010000 (  0.676515)
+   pygments popen (process already started 2)   0.000000   0.010000   0.010000 (  0.674189)
+----
+
+== Development
+
+After checking out the repo, run `bundle install` to install dependencies.
+Then, run `bundle exec rake test` to run the tests.
+
+== Copyright
+
+Copyright (C) Ted Nyman, Aman Gupta, Marat Radchenko, 2012-2021.
+Free use of this software is granted under the terms of the MIT License.
+
+For the full text of the license, see the link:LICENSE[] file.

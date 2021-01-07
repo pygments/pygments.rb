@@ -1,0 +1,115 @@
+= {project-name} Changelog
+:project-name: pygments.rb
+:uri-repo: https://github.com/tmm1/pygments.rb
+
+This document provides a high-level view of the changes to the {project-name} by release.
+For a detailed view of what has changed, refer to the {uri-repo}/commits/master[commit history] on GitHub.
+
+== Unreleased
+
+* Modify `mentos.py` to run on Python 3.x instead of Python 2.7
+* Add `:timeout` parameter to allow for configurable timeouts
+* Add several Python 3.x versions to test matrix
+* Drop dependency on MultiJson
+* Fix hanging on JRuby + Windows
+* Update Pygments to 2.7.3
+* Drop GitHub custom lexers
+* Rework timeout handling
+* Improve error message when Python is not found
+* *Breaking change* Pygments.rb no longer sets default timeout for its operations
+* *Breaking change* Now pygments.rb raises `MentosError` instead of returning `nil` on timeout
+
+== 1.2.1 (2017-12-07)
+
+* Automatically update `lexers` cache on build ({uri-repo}/pull/186[#186])
++
+See {uri-repo}/pull/185[#185] for the reason
+
+== 1.2.0 (2017-09-13)
+
+* Exclude symlinks from the gem package to solve Windows issues ({uri-repo}/pull/181[#181])
+* Upgrade pygments to 2.0.0 ({uri-repo}/pull/180[#180])
+
+== 1.1.2 (2017-04-03)
+
+* Resolves {uri-repo}/pull/176[#176] exclude find_error.py symlink from gem ({uri-repo}/pull/177[#177])
+
+== 1.1.1 (2016-12-28)
+
+* Suppress Ruby 2.4.0's warnings ({uri-repo}/pull/172[#172])
+* Enable `frozen_string_literal` ({uri-repo}/pull/173[#173])
+
+== 1.1.0 (2016-12-24)
+
+* Support JRuby ({uri-repo}/pull/170[#170])
+* Make pygments.rb thread safe ({uri-repo}/pull/171[#171])
+
+== 1.0.0 (2016-12-11)
+
+* Upgrade bundled pygments to 2.2.0-HEAD ({uri-repo}/pull/167[#167])
++
+This includes *incompatible changes* because of upgrade of pygments.
+See https://pygments.org/ for details.
+* Relax yajl-ruby dependency to "~> 1.2" ({uri-repo}/pull/164[#164])
+* Python binary can be configured by `PYTMENTS_RB_PYTHON` env ({uri-repo}/pull/168[#168])
+* Improved error messages when python binary is missing ({uri-repo}/pull/158[#158])
+
+== 0.5.4 (2013-11-03)
+
+* Update lexers file
+
+== 0.5.3 (2013-09-17)
+
+* Fixes for Slash lexer
+* Improve highlighting for Slash lexer
+* Upgrade to latest pygments (1.7, changes summary follows.
+See pygments changelog for details)
+** Add Clay lexer
+** Add Perl 6 lexer
+** Add Swig lexer
+** Add nesC lexer
+** Add BlitzBasic lexer
+** Add EBNF lexer
+** Add Igor Pro lexer
+** Add Rexx lexer
+** Add Agda lexer
+** Recognize vim modelines
+** Improve Python 3 lexer
+** Improve Opa lexer
+** Improve Julia lexer
+** Improve Lasso lexer
+** Improve Objective C/C++ lexer
+** Improve Ruby lexer
+** Improve Stan lexer
+** Improve JavaScript lexer
+** Improve HTTP lexer
+** Improve Koka lexer
+** Improve Haxe lexer
+** Improve Prolog lexer
+** Improve F# lexer
+
+== 0.5.2 (2013-07-17)
+
+* Add Slash lexer
+
+== 0.5.1 (2013-06-25)
+
+* Ensure compatibility across distros by detecting if `python2` is available
+
+== 0.5.0 (2013-04-13)
+
+* Use `#rstrip` to fix table mode bug
+
+== 0.4.2 (2013-02-25)
+
+* Add new lexers, including custom lexers
+
+== 0.3.7 (2013-01-02)
+
+* Fixed missing custom lexers
+* Added syntax highlighting for Hxml
+
+== 0.3.4 (2012-12-28)
+
+* Add support for Windows
+* Add MIT license
