@@ -237,7 +237,6 @@ module Pygments
             stop error_message
             state = :timeout
           end
-
         end
       end : nil
       begin
@@ -258,7 +257,7 @@ module Pygments
 
     # Our 'rpc'-ish request to mentos. Requires a method name, and then optional
     # args, kwargs, code.
-    def mentos(method, args = [], kwargs = {}, original_code = nil)
+    def mentos(method, args = [], kwargs = {}, code = nil)
       # Open the pipe if necessary
       start unless alive?
 
@@ -273,12 +272,6 @@ module Pygments
                        end
       end
 
-      # For sanity checking on both sides of the pipe when highlighting, we prepend and
-      # append an id.  mentos checks that these are 8 character ids and that they match.
-      # It then returns the id's back to Rubyland.
-      id = (0...8).map { rand(65..89).chr }.join
-      code = original_code ? add_ids(original_code, id) : nil
-
       # Add metadata to the header and generate it.
       bytesize = if code
                    code.bytesize
@@ -287,7 +280,7 @@ module Pygments
                  end
 
       kwargs.freeze
-      kwargs = kwargs.merge('fd' => @out.to_i, 'id' => id, 'bytes' => bytesize)
+      kwargs = kwargs.merge('fd' => @out.to_i, 'bytes' => bytesize)
       out_header = JSON.generate(method: method, args: args, kwargs: kwargs)
 
       begin
@@ -315,7 +308,7 @@ module Pygments
           header = @out.read(header_len)
 
           # Now handle the header, any read any more data required.
-          handle_header_and_return(header, id)
+          handle_header_and_return(header)
         end
 
         # Finally, return what we got.
@@ -341,10 +334,8 @@ module Pygments
     # Based on the header we receive, determine if we need
     # to read more bytes, and read those bytes if necessary.
     #
-    # Then, do a sanity check with the ids.
-    #
     # Returns a result - either highlighted text or metadata.
-    def handle_header_and_return(header, id)
+    def handle_header_and_return(header)
       if header
         @log.info "In header: #{header}"
         header = header_to_json(header)
@@ -356,35 +347,12 @@ module Pygments
         if header[:method] == 'highlight'
           # Make sure we have a result back; else consider this an error.
           raise MentosError, 'No highlight result back from mentos.' if res.nil?
-
-          @log.info 'Highlight in process.'
-
-          # Get the id's
-          start_id = res[0..7]
-          end_id = res[-8..-1]
-
-          # Sanity check.
-          if !((start_id == id) && (end_id == id))
-            raise MentosError, "ID's did not match. Aborting."
-          else
-            # We're good. Remove the padding
-            res = res[10..-11]
-            @log.info 'Highlighting complete.'
-            res
-          end
         end
+
         res
       else
         raise MentosError, 'No header received back.'
       end
-    end
-
-    # With the code, prepend the id (with two spaces to avoid escaping weirdness if
-    # the following text starts with a slash (like terminal code), and append the
-    # id, with two padding also. This means we are sending over the 8 characters +
-    # code + 8 characters.
-    def add_ids(code, id)
-      (id + "  #{code}  #{id}").freeze
     end
 
     # Return the final result for the API. Return Ruby objects for the methods that

@@ -196,27 +196,6 @@ class Mentos(object):
         sys.stdout.buffer.write(res_bytes)
         sys.stdout.flush()
 
-
-    def _get_ids(self, text):
-        start_id = text[:8]
-        end_id = text[-8:]
-        return start_id, end_id
-
-    def _check_and_return_text(self, text, start_id, end_id):
-
-        # Sanity check.
-        id_regex = re.compile('[A-Z]{8}')
-
-        if not id_regex.match(start_id) and not id_regex.match(end_id):
-            _write_error("ID check failed. Not an ID.")
-
-        if not start_id == end_id:
-            _write_error("ID check failed. ID's did not match.")
-
-        # Passed the sanity check. Remove the id's and return
-        text = text[10:-10]
-        return text
-
     def _parse_header(self, header):
         method = header["method"]
         args = header.get("args", [])
@@ -261,17 +240,8 @@ class Mentos(object):
                 # Read up to the given number of *bytes* (not chars) (possibly 0)
                 text = sys.stdin.buffer.read(_bytes).decode('utf-8')
 
-                # Sanity check the return.
-                if _bytes:
-                    start_id, end_id = self._get_ids(text)
-                    text = self._check_and_return_text(text, start_id, end_id)
-
                 # Get the actual data from pygments.
                 res = self.get_data(method, lexer, args, kwargs, text)
-
-                # Put back the sanity check values.
-                if method == "highlight":
-                    res = start_id + "  " + res + "  " + end_id
 
                 self._send_data(res, method)
 
