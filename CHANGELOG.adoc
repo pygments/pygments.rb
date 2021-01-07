@@ -1,6 +1,6 @@
 = {project-name} Changelog
 :project-name: pygments.rb
-:uri-repo: https://github.com/tmm1/pygments.rb
+:uri-repo: https://github.com/pygments/pygments.rb
 
 This document provides a high-level view of the changes to the {project-name} by release.
 For a detailed view of what has changed, refer to the {uri-repo}/commits/master[commit history] on GitHub.

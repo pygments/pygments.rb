@@ -9,11 +9,11 @@ Gem::Specification.new do |s|
   s.summary = 'pygments wrapper for ruby'
   s.description = 'pygments.rb exposes the pygments syntax highlighter to Ruby'
 
-  s.homepage = 'https://github.com/tmm1/pygments.rb'
+  s.homepage = 'https://github.com/pygments/pygments.rb'
   s.required_ruby_version = '>= 2.3.0'
 
-  s.authors = ['Aman Gupta', 'Ted Nyman']
-  s.email = ['aman@tmm1.net']
+  s.authors = ['Aman Gupta', 'Ted Nyman', 'Marat Radchenko']
+  s.email = ['marat@slonopotamus.org']
   s.license = 'MIT'
 
   s.add_development_dependency 'rake-compiler', '~> 1.1.0'
