@@ -9,8 +9,6 @@ task default: :test
 # Packaging
 # ==========================================================
 
-GEMSPEC = eval(File.read('pygments.rb.gemspec'))
-
 require 'rubygems/package_task'
 
 # ==========================================================
@@ -36,7 +34,7 @@ end
 
 # Write all the lexers to a file for easy lookup
 task :lexers do
-  sh 'ruby cache-lexers.rb'
+  sh 'ruby cache_lexers.rb'
 end
 
 task(:test).enhance([:lexers])
