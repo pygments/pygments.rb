@@ -1,0 +1,18 @@
+Metrics/AbcSize:
+  Enabled: false
+Metrics/BlockLength:
+  Enabled: false
+Metrics/ClassLength:
+  Enabled: false
+Metrics/CyclomaticComplexity:
+  Enabled: false
+Layout/LineLength:
+  Max: 120
+Metrics/MethodLength:
+  Enabled: false
+Security/MarshalLoad:
+  Enabled: false
+Style/StructInheritance:
+  Enabled: false
+Style/Documentation:
+  Enabled: false

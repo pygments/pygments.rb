@@ -30,7 +30,7 @@ module Pygments
         extnames = []
 
         extname = File.extname(filename)
-        if m = extname.match(/\[(.+)\]/)
+        if (m = extname.match(/\[(.+)\]/))
           m[1].scan(/./).each do |s|
             extnames << extname.sub(m[0], s)
           end

@@ -5,6 +5,18 @@ on:
     tags-ignore: [ '**' ]
   pull_request:
 jobs:
+  rubocop:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.0'
+          bundler-cache: true
+      - name: Rubocop
+        run: bundle exec rubocop
   build:
     strategy:
       matrix:

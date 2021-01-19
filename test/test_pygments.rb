@@ -10,7 +10,9 @@ PE = Pygments.engine
 class PygmentsHighlightTest < Test::Unit::TestCase
   RUBY_CODE = "#!/usr/bin/ruby\nputs 'foo'"
   RUBY_CODE_TRAILING_NEWLINE = "#!/usr/bin/ruby\nputs 'foo'\n"
-  TEST_CODE = File.read(File.join(File.dirname(__FILE__), '..', 'lib', 'pygments', 'mentos.py'))
+  TEST_CODE = File.read(
+    File.join(__dir__, '..', 'lib', 'pygments', 'mentos.py')
+  )
 
   def test_highlight_defaults_to_html
     code = P.highlight(RUBY_CODE)
@@ -21,13 +23,19 @@ class PygmentsHighlightTest < Test::Unit::TestCase
   def test_full_html_highlight
     code = P.highlight(RUBY_CODE)
     assert_match '<span class="ch">#!/usr/bin/ruby</span>', code
-    assert_equal "<div class=\"highlight\"><pre><span></span><span class=\"ch\">#!/usr/bin/ruby</span>\n<span class=\"nb\">puts</span> <span class=\"s1\">&#39;foo&#39;</span>\n</pre></div>", code
+    assert_equal %(<div class="highlight"><pre><span></span><span class="ch">#!/usr/bin/ruby</span>
+<span class="nb">puts</span> <span class="s1">&#39;foo&#39;</span>
+</pre></div>), code
   end
 
   def test_full_table_highlight
     code = P.highlight(RUBY_CODE, options: { linenos: true })
     assert_match '<span class="ch">#!/usr/bin/ruby</span>', code
-    assert_equal "<table class=\"highlighttable\"><tr><td class=\"linenos\"><div class=\"linenodiv\"><pre>1\n2</pre></div></td><td class=\"code\"><div class=\"highlight\"><pre><span></span><span class=\"ch\">#!/usr/bin/ruby</span>\n<span class=\"nb\">puts</span> <span class=\"s1\">&#39;foo&#39;</span>\n</pre></div>\n</td></tr></table>", code
+    assert_equal %(<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="ch">#!/usr/bin/ruby</span>
+<span class="nb">puts</span> <span class="s1">&#39;foo&#39;</span>
+</pre></div>
+</td></tr></table>), code
   end
 
   def test_highlight_works_with_larger_files
