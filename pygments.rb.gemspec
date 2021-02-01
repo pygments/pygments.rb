@@ -18,7 +18,7 @@ Gem::Specification.new do |s|
 
   s.add_development_dependency 'rake', '~> 13.0.0'
   s.add_development_dependency 'rubocop', '~> 0.81.0'
-  s.add_development_dependency 'test-unit', '~> 3.3.0'
+  s.add_development_dependency 'test-unit', '~> 3.4.0'
 
   # s.extensions = ['ext/extconf.rb']
   s.require_paths = ['lib']
