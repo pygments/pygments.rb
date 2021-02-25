@@ -1,13 +1,17 @@
 # frozen_string_literal: true
 
-require File.join(File.dirname(__FILE__), 'pygments/popen')
 require 'forwardable'
 
-module Pygments
-  autoload :Lexer, 'pygments/lexer'
+require_relative 'pygments/lexer'
+require_relative 'pygments/popen'
 
+module Pygments
   class << self
     extend Forwardable
+
+    def lexers
+      LexerCache.instance.raw_lexers
+    end
 
     def engine
       Thread.current.thread_variable_get(:pygments_engine) ||
@@ -16,7 +20,6 @@ module Pygments
 
     def_delegators :engine,
                    :formatters,
-                   :lexers,
                    :lexers!,
                    :filters,
                    :styles,

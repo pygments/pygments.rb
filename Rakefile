@@ -29,18 +29,6 @@ task :bench do
 end
 
 # ==========================================================
-# Cache lexers
-# ==========================================================
-
-# Write all the lexers to a file for easy lookup
-task :lexers do
-  sh 'ruby cache_lexers.rb'
-end
-
-task(:test).enhance([:lexers])
-task(:build).enhance([:lexers])
-
-# ==========================================================
 # Vendor
 # ==========================================================
 

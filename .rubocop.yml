@@ -10,8 +10,6 @@ Layout/LineLength:
   Max: 120
 Metrics/MethodLength:
   Enabled: false
-Security/MarshalLoad:
-  Enabled: false
 Style/StructInheritance:
   Enabled: false
 Style/Documentation:

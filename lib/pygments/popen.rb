@@ -103,25 +103,8 @@ module Pygments
       end
     end
 
-    # Get all lexers from a serialized array.
-    # This avoids needing to spawn mentos when it's not really needed
-    # (e.g., one-off jobs, loading the Rails env, etc).
-    #
-    # Should be preferred to #lexers!
-    #
-    # @return [Array<String>] an array of lexers
-    def lexers
-      lexer_file = File.join(__dir__, '..', '..', 'lexers')
-      begin
-        File.open(lexer_file, 'rb') do |f|
-          Marshal.load(f)
-        end
-      rescue Errno::ENOENT
-        raise MentosError, %(Error loading #{lexer_file}. Was it created and vendored?)
-      end
-    end
-
-    # Get back all available lexers from mentos itself
+    # Get all available lexers from mentos itself
+    # Do not use this method directly, instead use Pygments#lexers
     #
     # @return [Array<String>] an array of lexers
     def lexers!
