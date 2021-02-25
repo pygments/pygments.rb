@@ -1,61 +1,14 @@
 # frozen_string_literal: true
 
+require 'singleton'
+
 module Pygments
   class Lexer < Struct.new(:name, :aliases, :filenames, :mimetypes)
-    @lexers          = []
-    @index           = {}
-    @name_index      = {}
-    @alias_index     = {}
-    @extname_index   = {}
-    @mimetypes_index = {}
-
-    # Internal: Create a new Lexer object
-    #
-    # hash - A hash of attributes
-    #
-    # Returns a Lexer object
-    def self.create(hash)
-      lexer = new(hash[:name], hash[:aliases], hash[:filenames], hash[:mimetypes])
-
-      @lexers << lexer
-
-      @index[lexer.name.downcase] = @name_index[lexer.name] = lexer
-
-      lexer.aliases.each do |name|
-        @alias_index[name] = lexer
-        @index[name.downcase] ||= lexer
-      end
-
-      lexer.filenames.each do |filename|
-        extnames = []
-
-        extname = File.extname(filename)
-        if (m = extname.match(/\[(.+)\]/))
-          m[1].scan(/./).each do |s|
-            extnames << extname.sub(m[0], s)
-          end
-        elsif extname != ''
-          extnames << extname
-        end
-
-        extnames.each do |the_extname|
-          @extname_index[the_extname] = lexer
-          @index[the_extname.downcase.sub(/^\./, '')] ||= lexer
-        end
-      end
-
-      lexer.mimetypes.each do |type|
-        @mimetypes_index[type] = lexer
-      end
-
-      lexer
-    end
-
     # Public: Get all Lexers
     #
-    # Returns an Array of Lexers
+    # @return [Array<Lexer>]
     def self.all
-      @lexers
+      LexerCache.instance.lexers
     end
 
     # Public: Look up Lexer by name or alias.
@@ -65,12 +18,15 @@ module Pygments
     #   Lexer.find('Ruby')
     #   => #<Lexer name="Ruby">
     #
-    # Returns the Lexer or nil if none was found.
+    # @return [Lexer, nil]
     def self.find(name)
-      @index[name.to_s.downcase]
+      LexerCache.instance.index[name.to_s.downcase]
     end
 
     # Public: Alias for find.
+    #
+    # @param name [String]
+    # @return [Lexer, nil]
     def self.[](name)
       find(name)
     end
@@ -84,9 +40,10 @@ module Pygments
     #   Lexer.find_by_name('Ruby')
     #   # => #<Lexer name="Ruby">
     #
-    # Returns the Lexer or nil if none was found.
+    # @param name [String]
+    # @return [Lexer, nil]
     def self.find_by_name(name)
-      @name_index[name]
+      LexerCache.instance.name_index[name]
     end
 
     # Public: Look up Lexer by one of its aliases.
@@ -98,9 +55,10 @@ module Pygments
     #   Lexer.find_by_alias('rb')
     #   # => #<Lexer name="Ruby">
     #
-    # Returns the Lexer or nil if none was found.
+    # @param name [String]
+    # @return [Lexer, nil]
     def self.find_by_alias(name)
-      @alias_index[name]
+      LexerCache.instance.alias_index[name]
     end
 
     # Public: Look up Lexer by one of it's file extensions.
@@ -112,9 +70,10 @@ module Pygments
     #  Lexer.find_by_extname('.rb')
     #  # => #<Lexer name="Ruby">
     #
-    # Returns the Lexer or nil if none was found.
+    # @param extname [String]
+    # @return [Lexer, nil]
     def self.find_by_extname(extname)
-      @extname_index[extname]
+      LexerCache.instance.extname_index[extname]
     end
 
     # Public: Look up Lexer by one of it's mime types.
@@ -126,9 +85,10 @@ module Pygments
     #  Lexer.find_by_mimetype('application/x-ruby')
     #  # => #<Lexer name="Ruby">
     #
-    # Returns the Lexer or nil if none was found.
+    # @param type [String]
+    # @return [Lexer, nil]
     def self.find_by_mimetype(type)
-      @mimetypes_index[type]
+      LexerCache.instance.mimetypes_index[type]
     end
 
     # Public: Highlight syntax of text
@@ -146,5 +106,67 @@ module Pygments
     alias eql? equal?
   end
 
-  lexers.values.each { |h| Lexer.create(h) }
+  class LexerCache
+    include Singleton
+
+    # @return [Array<Lexer>]
+    attr_reader(:lexers)
+    # @return [Map<String, Lexer>]
+    attr_reader(:index)
+    # @return [Map<String, Lexer>]
+    attr_reader(:name_index)
+    # @return [Map<String, Lexer]
+    attr_reader(:alias_index)
+    # @return [Map<String, Lexer>]
+    attr_reader(:extname_index)
+    # @return [Map<String, Lexer>]
+    attr_reader(:mimetypes_index)
+
+    attr_reader(:raw_lexers)
+
+    def initialize
+      @lexers = []
+      @index = {}
+      @name_index = {}
+      @alias_index = {}
+      @extname_index = {}
+      @mimetypes_index = {}
+      @raw_lexers = Pygments.lexers!
+
+      @raw_lexers.values.each do |hash|
+        lexer = Lexer.new(hash[:name], hash[:aliases], hash[:filenames], hash[:mimetypes])
+
+        @lexers << lexer
+
+        @index[lexer.name.downcase] = @name_index[lexer.name] = lexer
+
+        lexer.aliases.each do |name|
+          @alias_index[name] = lexer
+          @index[name.downcase] ||= lexer
+        end
+
+        lexer.filenames.each do |filename|
+          extnames = []
+
+          extname = File.extname(filename)
+          if (m = extname.match(/\[(.+)\]/))
+            m[1].scan(/./).each do |s|
+              extnames << extname.sub(m[0], s)
+            end
+          elsif extname != ''
+            extnames << extname
+          end
+
+          extnames.each do |the_extname|
+            @extname_index[the_extname] = lexer
+            @index[the_extname.downcase.sub(/^\./, '')] ||= lexer
+          end
+        end
+
+        lexer.mimetypes.each do |type|
+          @mimetypes_index[type] = lexer
+        end
+      end
+    end
+  end
 end
