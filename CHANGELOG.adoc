@@ -8,6 +8,7 @@ For a detailed view of what has changed, refer to the {uri-repo}/commits/master[
 == Unreleased
 
 * Add support for custom lexers ({uri-repo}/pull/187[#187])
+* Update Pygments to 2.8.1
 
 == 2.1.0 (2021-02-14) - @slonopotamus
 
