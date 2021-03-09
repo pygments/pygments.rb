@@ -2,7 +2,6 @@
 Ted Nyman <ted@ted.io>; Aman Gupta <aman@tmm1.net>; Marat Radchenko <marat@slonopotamus.org>
 :project-name: pygments.rb
 :slug: pygments/{project-name}
-:toc: preamble
 :uri-project: https://github.com/{slug}
 :uri-ci: {uri-project}/actions?query=branch%3Amaster
 :uri-gem: https://rubygems.org/gems/{project-name}
