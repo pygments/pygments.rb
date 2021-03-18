@@ -5,7 +5,7 @@
 This document provides a high-level view of the changes to the {project-name} by release.
 For a detailed view of what has changed, refer to the {uri-repo}/commits/master[commit history] on GitHub.
 
-== Unreleased
+== 2.2.0 (2021-03-18) - @slonopotamus
 
 * Add support for custom lexers ({uri-repo}/pull/187[#187])
 * Update Pygments to 2.8.1
