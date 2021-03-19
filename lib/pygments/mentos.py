@@ -174,6 +174,9 @@ class Mentos(object):
                 else:
                     _write_error("No lexer")
 
+            elif method == 'version':
+                res = json.dumps([pygments.__version__])
+
             else:
                 _write_error("Invalid method " + method)
 
