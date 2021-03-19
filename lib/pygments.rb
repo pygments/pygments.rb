@@ -26,6 +26,7 @@ module Pygments
                    :css,
                    :lexer_name_for,
                    :highlight,
-                   :start
+                   :start,
+                   :pygments_version
   end
 end

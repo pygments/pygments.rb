@@ -106,6 +106,12 @@ class PygmentsHighlightTest < Test::Unit::TestCase
     assert_match '>importr</span>', code
   end
 
+  def test_version
+    version_str = P.pygments_version
+    # This will throw "Malformed version number string" ArgumentError if version_str is not a valid version string
+    Gem::Version.new(version_str)
+  end
+
   def test_highlight_on_multi_threads
     omit 'We do not actually support multithreading'
 

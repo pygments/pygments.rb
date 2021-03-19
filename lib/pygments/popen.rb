@@ -88,6 +88,13 @@ module Pygments
       raise MentosError, 'EPERM checking if child process is alive.'
     end
 
+    # Public: Returns version of underlying Pygments library
+    #
+    # @return [Integer]
+    def pygments_version
+      mentos(:version)[0]
+    end
+
     # Public: Get an array of available Pygments formatters
     #
     # @return [Array<String>] an array of formatters
