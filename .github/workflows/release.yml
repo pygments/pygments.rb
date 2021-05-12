@@ -19,6 +19,6 @@ jobs:
       - name: Build
         run: bundle exec rake build
       - name: Publish to RubyGems.org
-        uses: dawidd6/action-publish-gem@v1
+        uses: dawidd6/action-publish-gem@v1.2.0
         with:
           api_key: ${{ secrets.RUBYGEMS_API_KEY }}
