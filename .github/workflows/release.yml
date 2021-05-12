@@ -13,7 +13,7 @@ jobs:
           ruby-version: '3.0'
           bundler-cache: true
       - name: Setup Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v2.2.2
         with:
           python-version: '3.9'
       - name: Build
