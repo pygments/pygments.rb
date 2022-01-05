@@ -5,9 +5,9 @@
 This document provides a high-level view of the changes to the {project-name} by release.
 For a detailed view of what has changed, refer to the {uri-repo}/commits/master[commit history] on GitHub.
 
-== Unreleased
+== 2.3.0 (2022-01-05) - @slonopotamus
 
-* add `Pygments.pygments_version` method to query underlying Pygments version ({uri-repo}/issues/226[#226])
+* Add `Pygments.pygments_version` method to query underlying Pygments version ({uri-repo}/issues/226[#226])
 * Update Pygments to 2.10.0 ({uri-repo}/issues/234[#234])
 
 == 2.2.0 (2021-03-18) - @slonopotamus
