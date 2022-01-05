@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'test/unit'
-require File.join(File.dirname(__FILE__), '..', '/lib/pygments.rb')
+require 'pygments'
 ENV['mentos-test'] = 'yes'
 
 P = Pygments
