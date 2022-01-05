@@ -163,13 +163,12 @@ class Mentos(object):
                 fmt = pygments.formatters.get_formatter_by_name(args[0], **kwargs)
                 res = fmt.get_style_defs(args[1])
 
-            elif method == 'lexer_name_for':
+            elif method == 'lexer_names_for':
                 lexer = self.return_lexer(None, args, kwargs, text)
 
                 if lexer:
-                    # We don't want the Lexer itself, just the name.
-                    # Take the first alias.
-                    res = lexer.aliases[0]
+                    # We don't want the Lexer itself, just aliases.
+                    res = json.dumps(list(lexer.aliases))
 
                 else:
                     _write_error("No lexer")

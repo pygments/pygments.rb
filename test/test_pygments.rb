@@ -92,12 +92,12 @@ class PygmentsHighlightTest < Test::Unit::TestCase
   end
 
   def test_highlight_works_with_multiple_newlines
-    code = P.highlight(RUBY_CODE_TRAILING_NEWLINE + "derp\n\n")
+    code = P.highlight("#{RUBY_CODE_TRAILING_NEWLINE}derp\n\n")
     assert_match '<span class="ch">#!/usr/bin/ruby</span>', code
   end
 
   def test_highlight_works_with_trailing_cr
-    code = P.highlight(RUBY_CODE_TRAILING_NEWLINE + "\r")
+    code = P.highlight("#{RUBY_CODE_TRAILING_NEWLINE}\r")
     assert_match '<span class="ch">#!/usr/bin/ruby</span>', code
   end
 
@@ -127,27 +127,27 @@ class PygmentsLexerTest < Test::Unit::TestCase
   RUBY_CODE = "#!/usr/bin/ruby\nputs 'foo'"
 
   def test_lexer_by_mimetype
-    assert_equal 'rb', P.lexer_name_for(mimetype: 'text/x-ruby')
+    assert_includes P.lexer_names_for(mimetype: 'text/x-ruby'), 'rb'
     assert_equal 'json', P.lexer_name_for(mimetype: 'application/json')
   end
 
   def test_lexer_by_filename
-    assert_equal 'rb', P.lexer_name_for(filename: 'test.rb')
+    assert_includes P.lexer_names_for(filename: 'test.rb'), 'rb'
     assert_equal 'scala', P.lexer_name_for(filename: 'test.scala')
   end
 
   def test_lexer_by_name
-    assert_equal 'rb', P.lexer_name_for(lexer: 'ruby')
+    assert_includes P.lexer_names_for(lexer: 'ruby'), 'rb'
     assert_equal 'python', P.lexer_name_for(lexer: 'python')
     assert_equal 'c', P.lexer_name_for(lexer: 'c')
   end
 
   def test_lexer_by_filename_and_content
-    assert_equal 'rb', P.lexer_name_for(RUBY_CODE, filename: 'test.rb')
+    assert_includes P.lexer_names_for(RUBY_CODE, filename: 'test.rb'), 'rb'
   end
 
   def test_lexer_by_content
-    assert_equal 'rb', P.lexer_name_for(RUBY_CODE)
+    assert_includes P.lexer_names_for(RUBY_CODE), 'rb'
   end
 
   def test_lexer_by_nothing

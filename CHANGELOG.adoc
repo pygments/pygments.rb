@@ -8,6 +8,7 @@ For a detailed view of what has changed, refer to the {uri-repo}/commits/master[
 == Unreleased
 
 * add `Pygments.pygments_version` method to query underlying Pygments version ({uri-repo}/issues/226[#226])
+* Update Pygments to 2.10.0 ({uri-repo}/issues/234[#234])
 
 == 2.2.0 (2021-03-18) - @slonopotamus
 

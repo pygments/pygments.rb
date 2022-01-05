@@ -133,7 +133,7 @@ module Pygments
       @mimetypes_index = {}
       @raw_lexers = Pygments.lexers!
 
-      @raw_lexers.values.each do |hash|
+      @raw_lexers.each_value do |hash|
         lexer = Lexer.new(hash[:name], hash[:aliases], hash[:filenames], hash[:mimetypes])
 
         @lexers << lexer
