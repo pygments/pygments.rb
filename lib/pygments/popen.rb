@@ -145,8 +145,8 @@ module Pygments
       mentos(:css, ['html', klass], opts)
     end
 
-    # @return [String, nil] the name of a lexer.
-    def lexer_name_for(*args)
+    # @return [[String], nil] aliases of a lexer.
+    def lexer_names_for(*args)
       # Pop off the last arg if it's a hash, which becomes our opts
       opts = if args.last.is_a?(Hash)
                args.pop
@@ -156,7 +156,7 @@ module Pygments
 
       code = (args.pop if args.last.is_a?(String))
 
-      mentos(:lexer_name_for, args, opts, code)
+      mentos(:lexer_names_for, args, opts, code)
     end
 
     # Public: Highlight code.
@@ -343,9 +343,9 @@ module Pygments
       # Read more bytes (the actual response body)
       res = @out.read(bytes.to_i)
 
-      if header[:method] == 'highlight'
+      if header[:method] == 'highlight' && res.nil?
         # Make sure we have a result back; else consider this an error.
-        raise MentosError, 'No highlight result back from mentos.' if res.nil?
+        raise MentosError, 'No highlight result back from mentos.'
       end
 
       res
@@ -353,8 +353,8 @@ module Pygments
 
     # @return Ruby objects for the methods that want them, text otherwise.
     def return_result(res, method)
-      res = JSON.parse(res, symbolize_names: true) unless %i[lexer_name_for highlight css].include?(method)
-      res = res.rstrip if res.class == String
+      res = JSON.parse(res, symbolize_names: true) unless %i[highlight css].include?(method)
+      res = res.rstrip if res.instance_of?(String)
       res
     end
 

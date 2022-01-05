@@ -18,13 +18,18 @@ module Pygments
         Thread.current.thread_variable_set(:pygments_engine, Pygments::Popen.new)
     end
 
+    def lexer_name_for(*args)
+      names = engine.lexer_names_for(*args)
+      names&.[](0)
+    end
+
     def_delegators :engine,
                    :formatters,
                    :lexers!,
                    :filters,
                    :styles,
                    :css,
-                   :lexer_name_for,
+                   :lexer_names_for,
                    :highlight,
                    :start,
                    :pygments_version

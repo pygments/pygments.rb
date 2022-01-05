@@ -12,8 +12,8 @@ repeats = ARGV[1] ? ARGV[1].to_i : 1
 code = File.open('test/test_pygments.rb').read.to_s * repeats
 
 puts "Benchmarking....\n"
-puts 'Size: ' + code.bytesize.to_s + " bytes\n"
-puts 'Iterations: ' + num.to_s + "\n"
+puts "Size: #{code.bytesize} bytes\n"
+puts "Iterations: #{num}\n"
 
 Benchmark.bm(40) do |x|
   x.report('pygments popen                             ') do
