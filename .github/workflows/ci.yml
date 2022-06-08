@@ -33,7 +33,7 @@ jobs:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
       - name: Setup Python
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v4.0.0
         with:
           python-version: ${{ matrix.python }}
       - name: Run Tests
