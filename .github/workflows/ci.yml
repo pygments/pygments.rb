@@ -38,3 +38,8 @@ jobs:
           python-version: ${{ matrix.python }}
       - name: Run Tests
         run: bundle exec rake test
+    env:
+      # Workaround JVM bug that causes JRuby to fail: https://bugs.openjdk.org/browse/JDK-8285445
+      # See https://github.com/ruby/setup-ruby/issues/339
+      # See https://github.com/jruby/jruby/issues/7182#issuecomment-1111610677
+      JAVA_OPTS: -Djdk.io.File.enableADS=true
