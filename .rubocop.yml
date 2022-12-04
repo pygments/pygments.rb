@@ -1,6 +1,8 @@
 AllCops:
   NewCops: enable
   TargetRubyVersion: 2.5
+Gemspec/RequireMFA:
+  Enabled: false
 Metrics/AbcSize:
   Enabled: false
 Metrics/BlockLength:
@@ -12,6 +14,8 @@ Metrics/CyclomaticComplexity:
 Layout/LineLength:
   Max: 120
 Metrics/MethodLength:
+  Enabled: false
+Metrics/PerceivedComplexity:
   Enabled: false
 Style/StructInheritance:
   Enabled: false
