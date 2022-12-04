@@ -6,7 +6,7 @@ on:
   pull_request:
 jobs:
   rubocop:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -22,7 +22,7 @@ jobs:
       matrix:
         ruby: [ 'jruby-9.2', '2.3', '3.1' ]
         python: [ '3.6', '3.11' ]
-        platform: [ ubuntu-18.04, macos-latest, windows-2019 ]
+        platform: [ ubuntu-20.04, macos-latest, windows-2019 ]
     runs-on: ${{ matrix.platform }}
     steps:
       - name: Checkout
