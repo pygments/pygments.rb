@@ -22,7 +22,7 @@ Gem::Specification.new do |s|
     'source_code_uri' => s.homepage
   }
 
-  s.required_ruby_version = '>= 2.3.0'
+  s.required_ruby_version = '>= 2.5.0'
 
   s.add_development_dependency 'rake', '~> 13.0.0'
   s.add_development_dependency 'rubocop', '~> 0.81.0'
