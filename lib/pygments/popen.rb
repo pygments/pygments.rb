@@ -39,9 +39,7 @@ module Pygments
       @python_binary ||= find_python_binary
     end
 
-    def python_binary=(python_bin)
-      @python_bin = python_bin
-    end
+    attr_writer :python_binary
 
     # Stop the child process by issuing a kill -9.
     #
@@ -197,7 +195,11 @@ module Pygments
 
     # Detect a suitable Python binary to use.
     def find_python_binary
-      return %w[py python3 python].first { |py| !which(py).nil? } if Gem.win_platform?
+      if Gem.win_platform?
+        return %w[py -3] if which('py')
+
+        return [%w[python3 python].find { |py| !which(py).nil? }]
+      end
 
       # On non-Windows platforms, we simply rely on shebang
       []
