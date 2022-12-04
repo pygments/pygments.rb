@@ -276,7 +276,7 @@ module Pygments
             raise Errno::EPIPE, %(Failed to read response from Python process on a mentos #{method} call)
           end
 
-          header_len = header_len_bytes.unpack('N')[0]
+          header_len = header_len_bytes.unpack1('N')
           @log.info "Size in: #{header_len}"
           header = @out.read(header_len)
 
