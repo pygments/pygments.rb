@@ -9,7 +9,7 @@ num = ARGV[0] ? ARGV[0].to_i : 10
 # we can also repeat the code itself
 repeats = ARGV[1] ? ARGV[1].to_i : 1
 
-code = File.open('test/test_pygments.rb').read.to_s * repeats
+code = File.read('test/test_pygments.rb') * repeats
 
 puts "Benchmarking....\n"
 puts "Size: #{code.bytesize} bytes\n"

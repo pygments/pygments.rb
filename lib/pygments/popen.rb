@@ -17,7 +17,7 @@ module Pygments
     # Python process that talks to the Pygments library. We'll talk back and
     # forth across this pipe.
     def start(pygments_path = File.join(__dir__, '..', '..', 'vendor', 'pygments-main'))
-      @log = Logger.new(ENV['MENTOS_LOG'] || File::NULL)
+      @log = Logger.new(ENV.fetch('MENTOS_LOG', File::NULL))
       @log.level = Logger::INFO
       @log.datetime_format = '%Y-%m-%d %H:%M '
 
@@ -323,11 +323,7 @@ module Pygments
     def get_timeout(timeout)
       return timeout unless timeout.nil?
 
-      begin
-        Integer(ENV['MENTOS_TIMEOUT'])
-      rescue TypeError
-        0
-      end
+      Integer(ENV.fetch('MENTOS_TIMEOUT', 0))
     end
 
     # Based on the header we receive, determine if we need
