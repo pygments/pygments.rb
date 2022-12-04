@@ -1,4 +1,5 @@
 AllCops:
+  NewCops: enable
   TargetRubyVersion: 2.5
 Metrics/AbcSize:
   Enabled: false
