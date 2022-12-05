@@ -71,11 +71,6 @@ class PygmentsHighlightTest < Test::Unit::TestCase
     assert_match 'ø..ø', code
   end
 
-  def test_highlight_formatter_bbcode
-    code = P.highlight(RUBY_CODE, formatter: 'bbcode')
-    assert_match 'color=#408080][i]#!/usr/bin/ruby[/i]', code
-  end
-
   def test_highlight_formatter_terminal
     code = P.highlight(RUBY_CODE, formatter: 'terminal')
     assert_match '39;49;00m', code
@@ -182,8 +177,6 @@ class PygmentsLexerClassTest < Test::Unit::TestCase
     assert_equal P::Lexer['Ruby'], P::Lexer.find_by_extname('.rb')
     assert_equal P::Lexer['PHP'], P::Lexer.find_by_extname('.php4')
     assert_equal P::Lexer['PHP'], P::Lexer.find_by_extname('.php5')
-    assert_equal P::Lexer['Groff'], P::Lexer.find_by_extname('.1')
-    assert_equal P::Lexer['Groff'], P::Lexer.find_by_extname('.3')
     assert_equal P::Lexer['C'], P::Lexer.find_by_extname('.c')
     assert_equal P::Lexer['Python'], P::Lexer.find_by_extname('.py')
     assert_equal P::Lexer['Java'], P::Lexer.find_by_extname('.java')
@@ -213,10 +206,6 @@ class PygmentsCssTest < Test::Unit::TestCase
 
   def test_css_prefix_and_options
     assert_match(/^\.mycode \.codeerr \{/, P.css('.mycode', classprefix: 'code'))
-  end
-
-  def test_css_default
-    assert_match '.c { color: #408080; font-style: italic }', P.css
   end
 
   def test_css_colorful

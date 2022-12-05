@@ -5,6 +5,10 @@
 This document provides a high-level view of the changes to the {project-name} by release.
 For a detailed view of what has changed, refer to the {uri-repo}/commits/master[commit history] on GitHub.
 
+== Unreleased
+
+* Update Pygments to 2.13.0
+
 == 2.3.1 (2022-12-04) - @slonopotamus
 
 * Fix bogus search for Python executable ({uri-repo})/issues/242[#242])
