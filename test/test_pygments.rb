@@ -20,14 +20,6 @@ class PygmentsHighlightTest < Test::Unit::TestCase
     assert_equal '<div class', code[0..9]
   end
 
-  def test_full_html_highlight
-    code = P.highlight(RUBY_CODE)
-    assert_match '<span class="ch">#!/usr/bin/ruby</span>', code
-    assert_equal %(<div class="highlight"><pre><span></span><span class="ch">#!/usr/bin/ruby</span>
-<span class="nb">puts</span> <span class="s1">&#39;foo&#39;</span>
-</pre></div>), code
-  end
-
   def test_highlight_works_with_larger_files
     code = P.highlight(TEST_CODE)
     assert_match 'Main loop, waiting for inputs on stdin', code

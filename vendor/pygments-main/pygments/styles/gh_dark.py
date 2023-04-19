@@ -5,13 +5,13 @@
     Github's Dark-Colorscheme based theme for Pygments
     Colors extracted from https://github.com/primer/primitives
 
-    :copyright: Copyright 2006-2022 by the Pygments team, see AUTHORS.
+    :copyright: Copyright 2006-2023 by the Pygments team, see AUTHORS.
     :license: BSD, see LICENSE for details.
 """
 
 from pygments.style import Style
-from pygments.token import (Keyword, Name, Comment, Error, Number,
-                            Operator, Generic, Text, Literal, String, Token)
+from pygments.token import Keyword, Name, Comment, Error, Number, Operator, \
+    Generic, Text, Literal, String, Token
 
 
 # vars are defined to match the defs in
@@ -31,7 +31,7 @@ PURPLE_2 = "#d2a8ff"
 GRAY_3 = "#8b949e"
 GRAY_4 = "#6e7681"
 FG_SUBTLE = "#6e7681"
-FG_DEFAULT = "#c9d1d9"
+FG_DEFAULT = "#e6edf3"
 BG_DEFAULT = "#0d1117"
 DANGER_FG = "#f85149"
 

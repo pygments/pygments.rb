@@ -4,14 +4,14 @@
 
     Lexers for configuration file formats.
 
-    :copyright: Copyright 2006-2022 by the Pygments team, see AUTHORS.
+    :copyright: Copyright 2006-2023 by the Pygments team, see AUTHORS.
     :license: BSD, see LICENSE for details.
 """
 
 import re
 
 from pygments.lexer import ExtendedRegexLexer, RegexLexer, default, words, \
-    bygroups, include, using
+    bygroups, include, using, line_re
 from pygments.token import Text, Comment, Operator, Keyword, Name, String, \
     Number, Punctuation, Whitespace, Literal, Error, Generic
 from pygments.lexers.shell import BashLexer
@@ -45,11 +45,21 @@ class IniLexer(RegexLexer):
         'root': [
             (r'\s+', Whitespace),
             (r'[;#].*', Comment.Single),
-            (r'\[.*?\]$', Keyword),
-            (r'(.*?)([ \t]*)(=)([ \t]*)([^\t\n]*)',
+            (r'(\[.*?\])([ \t]*)$', bygroups(Keyword, Whitespace)),
+            (r'(.*?)([  \t]*)([=:])([ \t]*)([^;#\n]*)(\\)(\s+)',
+             bygroups(Name.Attribute, Whitespace, Operator, Whitespace, String,
+                      Text, Whitespace),
+             "value"),
+            (r'(.*?)([ \t]*)([=:])([  \t]*)([^ ;#\n]*(?: +[^ ;#\n]+)*)',
              bygroups(Name.Attribute, Whitespace, Operator, Whitespace, String)),
             # standalone option, supported by some INI parsers
             (r'(.+?)$', Name.Attribute),
+        ],
+        'value': [     # line continuation
+            (r'\s+', Whitespace),
+            (r'(\s*)(.*)(\\)([ \t]*)',
+             bygroups(Whitespace, String, Text, Whitespace)),
+            (r'.*$', String, "#pop"),
         ],
     }
 
@@ -119,14 +129,42 @@ class PropertiesLexer(RegexLexer):
 
     tokens = {
         'root': [
-            (r'^(\w+)([ \t])(\w+\s*)$', bygroups(Name.Attribute, Whitespace, String)),
-            (r'^\w+(\\[ \t]\w*)*$', Name.Attribute),
-            (r'(^ *)([#!].*)', bygroups(Whitespace, Comment)),
-            # More controversial comments
-            (r'(^ *)((?:;|//).*)', bygroups(Whitespace, Comment)),
-            (r'(.*?)([ \t]*)([=:])([ \t]*)(.*(?:(?<=\\)\n.*)*)',
-             bygroups(Name.Attribute, Whitespace, Operator, Whitespace, String)),
-            (r'\s', Whitespace),
+            # comments
+            (r'[!#].*|/{2}.*', Comment.Single),
+            # ending a comment or whitespace-only line
+            (r'\n', Whitespace),
+            # eat whitespace at the beginning of a line
+            (r'^[^\S\n]+', Whitespace),
+            # start lexing a key
+            default('key'),
+        ],
+        'key': [
+            # non-escaped key characters
+            (r'[^\\:=\s]+', Name.Attribute),
+            # escapes
+            include('escapes'),
+            # separator is the first non-escaped whitespace or colon or '=' on the line;
+            # if it's whitespace, = and : are gobbled after it
+            (r'([^\S\n]*)([:=])([^\S\n]*)',
+             bygroups(Whitespace, Operator, Whitespace),
+             ('#pop', 'value')),
+            (r'[^\S\n]+', Whitespace, ('#pop', 'value')),
+            # maybe we got no value after all
+            (r'\n', Whitespace, '#pop'),
+        ],
+        'value': [
+            # non-escaped value characters
+            (r'[^\\\n]+', String),
+            # escapes
+            include('escapes'),
+            # end the value on an unescaped newline
+            (r'\n', Whitespace, '#pop'),
+        ],
+        'escapes': [
+            # line continuations; these gobble whitespace at the beginning of the next line
+            (r'(\\\n)([^\S\n]*)', bygroups(String.Escape, Whitespace)),
+            # other escapes
+            (r'\\(.|\n)', String.Escape),
         ],
     }
 
@@ -585,8 +623,8 @@ class TerraformLexer(ExtendedRegexLexer):
 
     name = 'Terraform'
     url = 'https://www.terraform.io/'
-    aliases = ['terraform', 'tf']
-    filenames = ['*.tf']
+    aliases = ['terraform', 'tf', 'hcl']
+    filenames = ['*.tf', '*.hcl']
     mimetypes = ['application/x-tf', 'application/x-terraform']
 
     classes = ('backend', 'data', 'module', 'output', 'provider',
@@ -653,7 +691,6 @@ class TerraformLexer(ExtendedRegexLexer):
         tolerant = True  # leading whitespace is always accepted
 
         lines = []
-        line_re = re.compile('.*?\n')
 
         for match in line_re.finditer(ctx.text, ctx.pos):
             if tolerant:
@@ -723,14 +760,12 @@ class TerraformLexer(ExtendedRegexLexer):
              bygroups(Keyword.Reserved, Whitespace, Name.Class, Whitespace, Name.Variable, Whitespace, Punctuation)),
 
             # here-doc style delimited strings
-            (
-                r'(<<-?)\s*([a-zA-Z_]\w*)(.*?\n)',
-                heredoc_callback,
-            )
+            (r'(<<-?)\s*([a-zA-Z_]\w*)(.*?\n)', heredoc_callback),
         ],
         'identifier': [
             (r'\b(var\.[0-9a-zA-Z-_\.\[\]]+)\b', bygroups(Name.Variable)),
-            (r'\b([0-9a-zA-Z-_\[\]]+\.[0-9a-zA-Z-_\.\[\]]+)\b', bygroups(Name.Variable)),
+            (r'\b([0-9a-zA-Z-_\[\]]+\.[0-9a-zA-Z-_\.\[\]]+)\b',
+             bygroups(Name.Variable)),
         ],
         'punctuation': [
             (r'[\[\]()\{\},.?:!=]', Punctuation),
@@ -1135,7 +1170,7 @@ class UnixConfigLexer(RegexLexer):
     * ``/etc/group``
     * ``/etc/passwd``
     * ``/etc/shadow``
-    
+
     .. versionadded:: 2.12
     """
 
