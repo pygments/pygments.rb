@@ -4,13 +4,13 @@
 
     Lexer for the Elm programming language.
 
-    :copyright: Copyright 2006-2022 by the Pygments team, see AUTHORS.
+    :copyright: Copyright 2006-2023 by the Pygments team, see AUTHORS.
     :license: BSD, see LICENSE for details.
 """
 
 from pygments.lexer import RegexLexer, words, include, bygroups
-from pygments.token import Comment, Keyword, Name, Number, Punctuation, String, \
-    Text, Whitespace
+from pygments.token import Comment, Keyword, Name, Number, Punctuation, \
+    String, Whitespace
 
 __all__ = ['ElmLexer']
 

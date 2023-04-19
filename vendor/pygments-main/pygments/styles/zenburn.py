@@ -7,15 +7,13 @@
     See: https://kippura.org/zenburnpage/
          https://github.com/jnurmine/Zenburn
 
-    :copyright: Copyright 2006-2022 by the Pygments team, see AUTHORS.
+    :copyright: Copyright 2006-2023 by the Pygments team, see AUTHORS.
     :license: BSD, see LICENSE for details.
 """
 
 from pygments.style import Style
-from pygments.token import (
-    Token, Name, Operator, Keyword, Generic, Comment, Number, String, Literal,
-    Punctuation, Error,
-)
+from pygments.token import Token, Name, Operator, Keyword, Generic, Comment, \
+    Number, String, Literal, Punctuation, Error
 
 
 class ZenburnStyle(Style):

@@ -4,7 +4,7 @@
 
     Lexers for graph query languages.
 
-    :copyright: Copyright 2006-2022 by the Pygments team, see AUTHORS.
+    :copyright: Copyright 2006-2023 by the Pygments team, see AUTHORS.
     :license: BSD, see LICENSE for details.
 """
 
@@ -77,10 +77,10 @@ class CypherLexer(RegexLexer):
             (r'(using)(\s+)(periodic)(\s+)(commit)\b',
                 bygroups(Keyword, Whitespace, Keyword, Whitespace, Keyword)),
             (words((
-                'all', 'any', 'as', 'asc', 'ascending', 'assert', 'call', 'case', 'create', 
-                'delete', 'desc', 'descending', 'distinct', 'end', 'fieldterminator', 
-                'foreach', 'in', 'limit', 'match', 'merge', 'none', 'not', 'null', 
-                'remove', 'return', 'set', 'skip', 'single', 'start', 'then', 'union', 
+                'all', 'any', 'as', 'asc', 'ascending', 'assert', 'call', 'case', 'create',
+                'delete', 'desc', 'descending', 'distinct', 'end', 'fieldterminator',
+                'foreach', 'in', 'limit', 'match', 'merge', 'none', 'not', 'null',
+                'remove', 'return', 'set', 'skip', 'single', 'start', 'then', 'union',
                 'unwind', 'yield', 'where', 'when', 'with'), suffix=r'\b'), Keyword),
         ],
         'relations': [

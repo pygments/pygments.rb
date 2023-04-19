@@ -4,7 +4,7 @@
 
     Lexers for Lispy languages.
 
-    :copyright: Copyright 2006-2022 by the Pygments team, see AUTHORS.
+    :copyright: Copyright 2006-2023 by the Pygments team, see AUTHORS.
     :license: BSD, see LICENSE for details.
 """
 
@@ -21,6 +21,7 @@ from pygments.lexers._scheme_builtins import scheme_keywords, scheme_builtins
 __all__ = ['SchemeLexer', 'CommonLispLexer', 'HyLexer', 'RacketLexer',
            'NewLispLexer', 'EmacsLispLexer', 'ShenLexer', 'CPSALexer',
            'XtlangLexer', 'FennelLexer']
+
 
 class SchemeLexer(RegexLexer):
     """

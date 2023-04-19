@@ -7,7 +7,7 @@ For a detailed view of what has changed, refer to the {uri-repo}/commits/master[
 
 == Unreleased
 
-* Update Pygments to 2.13.0
+* Update Pygments to 2.15.1
 
 == 2.3.1 (2022-12-04) - @slonopotamus
 

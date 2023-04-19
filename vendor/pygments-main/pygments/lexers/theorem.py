@@ -4,11 +4,9 @@
 
     Lexers for theorem-proving languages.
 
-    :copyright: Copyright 2006-2022 by the Pygments team, see AUTHORS.
+    :copyright: Copyright 2006-2023 by the Pygments team, see AUTHORS.
     :license: BSD, see LICENSE for details.
 """
-
-import re
 
 from pygments.lexer import RegexLexer, default, words
 from pygments.token import Text, Comment, Operator, Keyword, Name, String, \

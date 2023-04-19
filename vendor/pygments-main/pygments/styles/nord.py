@@ -5,30 +5,18 @@
     pygments version of the "nord" theme by Arctic Ice Studio
     https://www.nordtheme.com/
 
-    :copyright: Copyright 2006-2022 by the Pygments team, see AUTHORS.
+    :copyright: Copyright 2006-2023 by the Pygments team, see AUTHORS.
     :license: BSD, see LICENSE for details.
 """
 
 from pygments.style import Style
-from pygments.token import (
-    Keyword,
-    Name,
-    Comment,
-    String,
-    Error,
-    Number,
-    Operator,
-    Generic,
-    Whitespace,
-    Punctuation,
-    Text,
-    Token,
-)
+from pygments.token import Keyword, Name, Comment, String, Error, Number, \
+    Operator, Generic, Whitespace, Punctuation, Text, Token
 
 
 class NordStyle(Style):
     """
-    Pygments version of the "nord" theme by Arctic Ice Studio
+    Pygments version of the "nord" theme by Arctic Ice Studio.
     """
 
     line_number_color = "#D8DEE9"
@@ -92,6 +80,7 @@ class NordStyle(Style):
         Error:                      '#bf616a',
         Text:                       '#d8dee9',
     }
+
 
 class NordDarkerStyle(Style):
     """
