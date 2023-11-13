@@ -196,9 +196,9 @@ module Pygments
     # Detect a suitable Python binary to use.
     def find_python_binary
       if Gem.win_platform?
-        return %w[py -3] if which('py')
-
         return [%w[python3 python].find { |py| !which(py).nil? }]
+        
+        return %w[py -3] if which('py')
       end
 
       # On non-Windows platforms, we simply rely on shebang
