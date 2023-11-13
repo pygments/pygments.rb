@@ -5,6 +5,10 @@
 This document provides a high-level view of the changes to the {project-name} by release.
 For a detailed view of what has changed, refer to the {uri-repo}/commits/master[commit history] on GitHub.
 
+== 2.4.1
+
+* Fix handling of Python virtual environments on Windows ({uri-repo})/issues/256[#256])
+
 == 2.4.0
 
 * Update Pygments to 2.15.1
