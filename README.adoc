@@ -22,7 +22,7 @@ If a Python process dies, a new one will be spawned on the next pygments.rb requ
 
 == System Requirements
 
-- Python >= 3.6
+- Python >= 3.7
 - Ruby >= 2.6
 
 == Installation

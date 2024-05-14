@@ -8,6 +8,7 @@ For a detailed view of what has changed, refer to the {uri-repo}/commits/master[
 == Unreleased
 
 * Drop support for Ruby 2.5
+* Drop support for Python 3.6
 
 == 2.4.1 (2023-11-13) - @slonopotamus
 
