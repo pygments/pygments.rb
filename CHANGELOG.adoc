@@ -5,7 +5,7 @@
 This document provides a high-level view of the changes to the {project-name} by release.
 For a detailed view of what has changed, refer to the {uri-repo}/commits/master[commit history] on GitHub.
 
-== Unreleased
+== 3.0.0 (2024-05-14) - @slonopotamus
 
 * Drop support for Ruby 2.5.
 The oldest supported is 3.6 now.
