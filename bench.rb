@@ -17,12 +17,12 @@ puts "Iterations: #{num}\n"
 
 Benchmark.bm(40) do |x|
   x.report('pygments popen                             ') do
-    (1..num).each { |_i|; Pygments.highlight(code, lexer: 'python'); }
+    (1..num).each { |_i|; Pygments.highlight(code, lexer: 'python') }
   end
   x.report('pygments popen (process already started)   ') do
-    (1..num).each { |_i|; Pygments.highlight(code, lexer: 'python'); }
+    (1..num).each { |_i|; Pygments.highlight(code, lexer: 'python') }
   end
   x.report('pygments popen (process already started 2) ') do
-    (1..num).each { |_i|; Pygments.highlight(code, lexer: 'python'); }
+    (1..num).each { |_i|; Pygments.highlight(code, lexer: 'python') }
   end
 end
