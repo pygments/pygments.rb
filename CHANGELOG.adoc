@@ -5,7 +5,11 @@
 This document provides a high-level view of the changes to the {project-name} by release.
 For a detailed view of what has changed, refer to the {uri-repo}/commits/master[commit history] on GitHub.
 
-== 2.4.1
+== Unreleased
+
+* Drop support for Ruby 2.5
+
+== 2.4.1 (2023-11-13) - @slonopotamus
 
 * Fix handling of Python virtual environments on Windows ({uri-repo})/issues/256[#256])
 
