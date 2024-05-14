@@ -5,13 +5,16 @@
     Github's Dark-Colorscheme based theme for Pygments
     Colors extracted from https://github.com/primer/primitives
 
-    :copyright: Copyright 2006-2023 by the Pygments team, see AUTHORS.
+    :copyright: Copyright 2006-2024 by the Pygments team, see AUTHORS.
     :license: BSD, see LICENSE for details.
 """
 
 from pygments.style import Style
 from pygments.token import Keyword, Name, Comment, Error, Number, Operator, \
     Generic, Text, Literal, String, Token
+
+
+__all__ = ['GhDarkStyle']
 
 
 # vars are defined to match the defs in
@@ -40,6 +43,8 @@ class GhDarkStyle(Style):
     """
     Github's Dark-Colorscheme based theme for Pygments
     """
+    
+    name = 'github-dark'
 
     background_color = BG_DEFAULT
 
@@ -99,6 +104,7 @@ class GhDarkStyle(Style):
         Generic.Output:             GRAY_3,
         Generic.Prompt:             GRAY_3,
         Generic.Strong:             "bold",
+        Generic.EmphStrong:         "bold italic",
         Generic.Subheading:         BLUE_2,
         Generic.Traceback:          RED_3,
         Generic.Underline:          "underline",
