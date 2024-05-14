@@ -4,7 +4,7 @@
 
     Lexers for C/C++ languages.
 
-    :copyright: Copyright 2006-2023 by the Pygments team, see AUTHORS.
+    :copyright: Copyright 2006-2024 by the Pygments team, see AUTHORS.
     :license: BSD, see LICENSE for details.
 """
 
@@ -107,7 +107,8 @@ class CFamilyLexer(RegexLexer):
             (words(('int8', 'int16', 'int32', 'int64', 'wchar_t'), prefix=r'__',
                     suffix=r'\b'), Keyword.Reserved),
             (words(('bool', 'int', 'long', 'float', 'short', 'double', 'char',
-                    'unsigned', 'signed', 'void'), suffix=r'\b'), Keyword.Type)
+                    'unsigned', 'signed', 'void', '_BitInt',
+                    '__int128'), suffix=r'\b'), Keyword.Type)
         ],
         'keywords': [
             (r'(struct|union)(\s+)', bygroups(Keyword, Whitespace), 'classname'),
@@ -293,6 +294,8 @@ class CLexer(CFamilyLexer):
     aliases = ['c']
     filenames = ['*.c', '*.h', '*.idc', '*.x[bp]m']
     mimetypes = ['text/x-chdr', 'text/x-csrc', 'image/x-xbitmap', 'image/x-xpixmap']
+    url = 'https://en.wikipedia.org/wiki/C_(programming_language)'
+    version_added = ''
     priority = 0.1
 
     tokens = {
@@ -346,6 +349,7 @@ class CppLexer(CFamilyLexer):
                  '*.cc', '*.hh', '*.cxx', '*.hxx',
                  '*.C', '*.H', '*.cp', '*.CPP', '*.tpp']
     mimetypes = ['text/x-c++hdr', 'text/x-c++src']
+    version_added = ''
     priority = 0.1
 
     tokens = {
@@ -380,11 +384,12 @@ class CppLexer(CFamilyLexer):
                 'catch', 'const_cast', 'delete', 'dynamic_cast', 'explicit',
                 'export', 'friend', 'mutable', 'new', 'operator',
                 'private', 'protected', 'public', 'reinterpret_cast', 'class',
-                'restrict', 'static_cast', 'template', 'this', 'throw', 'throws',
+                '__restrict', 'static_cast', 'template', 'this', 'throw', 'throws',
                 'try', 'typeid', 'using', 'virtual', 'constexpr', 'nullptr', 'concept',
                 'decltype', 'noexcept', 'override', 'final', 'constinit', 'consteval',
                 'co_await', 'co_return', 'co_yield', 'requires', 'import', 'module',
-                'typename'),
+                'typename', 'and', 'and_eq', 'bitand', 'bitor', 'compl', 'not',
+                'not_eq', 'or', 'or_eq', 'xor', 'xor_eq'),
                suffix=r'\b'), Keyword),
             (r'namespace\b', Keyword, 'namespace'),
             (r'(enum)(\s+)', bygroups(Keyword, Whitespace), 'enumname'),

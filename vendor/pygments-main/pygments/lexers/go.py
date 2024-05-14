@@ -4,7 +4,7 @@
 
     Lexers for the Google Go language.
 
-    :copyright: Copyright 2006-2023 by the Pygments team, see AUTHORS.
+    :copyright: Copyright 2006-2024 by the Pygments team, see AUTHORS.
     :license: BSD, see LICENSE for details.
 """
 
@@ -18,14 +18,13 @@ __all__ = ['GoLexer']
 class GoLexer(RegexLexer):
     """
     For Go source.
-
-    .. versionadded:: 1.2
     """
     name = 'Go'
     url = 'https://go.dev/'
     filenames = ['*.go']
     aliases = ['go', 'golang']
     mimetypes = ['text/x-gosrc']
+    version_added = '1.2'
 
     tokens = {
         'root': [
@@ -53,7 +52,7 @@ class GoLexer(RegexLexer):
                 'string', 'bool', 'error', 'uintptr', 'any', 'comparable',
                 'print', 'println', 'panic', 'recover', 'close', 'complex',
                 'real', 'imag', 'len', 'cap', 'append', 'copy', 'delete',
-                'new', 'make'), suffix=r'\b(\()'),
+                'new', 'make', 'min', 'max', 'clear'), suffix=r'\b(\()'),
              bygroups(Name.Builtin, Punctuation)),
             (words((
                 'uint', 'uint8', 'uint16', 'uint32', 'uint64',
