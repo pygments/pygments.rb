@@ -21,7 +21,7 @@ jobs:
     strategy:
       matrix:
         ruby: [ 'jruby-9.3', 'jruby-9.4', '2.6', '3.3' ]
-        python: [ '3.6', '3.112' ]
+        python: [ '3.6', '3.12' ]
         platform: [ ubuntu-20.04, macos-latest, windows-2019 ]
     runs-on: ${{ matrix.platform }}
     steps:
