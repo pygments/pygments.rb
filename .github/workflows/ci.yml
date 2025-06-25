@@ -6,23 +6,23 @@ on:
   pull_request:
 jobs:
   rubocop:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.3'
+          ruby-version: '3.4'
           bundler-cache: true
       - name: Rubocop
         run: bundle exec rubocop
   build:
     strategy:
       matrix:
-        ruby: [ 'jruby-9.3', 'jruby-9.4', '2.6', '3.3' ]
-        python: [ '3.8', '3.12' ]
-        platform: [ ubuntu-22.04, macos-12, windows-2019 ]
+        ruby: [ 'jruby-9.3', 'jruby-9.4', '2.6', '3.4' ]
+        python: [ '3.8', '3.13' ]
+        platform: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.platform }}
     steps:
       - name: Checkout
