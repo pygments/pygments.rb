@@ -41,7 +41,7 @@ And then execute:
 $ bundle install
 ----
 
-Or install pygments.rb gem yourself as:
+Or install pygments.rb gem globally:
 
 [source,shell script]
 ----
