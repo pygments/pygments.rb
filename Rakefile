@@ -35,7 +35,7 @@ end
 namespace :vendor do
   file 'vendor/pygments-main' do |f|
     sh "pip install --target=#{f.name} pygments"
-    sh "git add -- #{f.name}"
+    sh "git add -f -- #{f.name}"
   end
 
   task :clobber do
