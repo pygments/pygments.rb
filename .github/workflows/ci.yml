@@ -20,7 +20,7 @@ jobs:
   build:
     strategy:
       matrix:
-        ruby: [ 'jruby-9.3', 'jruby-9.4', '2.6', '3.4' ]
+        ruby: [ 'jruby', '2.7', '3.4' ]
         python: [ '3.8', '3.13' ]
         platform: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.platform }}

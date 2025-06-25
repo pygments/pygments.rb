@@ -5,10 +5,15 @@
 This document provides a high-level view of the changes to the {project-name} by release.
 For a detailed view of what has changed, refer to the {uri-repo}/commits/master[commit history] on GitHub.
 
+== Unreleased
+
+* Drop support for Ruby 2.6.
+The oldest supported is 2.7 now.
+
 == 3.0.0 (2024-05-14) - @slonopotamus
 
 * Drop support for Ruby 2.5.
-The oldest supported is 3.6 now.
+The oldest supported is 2.6 now.
 * Drop support for Python 3.6 and 3.7.
 The oldest supported is 3.8 now.
 * Update Pygments to 2.18.0
