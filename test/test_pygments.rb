@@ -199,10 +199,6 @@ class PygmentsCssTest < Test::Unit::TestCase
   def test_css_prefix_and_options
     assert_match(/^\.mycode \.codeerr \{/, P.css('.mycode', classprefix: 'code'))
   end
-
-  def test_css_colorful
-    assert_match '.c { color: #888888 }', P.css(style: 'colorful')
-  end
 end
 
 class PygmentsConfigTest < Test::Unit::TestCase

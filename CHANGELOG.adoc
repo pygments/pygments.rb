@@ -9,6 +9,7 @@ For a detailed view of what has changed, refer to the {uri-repo}/commits/master[
 
 * Drop support for Ruby 2.6.
 The oldest supported is 2.7 now.
+* Update Pygments to 2.19.2 ({uri-repo})/issues/265[#265])
 
 == 3.0.0 (2024-05-14) - @slonopotamus
 
