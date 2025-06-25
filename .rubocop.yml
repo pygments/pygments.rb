@@ -1,6 +1,5 @@
 AllCops:
-  NewCops: enable
-  TargetRubyVersion: 2.6
+  NewCops: disable
 Gemspec/RequireMFA:
   Enabled: false
 Metrics/AbcSize:
