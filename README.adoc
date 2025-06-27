@@ -8,7 +8,7 @@ Ted Nyman <ted@ted.io>; Aman Gupta <aman@tmm1.net>; Marat Radchenko <marat@slono
 :uri-pygments: https://pygments.org/
 
 image:https://img.shields.io/gem/v/{project-name}.svg[Latest Release,link={uri-gem}]
-image:{uri-project}/workflows/CI/badge.svg?branch=master[Build Status,link={uri-ci}]
+image:{uri-project}/actions/workflows/ci.yml/badge.svg?branch=master[Build Status,link={uri-ci}]
 
 == Introduction
 
