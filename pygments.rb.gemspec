@@ -25,7 +25,7 @@ Gem::Specification.new do |s|
   s.required_ruby_version = '>= 2.7.0'
 
   s.add_development_dependency 'rake', '~> 13.4.1'
-  s.add_development_dependency 'rubocop', '~> 1.86.0'
+  s.add_development_dependency 'rubocop', '~> 1.87.0'
   s.add_development_dependency 'test-unit', '~> 3.7.0'
 
   s.files = `git ls-files -z`.split("\0").reject { |f| File.symlink?(f) }
