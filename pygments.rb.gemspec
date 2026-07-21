@@ -24,6 +24,8 @@ Gem::Specification.new do |s|
 
   s.required_ruby_version = '>= 2.7.0'
 
+  s.add_runtime_dependency 'logger', '~> 1.7'
+
   s.add_development_dependency 'rake', '~> 13.4.1'
   s.add_development_dependency 'rubocop', '~> 1.86.0'
   s.add_development_dependency 'test-unit', '~> 3.7.0'
