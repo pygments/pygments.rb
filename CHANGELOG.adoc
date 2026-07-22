@@ -5,7 +5,7 @@
 This document provides a high-level view of the changes to the {project-name} by release.
 For a detailed view of what has changed, refer to the {uri-repo}/commits/master[commit history] on GitHub.
 
-== Unreleased
+== 5.0.0 (2026-07-22) - @slonopotamus
 
 * Add explicit dependency on `logger` gem to fix Ruby 3.5+ compatibility
 * Update Pygments to 2.20.0
