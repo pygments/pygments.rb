@@ -37,7 +37,7 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
       - name: Run Tests
-        run: bundle exec rake test
+        run: bundle exec rake spec
     env:
       # Workaround JVM bug that causes JRuby to fail: https://bugs.openjdk.org/browse/JDK-8285445
       # See https://github.com/ruby/setup-ruby/issues/339

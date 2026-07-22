@@ -3,27 +3,19 @@
 
 require 'bundler/gem_tasks'
 
-task default: :test
-
-# ==========================================================
-# Packaging
-# ==========================================================
+task default: :spec
 
 require 'rubygems/package_task'
 
-# ==========================================================
-# Testing
-# ==========================================================
+require 'rspec/core/rake_task'
 
-require 'rake/testtask'
-Rake::TestTask.new 'test' do |t|
-  t.test_files = FileList['test/test_*.rb']
-end
+RSpec::Core::RakeTask.new(:spec)
 
 # ==========================================================
 # Benchmarking
 # ==========================================================
 
+desc 'run benchmarks'
 task :bench do
   sh 'ruby bench.rb'
 end
@@ -38,6 +30,7 @@ namespace :vendor do
     sh "git add -f -- #{f.name}"
   end
 
+  desc 'remove vendor/pygments-main'
   task :clobber do
     rm_rf 'vendor/pygments-main'
   end

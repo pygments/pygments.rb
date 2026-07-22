@@ -1,7 +1,13 @@
+plugins:
+  - rubocop-rake
+  - rubocop-rspec
+
 AllCops:
   NewCops: disable
 Gemspec/RequireMFA:
   Enabled: false
+Layout/LineLength:
+  Max: 120
 Metrics/AbcSize:
   Enabled: false
 Metrics/BlockLength:
@@ -10,13 +16,13 @@ Metrics/ClassLength:
   Enabled: false
 Metrics/CyclomaticComplexity:
   Enabled: false
-Layout/LineLength:
-  Max: 120
 Metrics/MethodLength:
   Enabled: false
 Metrics/PerceivedComplexity:
   Enabled: false
-Style/StructInheritance:
+RSpec/MultipleExpectations:
   Enabled: false
 Style/Documentation:
+  Enabled: false
+Style/StructInheritance:
   Enabled: false
