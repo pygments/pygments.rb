@@ -1,4 +1,4 @@
-#!/usr/bin/python3.13
+#!/Library/Developer/CommandLineTools/usr/bin/python3
 # -*- coding: utf-8 -*-
 import re
 import sys

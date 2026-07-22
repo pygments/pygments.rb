@@ -8,6 +8,7 @@ For a detailed view of what has changed, refer to the {uri-repo}/commits/master[
 == Unreleased
 
 * Add explicit dependency on `logger` gem to fix Ruby 3.5+ compatibility
+* Update Pygments to 2.20.0
 
 == 4.0.0 (2025-06-25) - @slonopotamus
 
